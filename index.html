@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación de Desempeño 180° · Etinar</title>
+<style>
+  :root{
+    --amarillo:#F7C23B; --amarillo-osc:#E0A81E;
+    --negro:#111111; --gris:#F4F4F5; --gris-borde:#E4E4E7;
+    --texto-suave:#6B7280; --rojo:#DC2626; --verde:#16A34A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+  body{background:var(--gris);color:var(--negro);line-height:1.5}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo .cuadro{width:30px;height:30px;background:var(--amarillo);border-radius:3px;flex-shrink:0}
+  .logo .marca{font-weight:800;font-size:26px;letter-spacing:.06em}
+  .oculto{display:none!important}
+
+  /* ---------- LOGIN ---------- */
+  #vista-login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .login-card{background:#fff;border:1px solid var(--gris-borde);border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.08);width:100%;max-width:400px;padding:40px 34px;text-align:center}
+  .login-card .logo{justify-content:center;margin-bottom:6px}
+  .login-card h2{font-size:18px;margin:16px 0 4px}
+  .login-card .sub{color:var(--texto-suave);font-size:13px;margin-bottom:26px}
+  .campo{text-align:left;margin-bottom:14px}
+  .campo label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151}
+  .campo input{width:100%;padding:11px 13px;border:1px solid var(--gris-borde);border-radius:9px;font-size:14px;background:#fafafa}
+  .campo input:focus{outline:2px solid var(--amarillo);background:#fff}
+  .btn{background:var(--amarillo);color:var(--negro);font-weight:700;border:none;padding:12px 16px;border-radius:9px;font-size:14px;cursor:pointer}
+  .btn:hover{background:var(--amarillo-osc)}
+  .btn:disabled{opacity:.6;cursor:default}
+  .btn-full{width:100%;margin-top:6px}
+  .msg{font-size:13px;margin-top:14px;min-height:18px}
+  .msg.error{color:var(--rojo)}
+  .msg.ok{color:var(--verde)}
+
+  /* ---------- APP (post-login) ---------- */
+  header.barra{background:var(--negro);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 22px}
+  header.barra .logo .marca{color:#fff;font-size:20px}
+  header.barra .usuario{display:flex;align-items:center;gap:14px;font-size:13px}
+  .chip-rol{background:var(--amarillo);color:var(--negro);font-weight:700;font-size:11px;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
+  .btn-salir{background:transparent;border:1px solid #444;color:#ddd;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer}
+  .btn-salir:hover{border-color:#888;color:#fff}
+  main{max-width:1000px;margin:0 auto;padding:28px 20px}
+  .panel{background:#fff;border:1px solid var(--gris-borde);border-radius:14px;padding:26px;box-shadow:0 4px 20px rgba(0,0,0,.04)}
+  .panel h1{font-size:20px;margin-bottom:6px}
+  .panel .desc{color:var(--texto-suave);font-size:14px;margin-bottom:18px}
+  .badge-pronto{display:inline-block;background:var(--gris);border:1px dashed var(--gris-borde);color:var(--texto-suave);font-size:12px;padding:8px 12px;border-radius:8px;margin-top:8px}
+</style>
+</head>
+<body>
+
+<!-- ==================== VISTA: LOGIN ==================== -->
+<section id="vista-login">
+  <div class="login-card">
+    <div class="logo"><div class="cuadro"></div><div class="marca">ETINAR</div></div>
+    <h2>Evaluación de Desempeño 180°</h2>
+    <div class="sub">Ingresa con tus credenciales para continuar</div>
+    <form id="form-login">
+      <div class="campo">
+        <label>Usuario</label>
+        <input type="text" id="in-usuario" placeholder="admin" autocomplete="username" required>
+      </div>
+      <div class="campo">
+        <label>Contraseña</label>
+        <input type="password" id="in-clave" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-full" id="btn-entrar">Ingresar</button>
+      <div class="msg" id="msg-login"></div>
+    </form>
+  </div>
+</section>
+
+<!-- ==================== VISTA: APP ==================== -->
+<section id="vista-app" class="oculto">
+  <header class="barra">
+    <div class="logo"><div class="cuadro"></div><div class="marca">ETINAR</div></div>
+    <div class="usuario">
+      <span id="nombre-usuario"></span>
+      <span class="chip-rol" id="chip-rol"></span>
+      <button class="btn-salir" id="btn-salir">Cerrar sesión</button>
+    </div>
+  </header>
+  <main id="contenido"></main>
+</section>
+
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ---------- Configuración ----------
+  const SUPABASE_URL = "https://hwscyzrytwdvqlombpph.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3c2N5enJ5dHdkdnFsb21icHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNjY4MTksImV4cCI6MjEwMDc0MjgxOX0.DK-K-HgqYPY8E8rpEE8OMBkknlZVmk-z85rZT4l2oe0";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // "admin" entra con el correo corporativo; los demás usan usuario@etinar.app
+  function usuarioAEmail(u){
+    u = (u || "").trim().toLowerCase();
+    if(u === "admin") return "comunicacion.organizacional@etinar.com";
+    if(u.includes("@")) return u;
+    return u + "@etinar.app";
+  }
+
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Login ----------
+  $("form-login").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = $("btn-entrar"), msg = $("msg-login");
+    msg.className = "msg"; msg.textContent = "";
+    btn.disabled = true; btn.textContent = "Ingresando...";
+    const email = usuarioAEmail($("in-usuario").value);
+    const password = $("in-clave").value;
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if(error){
+      msg.className = "msg error";
+      msg.textContent = "Usuario o contraseña incorrectos.";
+      btn.disabled = false; btn.textContent = "Ingresar";
+      return;
+    }
+    await iniciarSesion();
+  });
+
+  // ---------- Cargar la app tras iniciar sesión ----------
+  async function iniciarSesion(){
+    const { data:{ user } } = await sb.auth.getUser();
+    if(!user){ mostrarLogin(); return; }
+
+    // Traer el perfil (nombre y rol)
+    const { data: perfil } = await sb
+      .from("perfiles")
+      .select("nombre, rol, usuario")
+      .eq("id", user.id)
+      .single();
+
+    if(!perfil){
+      // Usuario autenticado pero sin perfil asignado
+      $("msg-login").className = "msg error";
+      $("msg-login").textContent = "Tu usuario no tiene un perfil asignado. Contacta a RRHH.";
+      await sb.auth.signOut();
+      $("btn-entrar").disabled = false; $("btn-entrar").textContent = "Ingresar";
+      return;
+    }
+
+    $("nombre-usuario").textContent = perfil.nombre || perfil.usuario;
+    $("chip-rol").textContent = perfil.rol;
+    $("vista-login").classList.add("oculto");
+    $("vista-app").classList.remove("oculto");
+    renderizarPorRol(perfil);
+  }
+
+  function mostrarLogin(){
+    $("vista-app").classList.add("oculto");
+    $("vista-login").classList.remove("oculto");
+    $("btn-entrar").disabled = false; $("btn-entrar").textContent = "Ingresar";
+    $("form-login").reset();
+  }
+
+  // ---------- Contenido según el rol (placeholder por ahora) ----------
+  function renderizarPorRol(perfil){
+    const c = $("contenido");
+    let titulo = "", desc = "";
+    if(perfil.rol === "admin"){
+      titulo = "Panel de Recursos Humanos";
+      desc = "Desde aquí administrarás puestos, competencias, usuarios y verás todos los resultados de las evaluaciones.";
+    } else if(perfil.rol === "evaluador"){
+      titulo = "Mis evaluaciones por realizar";
+      desc = "Aquí verás al personal que debes evaluar y podrás llenar el formulario 180°.";
+    } else {
+      titulo = "Mi autoevaluación";
+      desc = "Aquí podrás completar tu propia evaluación de desempeño.";
+    }
+    c.innerHTML = `
+      <div class="panel">
+        <h1>${titulo}</h1>
+        <div class="desc">Hola, ${perfil.nombre || perfil.usuario}. ${desc}</div>
+        <div class="badge-pronto">🚧 Esta sección se está construyendo — próximamente.</div>
+      </div>`;
+  }
+
+  // ---------- Cerrar sesión ----------
+  $("btn-salir").addEventListener("click", async () => {
+    await sb.auth.signOut();
+    mostrarLogin();
+  });
+
+  // ---------- Al abrir: revisar si ya hay sesión activa ----------
+  (async () => {
+    const { data:{ session } } = await sb.auth.getSession();
+    if(session){ await iniciarSesion(); } else { mostrarLogin(); }
+  })();
+</script>
+</body>
+</html>
