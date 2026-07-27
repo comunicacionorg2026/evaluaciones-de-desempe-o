@@ -8,7 +8,7 @@
   :root{
     --amarillo:#F7C23B; --amarillo-osc:#E0A81E;
     --negro:#111111; --gris:#F4F4F5; --gris-borde:#E4E4E7;
-    --texto-suave:#6B7280; --rojo:#DC2626; --verde:#16A34A;
+    --texto-suave:#6B7280; --rojo:#DC2626; --verde:#16A34A; --azul:#2563EB;
   }
   *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
   body{background:var(--gris);color:var(--negro);line-height:1.5}
@@ -16,6 +16,7 @@
   .logo .cuadro{width:30px;height:30px;background:var(--amarillo);border-radius:3px;flex-shrink:0}
   .logo .marca{font-weight:800;font-size:26px;letter-spacing:.06em}
   .oculto{display:none!important}
+  a{color:var(--azul)}
 
   /* ---------- LOGIN ---------- */
   #vista-login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -25,54 +26,84 @@
   .login-card .sub{color:var(--texto-suave);font-size:13px;margin-bottom:26px}
   .campo{text-align:left;margin-bottom:14px}
   .campo label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:#374151}
-  .campo input{width:100%;padding:11px 13px;border:1px solid var(--gris-borde);border-radius:9px;font-size:14px;background:#fafafa}
-  .campo input:focus{outline:2px solid var(--amarillo);background:#fff}
-  .btn{background:var(--amarillo);color:var(--negro);font-weight:700;border:none;padding:12px 16px;border-radius:9px;font-size:14px;cursor:pointer}
+  .campo input,.campo select,.campo textarea{width:100%;padding:11px 13px;border:1px solid var(--gris-borde);border-radius:9px;font-size:14px;background:#fafafa;font-family:inherit}
+  .campo input:focus,.campo select:focus,.campo textarea:focus{outline:2px solid var(--amarillo);background:#fff}
+  .btn{background:var(--amarillo);color:var(--negro);font-weight:700;border:none;padding:11px 18px;border-radius:9px;font-size:14px;cursor:pointer}
   .btn:hover{background:var(--amarillo-osc)}
   .btn:disabled{opacity:.6;cursor:default}
   .btn-full{width:100%;margin-top:6px}
+  .btn-sec{background:#fff;border:1px solid var(--gris-borde);color:#374151;font-weight:600}
+  .btn-sec:hover{background:var(--gris)}
+  .btn-mini{padding:5px 10px;font-size:12px;border-radius:7px}
+  .btn-peligro{background:#fff;border:1px solid #f3c2c2;color:var(--rojo)}
+  .btn-peligro:hover{background:#fef2f2}
   .msg{font-size:13px;margin-top:14px;min-height:18px}
-  .msg.error{color:var(--rojo)}
-  .msg.ok{color:var(--verde)}
+  .msg.error{color:var(--rojo)} .msg.ok{color:var(--verde)}
 
-  /* ---------- APP (post-login) ---------- */
-  header.barra{background:var(--negro);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 22px}
+  /* ---------- APP ---------- */
+  header.barra{background:var(--negro);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;flex-wrap:wrap;gap:10px}
   header.barra .logo .marca{color:#fff;font-size:20px}
-  header.barra .usuario{display:flex;align-items:center;gap:14px;font-size:13px}
+  header.barra .usuario{display:flex;align-items:center;gap:12px;font-size:13px}
   .chip-rol{background:var(--amarillo);color:var(--negro);font-weight:700;font-size:11px;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em}
   .btn-salir{background:transparent;border:1px solid #444;color:#ddd;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer}
   .btn-salir:hover{border-color:#888;color:#fff}
-  main{max-width:1000px;margin:0 auto;padding:28px 20px}
-  .panel{background:#fff;border:1px solid var(--gris-borde);border-radius:14px;padding:26px;box-shadow:0 4px 20px rgba(0,0,0,.04)}
-  .panel h1{font-size:20px;margin-bottom:6px}
-  .panel .desc{color:var(--texto-suave);font-size:14px;margin-bottom:18px}
-  .badge-pronto{display:inline-block;background:var(--gris);border:1px dashed var(--gris-borde);color:var(--texto-suave);font-size:12px;padding:8px 12px;border-radius:8px;margin-top:8px}
+  main{max-width:1040px;margin:0 auto;padding:24px 18px}
+
+  .tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+  .tab{background:#fff;border:1px solid var(--gris-borde);padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;color:#374151}
+  .tab.activo{background:var(--negro);color:#fff;border-color:var(--negro)}
+
+  .panel{background:#fff;border:1px solid var(--gris-borde);border-radius:14px;padding:24px;box-shadow:0 4px 20px rgba(0,0,0,.04);margin-bottom:18px}
+  .panel h1{font-size:19px;margin-bottom:4px}
+  .panel h2{font-size:15px;margin:0 0 14px}
+  .panel .desc{color:var(--texto-suave);font-size:13px;margin-bottom:18px}
+  .fila{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  .fila .campo{flex:1;min-width:150px;margin-bottom:0}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--gris-borde)}
+  th{color:var(--texto-suave);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  tr:hover td{background:#fafafa}
+  .estado{font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px}
+  .estado.pendiente{background:#FEF3C7;color:#92400E}
+  .estado.completada{background:#DCFCE7;color:#166534}
+  .vacio{color:var(--texto-suave);font-size:13px;padding:16px 0;text-align:center}
+
+  /* formulario 180 */
+  .categoria{background:var(--amarillo);color:var(--negro);font-weight:700;font-size:14px;padding:8px 14px;border-radius:8px;margin:20px 0 12px}
+  .item{border-bottom:1px solid var(--gris-borde);padding:12px 0}
+  .item p{font-size:14px;margin-bottom:9px}
+  .escala{display:flex;gap:7px}
+  .op{flex:1;text-align:center;border:1px solid var(--gris-borde);border-radius:8px;padding:8px 2px;font-size:11px;cursor:pointer;background:#fafafa;user-select:none}
+  .op:hover{border-color:var(--amarillo)}
+  .op.sel{background:var(--amarillo);border-color:var(--amarillo-osc);font-weight:700}
+  .op b{display:block;font-size:15px}
+  .resultado-cat{font-weight:700;margin:16px 0 6px;font-size:14px}
+  .barra-prom{background:var(--gris);border-radius:20px;height:22px;overflow:hidden;position:relative;margin:4px 0}
+  .barra-prom > div{background:var(--amarillo);height:100%}
+  .barra-prom span{position:absolute;left:10px;top:0;line-height:22px;font-size:11px;font-weight:700}
 </style>
 </head>
 <body>
 
-<!-- ==================== VISTA: LOGIN ==================== -->
+<!-- ==================== LOGIN ==================== -->
 <section id="vista-login">
   <div class="login-card">
     <div class="logo"><div class="cuadro"></div><div class="marca">ETINAR</div></div>
     <h2>Evaluación de Desempeño 180°</h2>
     <div class="sub">Ingresa con tus credenciales para continuar</div>
     <form id="form-login">
-      <div class="campo">
-        <label>Usuario</label>
-        <input type="text" id="in-usuario" placeholder="admin" autocomplete="username" required>
-      </div>
-      <div class="campo">
-        <label>Contraseña</label>
-        <input type="password" id="in-clave" placeholder="••••••••" autocomplete="current-password" required>
-      </div>
+      <div class="campo"><label>Usuario</label>
+        <input type="text" id="in-usuario" placeholder="admin" autocomplete="username" required></div>
+      <div class="campo"><label>Contraseña</label>
+        <input type="password" id="in-clave" placeholder="••••••••" autocomplete="current-password" required></div>
       <button type="submit" class="btn btn-full" id="btn-entrar">Ingresar</button>
       <div class="msg" id="msg-login"></div>
     </form>
   </div>
 </section>
 
-<!-- ==================== VISTA: APP ==================== -->
+<!-- ==================== APP ==================== -->
 <section id="vista-app" class="oculto">
   <header class="barra">
     <div class="logo"><div class="cuadro"></div><div class="marca">ETINAR</div></div>
@@ -85,110 +116,416 @@
   <main id="contenido"></main>
 </section>
 
-<!-- Supabase JS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // ---------- Configuración ----------
-  const SUPABASE_URL = "https://hwscyzrytwdvqlombpph.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3c2N5enJ5dHdkdnFsb21icHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNjY4MTksImV4cCI6MjEwMDc0MjgxOX0.DK-K-HgqYPY8E8rpEE8OMBkknlZVmk-z85rZT4l2oe0";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// ==================== Config ====================
+const SUPABASE_URL = "https://hwscyzrytwdvqlombpph.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3c2N5enJ5dHdkdnFsb21icHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNjY4MTksImV4cCI6MjEwMDc0MjgxOX0.DK-K-HgqYPY8E8rpEE8OMBkknlZVmk-z85rZT4l2oe0";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// cliente temporal (para crear usuarios sin cerrar la sesión del admin)
+const sbTmp = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ persistSession:false, autoRefreshToken:false }});
 
-  // "admin" entra con el correo corporativo; los demás usan usuario@etinar.app
-  function usuarioAEmail(u){
-    u = (u || "").trim().toLowerCase();
-    if(u === "admin") return "comunicacion.organizacional@etinar.com";
-    if(u.includes("@")) return u;
-    return u + "@etinar.app";
+const DOMINIO = "etinar.app";
+function usuarioAEmail(u){
+  u=(u||"").trim().toLowerCase();
+  if(u==="admin") return "comunicacion.organizacional@etinar.com";
+  if(u.includes("@")) return u;
+  return u+"@"+DOMINIO;
+}
+const $ = (id)=>document.getElementById(id);
+const esc = (t)=>(t==null?"":String(t)).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let PERFIL = null;
+
+// ==================== Login ====================
+$("form-login").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const btn=$("btn-entrar"), msg=$("msg-login");
+  msg.className="msg"; msg.textContent="";
+  btn.disabled=true; btn.textContent="Ingresando...";
+  const email=usuarioAEmail($("in-usuario").value);
+  const { error } = await sb.auth.signInWithPassword({ email, password:$("in-clave").value });
+  if(error){
+    msg.className="msg error"; msg.textContent="Usuario o contraseña incorrectos.";
+    btn.disabled=false; btn.textContent="Ingresar"; return;
   }
+  await iniciarSesion();
+});
 
-  const $ = (id) => document.getElementById(id);
-
-  // ---------- Login ----------
-  $("form-login").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const btn = $("btn-entrar"), msg = $("msg-login");
-    msg.className = "msg"; msg.textContent = "";
-    btn.disabled = true; btn.textContent = "Ingresando...";
-    const email = usuarioAEmail($("in-usuario").value);
-    const password = $("in-clave").value;
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if(error){
-      msg.className = "msg error";
-      msg.textContent = "Usuario o contraseña incorrectos.";
-      btn.disabled = false; btn.textContent = "Ingresar";
-      return;
-    }
-    await iniciarSesion();
-  });
-
-  // ---------- Cargar la app tras iniciar sesión ----------
-  async function iniciarSesion(){
-    const { data:{ user } } = await sb.auth.getUser();
-    if(!user){ mostrarLogin(); return; }
-
-    // Traer el perfil (nombre y rol)
-    const { data: perfil } = await sb
-      .from("perfiles")
-      .select("nombre, rol, usuario")
-      .eq("id", user.id)
-      .single();
-
-    if(!perfil){
-      // Usuario autenticado pero sin perfil asignado
-      $("msg-login").className = "msg error";
-      $("msg-login").textContent = "Tu usuario no tiene un perfil asignado. Contacta a RRHH.";
-      await sb.auth.signOut();
-      $("btn-entrar").disabled = false; $("btn-entrar").textContent = "Ingresar";
-      return;
-    }
-
-    $("nombre-usuario").textContent = perfil.nombre || perfil.usuario;
-    $("chip-rol").textContent = perfil.rol;
-    $("vista-login").classList.add("oculto");
-    $("vista-app").classList.remove("oculto");
-    renderizarPorRol(perfil);
-  }
-
-  function mostrarLogin(){
-    $("vista-app").classList.add("oculto");
-    $("vista-login").classList.remove("oculto");
-    $("btn-entrar").disabled = false; $("btn-entrar").textContent = "Ingresar";
-    $("form-login").reset();
-  }
-
-  // ---------- Contenido según el rol (placeholder por ahora) ----------
-  function renderizarPorRol(perfil){
-    const c = $("contenido");
-    let titulo = "", desc = "";
-    if(perfil.rol === "admin"){
-      titulo = "Panel de Recursos Humanos";
-      desc = "Desde aquí administrarás puestos, competencias, usuarios y verás todos los resultados de las evaluaciones.";
-    } else if(perfil.rol === "evaluador"){
-      titulo = "Mis evaluaciones por realizar";
-      desc = "Aquí verás al personal que debes evaluar y podrás llenar el formulario 180°.";
-    } else {
-      titulo = "Mi autoevaluación";
-      desc = "Aquí podrás completar tu propia evaluación de desempeño.";
-    }
-    c.innerHTML = `
-      <div class="panel">
-        <h1>${titulo}</h1>
-        <div class="desc">Hola, ${perfil.nombre || perfil.usuario}. ${desc}</div>
-        <div class="badge-pronto">🚧 Esta sección se está construyendo — próximamente.</div>
-      </div>`;
-  }
-
-  // ---------- Cerrar sesión ----------
-  $("btn-salir").addEventListener("click", async () => {
+async function iniciarSesion(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user){ mostrarLogin(); return; }
+  const { data: perfil } = await sb.from("perfiles").select("id,nombre,rol,usuario,departamento,puesto").eq("id",user.id).single();
+  if(!perfil){
+    $("msg-login").className="msg error";
+    $("msg-login").textContent="Tu usuario no tiene perfil asignado. Contacta a RRHH.";
     await sb.auth.signOut();
-    mostrarLogin();
-  });
+    $("btn-entrar").disabled=false; $("btn-entrar").textContent="Ingresar"; return;
+  }
+  PERFIL=perfil;
+  $("nombre-usuario").textContent=perfil.nombre||perfil.usuario;
+  $("chip-rol").textContent=perfil.rol;
+  $("vista-login").classList.add("oculto");
+  $("vista-app").classList.remove("oculto");
+  if(perfil.rol==="admin") renderAdmin(); else renderEvaluaciones();
+}
+function mostrarLogin(){
+  $("vista-app").classList.add("oculto");
+  $("vista-login").classList.remove("oculto");
+  $("btn-entrar").disabled=false; $("btn-entrar").textContent="Ingresar";
+  $("form-login").reset(); PERFIL=null;
+}
+$("btn-salir").addEventListener("click", async ()=>{ await sb.auth.signOut(); mostrarLogin(); });
 
-  // ---------- Al abrir: revisar si ya hay sesión activa ----------
-  (async () => {
-    const { data:{ session } } = await sb.auth.getSession();
-    if(session){ await iniciarSesion(); } else { mostrarLogin(); }
-  })();
+// ==================== ADMIN ====================
+function renderAdmin(){
+  $("contenido").innerHTML = `
+    <div class="tabs">
+      <div class="tab activo" data-t="puestos">Puestos y competencias</div>
+      <div class="tab" data-t="usuarios">Usuarios</div>
+      <div class="tab" data-t="evaluaciones">Evaluaciones</div>
+      <div class="tab" data-t="resultados">Resultados</div>
+    </div>
+    <div id="zona-tab"></div>`;
+  document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("activo"));
+    t.classList.add("activo");
+    const k=t.dataset.t;
+    if(k==="puestos") tabPuestos();
+    else if(k==="usuarios") tabUsuarios();
+    else if(k==="evaluaciones") tabEvaluaciones();
+    else tabResultados();
+  }));
+  tabPuestos();
+}
+
+// ---- Tab Puestos y competencias ----
+async function tabPuestos(){
+  const z=$("zona-tab");
+  z.innerHTML=`
+    <div class="panel">
+      <h1>Puestos y competencias</h1>
+      <div class="desc">Crea los puestos y, dentro de cada uno, las competencias a evaluar (cambian según el puesto).</div>
+      <form id="f-puesto" class="fila">
+        <div class="campo"><label>Nombre del puesto</label><input id="p-nombre" required placeholder="Ej. Maestro de obra"></div>
+        <div class="campo"><label>Departamento</label><input id="p-depto" placeholder="Ej. Operaciones"></div>
+        <button class="btn" type="submit">Agregar puesto</button>
+      </form>
+    </div>
+    <div class="panel"><h2>Puestos registrados</h2><div id="lista-puestos"><div class="vacio">Cargando...</div></div></div>
+    <div id="zona-comp"></div>`;
+  $("f-puesto").addEventListener("submit", async(e)=>{
+    e.preventDefault();
+    await sb.from("puestos").insert({ nombre:$("p-nombre").value.trim(), departamento:$("p-depto").value.trim() });
+    e.target.reset(); cargarPuestos();
+  });
+  cargarPuestos();
+}
+async function cargarPuestos(){
+  const { data } = await sb.from("puestos").select("*").order("nombre");
+  const cont=$("lista-puestos");
+  if(!data||!data.length){ cont.innerHTML=`<div class="vacio">Aún no hay puestos.</div>`; return; }
+  cont.innerHTML=`<table><thead><tr><th>Puesto</th><th>Departamento</th><th></th></tr></thead><tbody>${
+    data.map(p=>`<tr><td><b>${esc(p.nombre)}</b></td><td>${esc(p.departamento)||"-"}</td>
+      <td style="text-align:right"><button class="btn btn-mini btn-sec" data-comp="${p.id}" data-n="${esc(p.nombre)}">Competencias</button></td></tr>`).join("")
+  }</tbody></table>`;
+  cont.querySelectorAll("[data-comp]").forEach(b=>b.addEventListener("click",()=>gestionarComp(b.dataset.comp,b.dataset.n)));
+}
+async function gestionarComp(puestoId,nombre){
+  const z=$("zona-comp");
+  z.innerHTML=`<div class="panel">
+    <h2>Competencias de: ${esc(nombre)}</h2>
+    <form id="f-comp" class="fila">
+      <div class="campo"><label>Categoría</label><input id="c-cat" required placeholder="Ej. Trabajo en equipo"></div>
+      <div class="campo" style="flex:2"><label>Enunciado a evaluar</label><input id="c-texto" required placeholder="Ej. Colabora activamente con el equipo..."></div>
+      <div class="campo" style="max-width:90px"><label>Orden</label><input id="c-orden" type="number" value="0"></div>
+      <button class="btn" type="submit">Agregar</button>
+    </form>
+    <div id="lista-comp" style="margin-top:14px"></div>
+  </div>`;
+  z.scrollIntoView({behavior:"smooth"});
+  $("f-comp").addEventListener("submit", async(e)=>{
+    e.preventDefault();
+    await sb.from("competencias").insert({ puesto_id:puestoId, categoria:$("c-cat").value.trim(), texto:$("c-texto").value.trim(), orden:parseInt($("c-orden").value)||0 });
+    $("c-texto").value=""; cargarComp(puestoId);
+  });
+  cargarComp(puestoId);
+}
+async function cargarComp(puestoId){
+  const { data } = await sb.from("competencias").select("*").eq("puesto_id",puestoId).order("categoria").order("orden");
+  const cont=$("lista-comp");
+  if(!data||!data.length){ cont.innerHTML=`<div class="vacio">Sin competencias aún.</div>`; return; }
+  let html=""; let cat=null;
+  data.forEach(c=>{
+    if(c.categoria!==cat){ cat=c.categoria; html+=`<div class="categoria">${esc(cat)}</div>`; }
+    html+=`<div class="item" style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <span>${esc(c.texto)}</span>
+      <button class="btn btn-mini btn-peligro" data-del="${c.id}">Eliminar</button></div>`;
+  });
+  cont.innerHTML=html;
+  cont.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",async()=>{
+    await sb.from("competencias").delete().eq("id",b.dataset.del); cargarComp(puestoId);
+  }));
+}
+
+// ---- Tab Usuarios ----
+async function tabUsuarios(){
+  const { data:puestos } = await sb.from("puestos").select("*").order("nombre");
+  const opc=(puestos||[]).map(p=>`<option value="${esc(p.nombre)}">${esc(p.nombre)}</option>`).join("");
+  $("zona-tab").innerHTML=`
+    <div class="panel">
+      <h1>Usuarios</h1>
+      <div class="desc">Crea los accesos para evaluadores y evaluados. Iniciarán sesión con su usuario y contraseña.</div>
+      <form id="f-user">
+        <div class="fila">
+          <div class="campo"><label>Nombre completo</label><input id="u-nombre" required placeholder="Ej. Juan Pérez"></div>
+          <div class="campo"><label>Usuario</label><input id="u-usuario" required placeholder="Ej. jperez"></div>
+          <div class="campo"><label>Rol</label><select id="u-rol"><option value="evaluador">Evaluador</option><option value="evaluado">Evaluado</option></select></div>
+        </div>
+        <div class="fila" style="margin-top:12px">
+          <div class="campo"><label>Departamento</label><input id="u-depto" placeholder="Ej. Operaciones"></div>
+          <div class="campo"><label>Puesto</label><select id="u-puesto"><option value="">—</option>${opc}</select></div>
+          <div class="campo"><label>Contraseña</label><input id="u-clave" required minlength="6" placeholder="mínimo 6 caracteres"></div>
+          <button class="btn" type="submit" id="b-user">Crear usuario</button>
+        </div>
+        <div class="msg" id="msg-user"></div>
+      </form>
+    </div>
+    <div class="panel"><h2>Usuarios registrados</h2><div id="lista-users"><div class="vacio">Cargando...</div></div></div>`;
+  $("f-user").addEventListener("submit", crearUsuario);
+  cargarUsuarios();
+}
+async function crearUsuario(e){
+  e.preventDefault();
+  const btn=$("b-user"), msg=$("msg-user");
+  msg.className="msg"; msg.textContent="";
+  btn.disabled=true; btn.textContent="Creando...";
+  const usuario=$("u-usuario").value.trim().toLowerCase();
+  const email=usuarioAEmail(usuario);
+  const { data, error } = await sbTmp.auth.signUp({ email, password:$("u-clave").value });
+  if(error){
+    msg.className="msg error";
+    msg.textContent = error.message.includes("registered")||error.message.includes("exists")
+      ? "Ese usuario ya existe." : ("Error: "+error.message);
+    btn.disabled=false; btn.textContent="Crear usuario"; return;
+  }
+  const nuevoId=data.user.id;
+  const { error:e2 } = await sb.from("perfiles").insert({
+    id:nuevoId, usuario, nombre:$("u-nombre").value.trim(), rol:$("u-rol").value,
+    departamento:$("u-depto").value.trim(), puesto:$("u-puesto").value||null
+  });
+  if(e2){ msg.className="msg error"; msg.textContent="Se creó el acceso pero falló el perfil: "+e2.message; }
+  else { msg.className="msg ok"; msg.textContent="✅ Usuario creado."; $("f-user").reset(); }
+  btn.disabled=false; btn.textContent="Crear usuario";
+  cargarUsuarios();
+}
+async function cargarUsuarios(){
+  const { data } = await sb.from("perfiles").select("*").order("rol").order("nombre");
+  const cont=$("lista-users");
+  const otros=(data||[]).filter(u=>u.rol!=="admin");
+  if(!otros.length){ cont.innerHTML=`<div class="vacio">Aún no hay evaluadores ni evaluados.</div>`; return; }
+  cont.innerHTML=`<table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Departamento</th><th>Puesto</th></tr></thead><tbody>${
+    otros.map(u=>`<tr><td><b>${esc(u.nombre)}</b></td><td>${esc(u.usuario)}</td><td>${esc(u.rol)}</td><td>${esc(u.departamento)||"-"}</td><td>${esc(u.puesto)||"-"}</td></tr>`).join("")
+  }</tbody></table>`;
+}
+
+// ---- Tab Evaluaciones (asignar) ----
+async function tabEvaluaciones(){
+  const [{data:perfiles},{data:puestos}] = await Promise.all([
+    sb.from("perfiles").select("*").neq("rol","admin").order("nombre"),
+    sb.from("puestos").select("*").order("nombre")
+  ]);
+  const optPer=(perfiles||[]).map(p=>`<option value="${p.id}">${esc(p.nombre)} (${esc(p.usuario)})</option>`).join("");
+  const optPue=(puestos||[]).map(p=>`<option value="${p.id}">${esc(p.nombre)}</option>`).join("");
+  $("zona-tab").innerHTML=`
+    <div class="panel">
+      <h1>Asignar evaluaciones</h1>
+      <div class="desc">Define quién evalúa a quién. Para autoevaluación, la persona se evalúa a sí misma.</div>
+      <form id="f-eval">
+        <div class="fila">
+          <div class="campo"><label>Tipo</label><select id="e-tipo"><option value="evaluador">Evaluación (jefe → colaborador)</option><option value="autoevaluacion">Autoevaluación</option></select></div>
+          <div class="campo"><label>Evaluado</label><select id="e-evaluado" required><option value="">—</option>${optPer}</select></div>
+          <div class="campo" id="wrap-evaluador"><label>Evaluador</label><select id="e-evaluador"><option value="">—</option>${optPer}</select></div>
+        </div>
+        <div class="fila" style="margin-top:12px">
+          <div class="campo"><label>Puesto (define las competencias)</label><select id="e-puesto" required><option value="">—</option>${optPue}</select></div>
+          <div class="campo"><label>Codificación</label><input id="e-cod" placeholder="Ej. OP-001"></div>
+          <div class="campo"><label>Fecha</label><input id="e-fecha" type="date"></div>
+          <button class="btn" type="submit">Crear evaluación</button>
+        </div>
+        <div class="msg" id="msg-eval"></div>
+      </form>
+    </div>
+    <div class="panel"><h2>Evaluaciones creadas</h2><div id="lista-eval"><div class="vacio">Cargando...</div></div></div>`;
+  $("e-tipo").addEventListener("change",e=>{
+    $("wrap-evaluador").style.display = e.target.value==="autoevaluacion" ? "none":"block";
+  });
+  $("f-eval").addEventListener("submit", async(e)=>{
+    e.preventDefault();
+    const msg=$("msg-eval"); msg.className="msg";
+    const tipo=$("e-tipo").value;
+    const evaluado=$("e-evaluado").value;
+    const evaluador = tipo==="autoevaluacion" ? evaluado : $("e-evaluador").value;
+    if(!evaluado||!evaluador){ msg.className="msg error"; msg.textContent="Selecciona evaluado y evaluador."; return; }
+    const { error } = await sb.from("evaluaciones").insert({
+      evaluado_id:evaluado, evaluador_id:evaluador, puesto_id:$("e-puesto").value,
+      tipo, codificacion:$("e-cod").value.trim(), fecha:$("e-fecha").value||null
+    });
+    if(error){ msg.className="msg error"; msg.textContent="Error: "+error.message; return; }
+    msg.className="msg ok"; msg.textContent="✅ Evaluación asignada."; e.target.reset();
+    $("wrap-evaluador").style.display="block";
+    cargarEvalAdmin();
+  });
+  cargarEvalAdmin();
+}
+async function cargarEvalAdmin(){
+  const { data } = await sb.from("evaluaciones")
+    .select("id,tipo,estado,codificacion,fecha,evaluado:perfiles!evaluado_id(nombre),evaluador:perfiles!evaluador_id(nombre),puesto:puestos!puesto_id(nombre)")
+    .order("id",{ascending:false});
+  const cont=$("lista-eval");
+  if(!data||!data.length){ cont.innerHTML=`<div class="vacio">Aún no hay evaluaciones.</div>`; return; }
+  cont.innerHTML=`<table><thead><tr><th>Cód.</th><th>Evaluado</th><th>Evaluador</th><th>Puesto</th><th>Tipo</th><th>Estado</th></tr></thead><tbody>${
+    data.map(e=>`<tr><td>${esc(e.codificacion)||"-"}</td><td><b>${esc(e.evaluado?.nombre)}</b></td>
+      <td>${e.tipo==="autoevaluacion"?"<i>(él/ella)</i>":esc(e.evaluador?.nombre)}</td>
+      <td>${esc(e.puesto?.nombre)||"-"}</td><td>${e.tipo==="autoevaluacion"?"Autoeval.":"Evaluación"}</td>
+      <td><span class="estado ${e.estado}">${e.estado}</span></td></tr>`).join("")
+  }</tbody></table>`;
+}
+
+// ---- Tab Resultados ----
+async function tabResultados(){
+  const { data } = await sb.from("evaluaciones")
+    .select("id,tipo,estado,codificacion,evaluado:perfiles!evaluado_id(nombre),puesto:puestos!puesto_id(nombre)")
+    .eq("estado","completada").order("id",{ascending:false});
+  $("zona-tab").innerHTML=`<div class="panel"><h1>Resultados</h1>
+    <div class="desc">Evaluaciones completadas. Haz clic en una para ver el detalle y los promedios.</div>
+    <div id="lista-res"></div></div><div id="det-res"></div>`;
+  const cont=$("lista-res");
+  if(!data||!data.length){ cont.innerHTML=`<div class="vacio">Todavía no hay evaluaciones completadas.</div>`; return; }
+  cont.innerHTML=`<table><thead><tr><th>Cód.</th><th>Evaluado</th><th>Puesto</th><th>Tipo</th><th></th></tr></thead><tbody>${
+    data.map(e=>`<tr><td>${esc(e.codificacion)||"-"}</td><td><b>${esc(e.evaluado?.nombre)}</b></td><td>${esc(e.puesto?.nombre)||"-"}</td>
+      <td>${e.tipo==="autoevaluacion"?"Autoeval.":"Evaluación"}</td>
+      <td style="text-align:right"><button class="btn btn-mini btn-sec" data-ver="${e.id}">Ver detalle</button></td></tr>`).join("")
+  }</tbody></table>`;
+  cont.querySelectorAll("[data-ver]").forEach(b=>b.addEventListener("click",()=>verDetalle(b.dataset.ver)));
+}
+async function verDetalle(evalId){
+  const { data:ev } = await sb.from("evaluaciones").select("*,evaluado:perfiles!evaluado_id(nombre),evaluador:perfiles!evaluador_id(nombre),puesto:puestos!puesto_id(nombre)").eq("id",evalId).single();
+  const { data:resp } = await sb.from("respuestas").select("puntaje,competencia:competencias!competencia_id(categoria,texto,orden)").eq("evaluacion_id",evalId);
+  const { data:com } = await sb.from("comentarios").select("*").eq("evaluacion_id",evalId).maybeSingle();
+  const cats={};
+  (resp||[]).forEach(r=>{ const c=r.competencia?.categoria||"General"; (cats[c]=cats[c]||[]).push(r); });
+  let html=`<div class="panel"><h2>Detalle: ${esc(ev.evaluado?.nombre)} — ${esc(ev.puesto?.nombre)||""}</h2>`;
+  let total=0,n=0;
+  Object.keys(cats).forEach(cat=>{
+    const arr=cats[cat]; const prom=arr.reduce((s,r)=>s+r.puntaje,0)/arr.length;
+    total+=arr.reduce((s,r)=>s+r.puntaje,0); n+=arr.length;
+    html+=`<div class="resultado-cat">${esc(cat)}</div>
+      <div class="barra-prom"><div style="width:${prom/5*100}%"></div><span>Promedio: ${prom.toFixed(2)} / 5</span></div>`;
+    arr.forEach(r=>html+=`<div style="font-size:13px;display:flex;justify-content:space-between;padding:3px 0"><span>${esc(r.competencia?.texto)}</span><b>${r.puntaje}</b></div>`);
+  });
+  const promG = n? (total/n):0;
+  html+=`<div class="categoria" style="margin-top:18px">Promedio general: ${promG.toFixed(2)} / 5</div>`;
+  if(com){
+    if(com.fortalezas) html+=`<p style="margin-top:12px"><b>Fortalezas:</b> ${esc(com.fortalezas)}</p>`;
+    if(com.areas_mejora) html+=`<p style="margin-top:6px"><b>Áreas de mejora:</b> ${esc(com.areas_mejora)}</p>`;
+    if(com.aspectos_mejorar_evaluador) html+=`<p style="margin-top:6px"><b>Aspectos a mejorar del evaluador:</b> ${esc(com.aspectos_mejorar_evaluador)}</p>`;
+  }
+  html+=`</div>`;
+  $("det-res").innerHTML=html;
+  $("det-res").scrollIntoView({behavior:"smooth"});
+}
+
+// ==================== EVALUADOR / EVALUADO ====================
+async function renderEvaluaciones(){
+  const campo = PERFIL.rol==="evaluado" ? "evaluado_id" : "evaluador_id";
+  const { data } = await sb.from("evaluaciones")
+    .select("id,tipo,estado,codificacion,fecha,evaluado:perfiles!evaluado_id(nombre),puesto:puestos!puesto_id(nombre,id)")
+    .eq(campo,PERFIL.id).order("estado").order("id",{ascending:false});
+  let html=`<div class="panel"><h1>Mis evaluaciones</h1>
+    <div class="desc">${PERFIL.rol==="evaluado"?"Completa tu autoevaluación.":"Evalúa al personal asignado."}</div>`;
+  if(!data||!data.length){ html+=`<div class="vacio">No tienes evaluaciones asignadas por ahora.</div></div>`; $("contenido").innerHTML=html; return; }
+  html+=`<table><thead><tr><th>Cód.</th><th>${PERFIL.rol==="evaluado"?"Puesto":"Evaluado"}</th><th>Tipo</th><th>Estado</th><th></th></tr></thead><tbody>${
+    data.map(e=>`<tr><td>${esc(e.codificacion)||"-"}</td>
+      <td><b>${PERFIL.rol==="evaluado"?esc(e.puesto?.nombre):esc(e.evaluado?.nombre)}</b></td>
+      <td>${e.tipo==="autoevaluacion"?"Autoeval.":"Evaluación"}</td>
+      <td><span class="estado ${e.estado}">${e.estado}</span></td>
+      <td style="text-align:right"><button class="btn btn-mini ${e.estado==="completada"?"btn-sec":""}" data-ll="${e.id}">${e.estado==="completada"?"Ver":"Llenar"}</button></td></tr>`).join("")
+  }</tbody></table></div>`;
+  $("contenido").innerHTML=html;
+  document.querySelectorAll("[data-ll]").forEach(b=>b.addEventListener("click",()=>abrirFormulario(b.dataset.ll)));
+}
+async function abrirFormulario(evalId){
+  const { data:ev } = await sb.from("evaluaciones").select("*,evaluado:perfiles!evaluado_id(nombre),puesto:puestos!puesto_id(nombre,id)").eq("id",evalId).single();
+  const { data:comps } = await sb.from("competencias").select("*").eq("puesto_id",ev.puesto_id).order("categoria").order("orden");
+  const { data:prev } = await sb.from("respuestas").select("competencia_id,puntaje").eq("evaluacion_id",evalId);
+  const { data:comPrev } = await sb.from("comentarios").select("*").eq("evaluacion_id",evalId).maybeSingle();
+  const yaResp={}; (prev||[]).forEach(r=>yaResp[r.competencia_id]=r.puntaje);
+  const soloLectura = ev.estado==="completada";
+  const NIV=["Deficiente","Regular","Bueno","Muy bueno","Excelente"];
+
+  let html=`<div class="panel">
+    <button class="btn btn-mini btn-sec" id="volver">← Volver</button>
+    <h1 style="margin-top:12px">Evaluación 180° — ${esc(ev.evaluado?.nombre)}</h1>
+    <div class="desc">Puesto: ${esc(ev.puesto?.nombre)||"-"} · Codificación: ${esc(ev.codificacion)||"-"}</div>`;
+  if(!comps||!comps.length){
+    html+=`<div class="vacio">Este puesto todavía no tiene competencias configuradas. Avisa a RRHH.</div></div>`;
+    $("contenido").innerHTML=html; $("volver").addEventListener("click",renderEvaluaciones); return;
+  }
+  let cat=null;
+  comps.forEach(c=>{
+    if(c.categoria!==cat){ cat=c.categoria; html+=`<div class="categoria">${esc(cat)}</div>`; }
+    html+=`<div class="item"><p>${esc(c.texto)}</p><div class="escala" data-comp="${c.id}">${
+      NIV.map((nv,i)=>{const v=i+1;return `<div class="op ${yaResp[c.id]===v?"sel":""}" data-v="${v}">${'<b>'+v+'</b>'}${nv}</div>`;}).join("")
+    }</div></div>`;
+  });
+  html+=`<div class="categoria">Comentarios</div>
+    <div class="campo"><label>Fortalezas</label><textarea id="cm-fort" rows="2">${esc(comPrev?.fortalezas)}</textarea></div>
+    <div class="campo"><label>Áreas de mejora</label><textarea id="cm-area" rows="2">${esc(comPrev?.areas_mejora)}</textarea></div>`;
+  if(ev.tipo!=="autoevaluacion")
+    html+=`<div class="campo"><label>Aspectos a mejorar del evaluador</label><textarea id="cm-evalr" rows="2">${esc(comPrev?.aspectos_mejorar_evaluador)}</textarea></div>`;
+  if(!soloLectura) html+=`<button class="btn btn-full" id="b-guardar" style="margin-top:16px">Guardar y enviar evaluación</button>`;
+  html+=`<div class="msg" id="msg-form"></div></div>`;
+  $("contenido").innerHTML=html;
+  $("volver").addEventListener("click",renderEvaluaciones);
+
+  if(soloLectura){
+    document.querySelectorAll(".op").forEach(o=>o.style.cursor="default");
+    document.querySelectorAll("textarea").forEach(t=>t.disabled=true);
+    return;
+  }
+  document.querySelectorAll(".escala").forEach(esc2=>{
+    esc2.querySelectorAll(".op").forEach(op=>op.addEventListener("click",()=>{
+      esc2.querySelectorAll(".op").forEach(x=>x.classList.remove("sel"));
+      op.classList.add("sel");
+    }));
+  });
+  $("b-guardar").addEventListener("click",()=>guardarFormulario(evalId,ev.tipo));
+}
+async function guardarFormulario(evalId,tipo){
+  const msg=$("msg-form"); msg.className="msg";
+  const filas=[]; let faltan=false;
+  document.querySelectorAll(".escala").forEach(e=>{
+    const sel=e.querySelector(".op.sel");
+    if(!sel){ faltan=true; return; }
+    filas.push({ evaluacion_id:Number(evalId), competencia_id:Number(e.dataset.comp), puntaje:Number(sel.dataset.v) });
+  });
+  if(faltan){ msg.className="msg error"; msg.textContent="Por favor califica todas las competencias antes de enviar."; return; }
+  const btn=$("b-guardar"); btn.disabled=true; btn.textContent="Guardando...";
+  const { error:e1 } = await sb.from("respuestas").upsert(filas,{onConflict:"evaluacion_id,competencia_id"});
+  const com={ evaluacion_id:Number(evalId), fortalezas:$("cm-fort").value.trim(), areas_mejora:$("cm-area").value.trim(),
+    aspectos_mejorar_evaluador: tipo!=="autoevaluacion" ? ($("cm-evalr")?.value.trim()||null) : null };
+  const { error:e2 } = await sb.from("comentarios").upsert(com,{onConflict:"evaluacion_id"});
+  const { error:e3 } = await sb.from("evaluaciones").update({estado:"completada"}).eq("id",evalId);
+  if(e1||e2||e3){ msg.className="msg error"; msg.textContent="Error al guardar: "+((e1||e2||e3).message); btn.disabled=false; btn.textContent="Guardar y enviar evaluación"; return; }
+  msg.className="msg ok"; msg.textContent="✅ Evaluación enviada. ¡Gracias!";
+  setTimeout(renderEvaluaciones,1200);
+}
+
+// ==================== Inicio ====================
+(async()=>{
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session) await iniciarSesion(); else mostrarLogin();
+})();
 </script>
 </body>
 </html>
