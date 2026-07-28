@@ -117,6 +117,7 @@
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // ==================== Config ====================
 const SUPABASE_URL = "https://hwscyzrytwdvqlombpph.supabase.co";
@@ -240,6 +241,14 @@ async function gestionarComp(puestoId,nombre){
       <div class="campo" style="max-width:90px"><label>Orden</label><input id="c-orden" type="number" value="0"></div>
       <button class="btn" type="submit">Agregar</button>
     </form>
+    <details style="margin-top:16px;border:1px solid var(--gris-borde);border-radius:10px;padding:12px 14px">
+      <summary style="cursor:pointer;font-weight:600;font-size:13px">📋 Importar varias competencias en lote (pegar texto o subir archivo)</summary>
+      <div class="desc" style="margin-top:10px">Una competencia por línea con el formato <b>Categoría | Enunciado</b>. También puedes poner la categoría en una línea sola y debajo los enunciados. Acepta archivos .txt o .csv.</div>
+      <input type="file" id="c-file" accept=".txt,.csv" style="margin-bottom:10px;font-size:13px">
+      <textarea id="c-bulk" rows="7" style="width:100%;padding:11px 13px;border:1px solid var(--gris-borde);border-radius:9px;font-size:13px;font-family:inherit;background:#fafafa" placeholder="Trabajo en equipo | Colabora activamente con el equipo para cumplir los objetivos.&#10;Trabajo en equipo | Apoya a sus compañeros cuando se requiere cooperación.&#10;Comunicación | Comunica de forma clara las instrucciones técnicas."></textarea>
+      <button class="btn" id="b-bulk" type="button" style="margin-top:10px">Importar competencias</button>
+      <div class="msg" id="msg-bulk"></div>
+    </details>
     <div id="lista-comp" style="margin-top:14px"></div>
   </div>`;
   z.scrollIntoView({behavior:"smooth"});
@@ -248,6 +257,39 @@ async function gestionarComp(puestoId,nombre){
     await sb.from("competencias").insert({ puesto_id:puestoId, categoria:$("c-cat").value.trim(), texto:$("c-texto").value.trim(), orden:parseInt($("c-orden").value)||0 });
     $("c-texto").value=""; cargarComp(puestoId);
   });
+  $("c-file").addEventListener("change",(e)=>{
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ $("c-bulk").value = ($("c-bulk").value ? $("c-bulk").value+"\n" : "") + r.result; };
+    r.readAsText(f);
+  });
+  $("b-bulk").addEventListener("click",()=>importarComp(puestoId));
+  cargarComp(puestoId);
+}
+
+async function importarComp(puestoId){
+  const msg=$("msg-bulk"); msg.className="msg";
+  const lineas=$("c-bulk").value.split("\n");
+  let cat="General"; const orden={}; const filas=[];
+  lineas.forEach(l=>{
+    l=l.trim(); if(!l) return;
+    if(l.includes("|")){
+      const i=l.indexOf("|");
+      const c=l.slice(0,i).trim(); const t=l.slice(i+1).trim();
+      if(c) cat=c;
+      if(!t) return;
+      orden[cat]=(orden[cat]||0)+1;
+      filas.push({puesto_id:puestoId, categoria:cat, texto:t, orden:orden[cat]});
+    } else {
+      cat=l; // línea sola = encabezado de categoría
+    }
+  });
+  if(!filas.length){ msg.className="msg error"; msg.textContent="No encontré competencias válidas. Usa el formato: Categoría | Enunciado"; return; }
+  const btn=$("b-bulk"); btn.disabled=true; btn.textContent="Importando...";
+  const { error } = await sb.from("competencias").insert(filas);
+  if(error){ msg.className="msg error"; msg.textContent="Error: "+error.message; }
+  else { msg.className="msg ok"; msg.textContent="✅ Se importaron "+filas.length+" competencias."; $("c-bulk").value=""; }
+  btn.disabled=false; btn.textContent="Importar competencias";
   cargarComp(puestoId);
 }
 async function cargarComp(puestoId){
@@ -290,8 +332,118 @@ async function tabUsuarios(){
         <div class="msg" id="msg-user"></div>
       </form>
     </div>
+    <div class="panel">
+      <h2>Carga masiva de usuarios (Excel)</h2>
+      <div class="desc">Sube un Excel con las columnas <b>Nombres, Apellidos, Cedula, Departamento, Puesto, Rol</b>. El usuario se genera solo (inicial + apellido) y la contraseña de cada persona será su <b>cédula</b>.</div>
+      <input type="file" id="u-file" accept=".xlsx,.xls,.csv" style="font-size:13px">
+      <button class="btn btn-sec" id="b-prev" type="button" style="margin-left:8px">Vista previa</button>
+      <div id="prev-masivo" style="margin-top:14px"></div>
+    </div>
     <div class="panel"><h2>Usuarios registrados</h2><div id="lista-users"><div class="vacio">Cargando...</div></div></div>`;
   $("f-user").addEventListener("submit", crearUsuario);
+  $("b-prev").addEventListener("click", previewMasivo);
+  cargarUsuarios();
+}
+
+// ---- Carga masiva de usuarios ----
+let LISTA_MASIVA=[];
+const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
+function normTxt(s){return (s==null?"":s.toString()).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function soloAlnum(s){return normTxt(s).replace(/[^a-z0-9]/g,'');}
+function normCedula(c){ c=(c==null?"":c.toString()).replace(/\D/g,''); if(c.length===9) c='0'+c; return c; }
+function mapFila(row){
+  const o={};
+  for(const k in row){
+    const nk=normTxt(k);
+    if(nk.startsWith('nombre')) o.nombres=row[k];
+    else if(nk.startsWith('apellido')) o.apellidos=row[k];
+    else if(nk.startsWith('cedula')||nk==='ci'||nk==='c.i') o.cedula=row[k];
+    else if(nk.startsWith('depart')||nk.startsWith('area')) o.departamento=row[k];
+    else if(nk.startsWith('puesto')||nk.startsWith('cargo')) o.puesto=row[k];
+    else if(nk.startsWith('rol')) o.rol=row[k];
+    else if(nk.startsWith('usuario')) o.usuario=row[k];
+  }
+  return o;
+}
+function generarUsuario(nombres,apellidos,usados){
+  const n=soloAlnum((nombres||'').split(/\s+/)[0]);
+  const a=soloAlnum((apellidos||'').split(/\s+/)[0]);
+  let base=((n[0]||'')+a) || soloAlnum(nombres)+soloAlnum(apellidos) || 'usuario';
+  let u=base, i=1;
+  while(usados.has(u)){ i++; u=base+i; }
+  usados.add(u); return u;
+}
+function leerExcel(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=(e)=>{ try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      res(XLSX.utils.sheet_to_json(ws,{defval:"",raw:false}));
+    }catch(err){rej(err);} };
+    r.onerror=rej; r.readAsBinaryString(file);
+  });
+}
+async function previewMasivo(){
+  const cont=$("prev-masivo");
+  const file=$("u-file").files[0];
+  if(!file){ cont.innerHTML=`<div class="msg error">Primero elige un archivo.</div>`; return; }
+  cont.innerHTML=`<div class="vacio">Leyendo archivo...</div>`;
+  let filas;
+  try{ filas=await leerExcel(file); }catch(err){ cont.innerHTML=`<div class="msg error">No pude leer el archivo: ${esc(err.message)}</div>`; return; }
+  // usuarios ya existentes para no repetir
+  const { data:existentes } = await sb.from("perfiles").select("usuario");
+  const usados=new Set((existentes||[]).map(u=>u.usuario));
+  LISTA_MASIVA=[];
+  filas.forEach(row=>{
+    const f=mapFila(row);
+    const nombres=(f.nombres||"").toString().trim();
+    const apellidos=(f.apellidos||"").toString().trim();
+    if(!nombres && !apellidos) return; // fila vacía
+    const cedula=normCedula(f.cedula);
+    const usuario = f.usuario ? soloAlnum(f.usuario) : generarUsuario(nombres,apellidos,usados);
+    if(f.usuario) usados.add(usuario);
+    let rol=normTxt(f.rol); rol = rol.startsWith('evaluador')?'evaluador':'evaluado';
+    LISTA_MASIVA.push({ usuario, cedula, nombre:(nombres+" "+apellidos).trim(),
+      rol, departamento:(f.departamento||"").toString().trim(), puesto:(f.puesto||"").toString().trim() });
+  });
+  if(!LISTA_MASIVA.length){ cont.innerHTML=`<div class="msg error">No encontré filas válidas. Revisa que el Excel tenga las columnas Nombres, Apellidos, Cedula...</div>`; return; }
+  const sinCed=LISTA_MASIVA.filter(r=>r.cedula.length<6).length;
+  cont.innerHTML=`
+    <div class="desc">Se van a crear <b>${LISTA_MASIVA.length}</b> usuarios. ${sinCed?`<span style="color:var(--rojo)">⚠️ ${sinCed} sin cédula válida (mín. 6 dígitos) — corrígelos en el Excel.</span>`:""}</div>
+    <div style="max-height:300px;overflow:auto;border:1px solid var(--gris-borde);border-radius:9px">
+    <table><thead><tr><th>Nombre</th><th>Usuario</th><th>Contraseña (cédula)</th><th>Rol</th><th>Puesto</th></tr></thead><tbody>${
+      LISTA_MASIVA.slice(0,50).map(r=>`<tr><td>${esc(r.nombre)}</td><td><b>${esc(r.usuario)}</b></td><td>${esc(r.cedula)||'<span style="color:var(--rojo)">falta</span>'}</td><td>${esc(r.rol)}</td><td>${esc(r.puesto)||'-'}</td></tr>`).join("")
+    }</tbody></table></div>
+    ${LISTA_MASIVA.length>50?`<div class="desc" style="margin-top:6px">Mostrando los primeros 50 de ${LISTA_MASIVA.length}.</div>`:""}
+    <button class="btn" id="b-crear-masivo" type="button" style="margin-top:12px">Crear los ${LISTA_MASIVA.length} usuarios</button>
+    <div class="msg" id="msg-masivo"></div>`;
+  $("b-crear-masivo").addEventListener("click", crearMasivo);
+}
+async function crearMasivo(){
+  const btn=$("b-crear-masivo"), msg=$("msg-masivo");
+  btn.disabled=true;
+  let ok=0, saltados=0; const errores=[];
+  for(let i=0;i<LISTA_MASIVA.length;i++){
+    const r=LISTA_MASIVA[i];
+    msg.className="msg"; msg.textContent=`Creando ${i+1} de ${LISTA_MASIVA.length}...  ✅ ${ok} creados`;
+    if(r.cedula.length<6){ saltados++; errores.push(`${r.usuario}: cédula inválida`); continue; }
+    const email=usuarioAEmail(r.usuario);
+    const { data, error } = await sbTmp.auth.signUp({ email, password:r.cedula });
+    if(error){
+      if(/registered|exists|already/i.test(error.message)){ saltados++; }
+      else if(/rate|too many/i.test(error.message)){ errores.push(`${r.usuario}: límite de Supabase, espera y reintenta`); await sleep(3000); }
+      else { errores.push(`${r.usuario}: ${error.message}`); }
+      await sleep(200); continue;
+    }
+    const { error:e2 } = await sb.from("perfiles").insert({ id:data.user.id, usuario:r.usuario, nombre:r.nombre, rol:r.rol, departamento:r.departamento, puesto:r.puesto||null });
+    if(e2){ errores.push(`${r.usuario}: perfil ${e2.message}`); } else { ok++; }
+    await sleep(200);
+  }
+  msg.className="msg ok";
+  msg.innerHTML=`✅ Listo. Creados: <b>${ok}</b>. Saltados (ya existían o sin cédula): <b>${saltados}</b>.${errores.length?` Con detalle: ${errores.length} avisos.`:""}`;
+  if(errores.length){ msg.innerHTML+=`<div style="margin-top:8px;max-height:140px;overflow:auto;font-size:12px;color:var(--rojo)">${errores.slice(0,100).map(esc).join("<br>")}</div>`; }
+  btn.disabled=false;
   cargarUsuarios();
 }
 async function crearUsuario(e){
