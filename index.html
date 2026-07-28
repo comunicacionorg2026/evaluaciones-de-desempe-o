@@ -381,6 +381,15 @@ async function tabUsuarios(){
       <button class="btn btn-sec" id="b-prev" type="button" style="margin-left:8px">Vista previa</button>
       <div id="prev-masivo" style="margin-top:14px"></div>
     </div>
+    <div class="panel">
+      <h2>🔑 Recuperar acceso de un usuario</h2>
+      <div class="desc">Si alguien olvidó su usuario o contraseña, selecciónalo y te muestro sus datos de acceso.</div>
+      <div class="fila">
+        <div class="campo"><label>Selecciona a la persona</label><select id="rec-user"><option value="">—</option></select></div>
+        <button class="btn" type="button" id="b-rec">Ver acceso</button>
+      </div>
+      <div id="rec-out"></div>
+    </div>
     <div class="panel"><h2>Usuarios registrados</h2><div id="lista-users"><div class="vacio">Cargando...</div></div></div>`;
   usuarioEditado=false;
   $("u-usuario").addEventListener("input",()=>{ usuarioEditado=true; });
@@ -388,7 +397,16 @@ async function tabUsuarios(){
   $("u-puesto").addEventListener("change",(e)=>{ const o=e.target.selectedOptions[0]; if(o&&o.dataset.depto) $("u-depto").value=o.dataset.depto; });
   $("f-user").addEventListener("submit", crearUsuario);
   $("b-prev").addEventListener("click", previewMasivo);
+  $("b-rec").addEventListener("click", recuperarAcceso);
   cargarUsuarios();
+}
+async function recuperarAcceso(){
+  const id=$("rec-user").value, out=$("rec-out");
+  if(!id){ out.innerHTML=""; return; }
+  const { data } = await sb.from("accesos_temp").select("usuario,clave").eq("perfil_id",id).maybeSingle();
+  if(!data){ out.innerHTML=`<div class="msg error" style="margin-top:10px">No hay datos de acceso guardados para esta persona (quizá se creó antes de activar esta función). Puedes volver a crearla para regenerarlos.</div>`; return; }
+  out.innerHTML=`<div style="margin-top:12px;background:#FFF7E0;border:1px solid var(--amarillo);border-radius:10px;padding:14px;font-size:14px">
+    Usuario: <b style="font-size:16px">${esc(data.usuario)}</b><br>Contraseña: <b style="font-size:16px">${esc(data.clave)}</b></div>`;
 }
 
 // ---- Generación de usuario y contraseña (alta individual) ----
@@ -506,7 +524,7 @@ async function crearMasivo(){
       await sleep(200); continue;
     }
     const { error:e2 } = await sb.from("perfiles").insert({ id:data.user.id, usuario:r.usuario, nombre:r.nombre, rol:r.rol, departamento:r.departamento, puesto:r.puesto||null });
-    if(e2){ errores.push(`${r.usuario}: perfil ${e2.message}`); } else { ok++; }
+    if(e2){ errores.push(`${r.usuario}: perfil ${e2.message}`); } else { ok++; await sb.from("accesos_temp").insert({ perfil_id:data.user.id, usuario:r.usuario, clave:r.cedula }); }
     await sleep(200);
   }
   msg.className="msg ok";
@@ -537,6 +555,7 @@ async function crearUsuario(e){
     departamento:$("u-depto").value||null, puesto:$("u-puesto").value||null
   });
   if(e2){ msg.className="msg error"; msg.textContent="Se creó el acceso pero falló el perfil: "+e2.message; btn.disabled=false; btn.textContent="Crear usuario"; return; }
+  await sb.from("accesos_temp").insert({ perfil_id:data.user.id, usuario, clave:password });
   cred.innerHTML=`<div style="margin-top:14px;background:#FFF7E0;border:1px solid var(--amarillo);border-radius:10px;padding:14px;font-size:14px">
     ✅ <b>Usuario creado.</b> Copia estos datos y compártelos con la persona:<br><br>
     Usuario: <b style="font-size:16px">${esc(usuario)}</b><br>
@@ -549,6 +568,8 @@ async function cargarUsuarios(){
   const { data } = await sb.from("perfiles").select("*").order("rol").order("nombre");
   const cont=$("lista-users");
   const otros=(data||[]).filter(u=>u.rol!=="admin");
+  const rec=$("rec-user");
+  if(rec) rec.innerHTML=`<option value="">—</option>`+otros.map(u=>`<option value="${u.id}">${esc(u.nombre)} (${esc(u.usuario)})</option>`).join("");
   if(!otros.length){ cont.innerHTML=`<div class="vacio">Aún no hay evaluadores ni evaluados.</div>`; return; }
   cont.innerHTML=`<table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Departamento</th><th>Puesto</th></tr></thead><tbody>${
     otros.map(u=>`<tr><td><b>${esc(u.nombre)}</b></td><td>${esc(u.usuario)}</td><td>${esc(u.rol)}</td><td>${esc(u.departamento)||"-"}</td><td>${esc(u.puesto)||"-"}</td></tr>`).join("")
