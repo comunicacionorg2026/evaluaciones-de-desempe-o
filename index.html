@@ -205,13 +205,14 @@ async function tabPuestos(){
   z.innerHTML=`
     <div class="panel">
       <h1>Puestos y competencias</h1>
-      <div class="desc">Crea los puestos y, dentro de cada uno, las competencias a evaluar (cambian según el puesto).</div>
+      <div class="desc">Cada puesto se evalúa con <b>4 competencias propias</b> + la <b>competencia transversal "Valores Etinar"</b> (común a todos). Crea el puesto y luego define sus competencias.</div>
       <form id="f-puesto" class="fila">
         <div class="campo"><label>Nombre del puesto</label><input id="p-nombre" required placeholder="Ej. Maestro de obra"></div>
         <div class="campo"><label>Departamento</label><input id="p-depto" placeholder="Ej. Operaciones"></div>
         <button class="btn" type="submit">Agregar puesto</button>
       </form>
     </div>
+    <div id="zona-transversal"></div>
     <div class="panel"><h2>Puestos registrados</h2><div id="lista-puestos"><div class="vacio">Cargando...</div></div></div>
     <div id="zona-comp"></div>`;
   $("f-puesto").addEventListener("submit", async(e)=>{
@@ -219,7 +220,46 @@ async function tabPuestos(){
     await sb.from("puestos").insert({ nombre:$("p-nombre").value.trim(), departamento:$("p-depto").value.trim() });
     e.target.reset(); cargarPuestos();
   });
+  cargarTransversal();
   cargarPuestos();
+}
+
+// ---- Competencia transversal (Valores Etinar): puesto_id = null (aplica a todos) ----
+async function cargarTransversal(){
+  const { data } = await sb.from("competencias").select("*").is("puesto_id",null).order("orden");
+  const items = data||[];
+  const cont=$("zona-transversal");
+  cont.innerHTML=`<div class="panel" style="border:2px solid var(--amarillo)">
+    <h2>⭐ Competencia transversal — Valores Etinar</h2>
+    <div class="desc">Estos ítems se evalúan en <b>TODOS los puestos</b> (además de las 4 competencias propias). Son los valores de la empresa: Calidad, Eficiencia, Confianza y Experiencia.</div>
+    ${items.length? "" : `<button class="btn" id="b-seed-val" type="button">Cargar los 4 valores por defecto</button>`}
+    <div id="lista-transv" style="margin-top:10px"></div>
+    <form id="f-transv" class="fila" style="margin-top:14px">
+      <div class="campo" style="flex:2"><label>Agregar otro ítem transversal</label><input id="t-texto" placeholder="Ej. Seguridad: cumple las normas de seguridad en obra."></div>
+      <button class="btn btn-sec" type="submit">Agregar</button>
+    </form>
+  </div>`;
+  const lista=$("lista-transv");
+  lista.innerHTML = items.length
+    ? items.map(c=>`<div class="item" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span>${esc(c.texto)}</span><button class="btn btn-mini btn-peligro" data-delt="${c.id}">Eliminar</button></div>`).join("")
+    : `<div class="vacio">Aún no has cargado los valores transversales.</div>`;
+  lista.querySelectorAll("[data-delt]").forEach(b=>b.addEventListener("click",async()=>{ await sb.from("competencias").delete().eq("id",b.dataset.delt); cargarTransversal(); }));
+  if($("b-seed-val")) $("b-seed-val").addEventListener("click",seedValores);
+  $("f-transv").addEventListener("submit",async(e)=>{
+    e.preventDefault(); const t=$("t-texto").value.trim(); if(!t) return;
+    await sb.from("competencias").insert({puesto_id:null,categoria:"Valores Etinar",texto:t,orden:items.length+1});
+    cargarTransversal();
+  });
+}
+async function seedValores(){
+  const vals=[
+    "Calidad: realiza su trabajo con altos estándares de calidad, cuidando los detalles y evitando errores.",
+    "Eficiencia: cumple sus tareas optimizando el tiempo y los recursos disponibles.",
+    "Confianza: actúa con honestidad y responsabilidad, generando confianza en su equipo.",
+    "Experiencia: aplica su conocimiento y experiencia para resolver situaciones y aportar valor."
+  ];
+  await sb.from("competencias").insert(vals.map((t,i)=>({puesto_id:null,categoria:"Valores Etinar",texto:t,orden:i+1})));
+  cargarTransversal();
 }
 async function cargarPuestos(){
   const { data } = await sb.from("puestos").select("*").order("nombre");
@@ -241,8 +281,8 @@ async function gestionarComp(puestoId,nombre){
       <div class="campo" style="max-width:90px"><label>Orden</label><input id="c-orden" type="number" value="0"></div>
       <button class="btn" type="submit">Agregar</button>
     </form>
-    <details style="margin-top:16px;border:1px solid var(--gris-borde);border-radius:10px;padding:12px 14px">
-      <summary style="cursor:pointer;font-weight:600;font-size:13px">📋 Importar varias competencias en lote (pegar texto o subir archivo)</summary>
+    <details open style="margin-top:16px;border:1px solid var(--gris-borde);border-radius:10px;padding:12px 14px">
+      <summary style="cursor:pointer;font-weight:600;font-size:13px">📋 Importar competencias / subir documento (.txt o .csv)</summary>
       <div class="desc" style="margin-top:10px">Una competencia por línea con el formato <b>Categoría | Enunciado</b>. También puedes poner la categoría en una línea sola y debajo los enunciados. Acepta archivos .txt o .csv.</div>
       <input type="file" id="c-file" accept=".txt,.csv" style="margin-bottom:10px;font-size:13px">
       <textarea id="c-bulk" rows="7" style="width:100%;padding:11px 13px;border:1px solid var(--gris-borde);border-radius:9px;font-size:13px;font-family:inherit;background:#fafafa" placeholder="Trabajo en equipo | Colabora activamente con el equipo para cumplir los objetivos.&#10;Trabajo en equipo | Apoya a sus compañeros cuando se requiere cooperación.&#10;Comunicación | Comunica de forma clara las instrucciones técnicas."></textarea>
@@ -312,24 +352,26 @@ async function cargarComp(puestoId){
 // ---- Tab Usuarios ----
 async function tabUsuarios(){
   const { data:puestos } = await sb.from("puestos").select("*").order("nombre");
-  const opc=(puestos||[]).map(p=>`<option value="${esc(p.nombre)}">${esc(p.nombre)}</option>`).join("");
+  const opc=(puestos||[]).map(p=>`<option value="${esc(p.nombre)}" data-depto="${esc(p.departamento||'')}">${esc(p.nombre)}</option>`).join("");
+  const deptos=[...new Set((puestos||[]).map(p=>(p.departamento||'').trim()).filter(Boolean))].sort();
+  const optDep=deptos.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join("");
   $("zona-tab").innerHTML=`
     <div class="panel">
       <h1>Usuarios</h1>
-      <div class="desc">Crea los accesos para evaluadores y evaluados. Iniciarán sesión con su usuario y contraseña.</div>
+      <div class="desc">Escribe el <b>nombre completo</b> y elige departamento y puesto. El <b>usuario</b> y la <b>contraseña</b> se generan automáticamente.</div>
       <form id="f-user">
         <div class="fila">
-          <div class="campo"><label>Nombre completo</label><input id="u-nombre" required placeholder="Ej. Juan Pérez"></div>
-          <div class="campo"><label>Usuario</label><input id="u-usuario" required placeholder="Ej. jperez"></div>
-          <div class="campo"><label>Rol</label><select id="u-rol"><option value="evaluador">Evaluador</option><option value="evaluado">Evaluado</option></select></div>
+          <div class="campo" style="flex:2"><label>Nombre completo</label><input id="u-nombre" required placeholder="Ej. Juan Carlos Pérez López"></div>
+          <div class="campo"><label>Rol</label><select id="u-rol"><option value="evaluado">Evaluado</option><option value="evaluador">Evaluador</option></select></div>
         </div>
         <div class="fila" style="margin-top:12px">
-          <div class="campo"><label>Departamento</label><input id="u-depto" placeholder="Ej. Operaciones"></div>
+          <div class="campo"><label>Departamento</label><select id="u-depto"><option value="">—</option>${optDep}</select></div>
           <div class="campo"><label>Puesto</label><select id="u-puesto"><option value="">—</option>${opc}</select></div>
-          <div class="campo"><label>Contraseña</label><input id="u-clave" required minlength="6" placeholder="mínimo 6 caracteres"></div>
+          <div class="campo"><label>Usuario (automático)</label><input id="u-usuario" placeholder="se genera solo"></div>
           <button class="btn" type="submit" id="b-user">Crear usuario</button>
         </div>
         <div class="msg" id="msg-user"></div>
+        <div id="cred-user"></div>
       </form>
     </div>
     <div class="panel">
@@ -340,9 +382,36 @@ async function tabUsuarios(){
       <div id="prev-masivo" style="margin-top:14px"></div>
     </div>
     <div class="panel"><h2>Usuarios registrados</h2><div id="lista-users"><div class="vacio">Cargando...</div></div></div>`;
+  usuarioEditado=false;
+  $("u-usuario").addEventListener("input",()=>{ usuarioEditado=true; });
+  $("u-nombre").addEventListener("input",()=>{ if(!usuarioEditado) $("u-usuario").value=sugiereUsuario($("u-nombre").value); });
+  $("u-puesto").addEventListener("change",(e)=>{ const o=e.target.selectedOptions[0]; if(o&&o.dataset.depto) $("u-depto").value=o.dataset.depto; });
   $("f-user").addEventListener("submit", crearUsuario);
   $("b-prev").addEventListener("click", previewMasivo);
   cargarUsuarios();
+}
+
+// ---- Generación de usuario y contraseña (alta individual) ----
+let usuarioEditado=false;
+function sugiereUsuario(nombre){
+  const t=normTxt(nombre).split(/\s+/).map(soloAlnum).filter(Boolean);
+  if(!t.length) return "usuario";
+  let ap=""; if(t.length>=4) ap=t[2]; else if(t.length>=2) ap=t[1];
+  const base=((t[0][0]||"")+(ap||t[0]));
+  return base||t[0];
+}
+function genPassword(nombre){
+  const n=soloAlnum((nombre||"").split(/\s+/)[0]);
+  const cap=n?(n[0].toUpperCase()+n.slice(1)):"Etinar";
+  return cap+"2026";
+}
+async function usuarioUnico(base){
+  let u=base||"usuario", i=1;
+  while(true){
+    const { data } = await sb.from("perfiles").select("usuario").eq("usuario",u).maybeSingle();
+    if(!data) return u;
+    i++; u=base+i;
+  }
 }
 
 // ---- Carga masiva de usuarios ----
@@ -448,25 +517,31 @@ async function crearMasivo(){
 }
 async function crearUsuario(e){
   e.preventDefault();
-  const btn=$("b-user"), msg=$("msg-user");
-  msg.className="msg"; msg.textContent="";
+  const btn=$("b-user"), msg=$("msg-user"), cred=$("cred-user");
+  msg.className="msg"; msg.textContent=""; cred.innerHTML="";
+  const nombre=$("u-nombre").value.trim();
+  if(!nombre) return;
   btn.disabled=true; btn.textContent="Creando...";
-  const usuario=$("u-usuario").value.trim().toLowerCase();
+  let usuario=soloAlnum($("u-usuario").value) || sugiereUsuario(nombre);
+  usuario=await usuarioUnico(usuario);
+  const password=genPassword(nombre);
   const email=usuarioAEmail(usuario);
-  const { data, error } = await sbTmp.auth.signUp({ email, password:$("u-clave").value });
+  const { data, error } = await sbTmp.auth.signUp({ email, password });
   if(error){
     msg.className="msg error";
-    msg.textContent = error.message.includes("registered")||error.message.includes("exists")
-      ? "Ese usuario ya existe." : ("Error: "+error.message);
+    msg.textContent = /registered|exists|already/i.test(error.message) ? "Ese usuario ya existe, intenta con otro nombre." : ("Error: "+error.message);
     btn.disabled=false; btn.textContent="Crear usuario"; return;
   }
-  const nuevoId=data.user.id;
   const { error:e2 } = await sb.from("perfiles").insert({
-    id:nuevoId, usuario, nombre:$("u-nombre").value.trim(), rol:$("u-rol").value,
-    departamento:$("u-depto").value.trim(), puesto:$("u-puesto").value||null
+    id:data.user.id, usuario, nombre, rol:$("u-rol").value,
+    departamento:$("u-depto").value||null, puesto:$("u-puesto").value||null
   });
-  if(e2){ msg.className="msg error"; msg.textContent="Se creó el acceso pero falló el perfil: "+e2.message; }
-  else { msg.className="msg ok"; msg.textContent="✅ Usuario creado."; $("f-user").reset(); }
+  if(e2){ msg.className="msg error"; msg.textContent="Se creó el acceso pero falló el perfil: "+e2.message; btn.disabled=false; btn.textContent="Crear usuario"; return; }
+  cred.innerHTML=`<div style="margin-top:14px;background:#FFF7E0;border:1px solid var(--amarillo);border-radius:10px;padding:14px;font-size:14px">
+    ✅ <b>Usuario creado.</b> Copia estos datos y compártelos con la persona:<br><br>
+    Usuario: <b style="font-size:16px">${esc(usuario)}</b><br>
+    Contraseña: <b style="font-size:16px">${esc(password)}</b></div>`;
+  $("f-user").reset(); usuarioEditado=false;
   btn.disabled=false; btn.textContent="Crear usuario";
   cargarUsuarios();
 }
@@ -608,7 +683,8 @@ async function renderEvaluaciones(){
 }
 async function abrirFormulario(evalId){
   const { data:ev } = await sb.from("evaluaciones").select("*,evaluado:perfiles!evaluado_id(nombre),puesto:puestos!puesto_id(nombre,id)").eq("id",evalId).single();
-  const { data:comps } = await sb.from("competencias").select("*").eq("puesto_id",ev.puesto_id).order("categoria").order("orden");
+  let { data:comps } = await sb.from("competencias").select("*").or(`puesto_id.eq.${ev.puesto_id},puesto_id.is.null`);
+  comps = (comps||[]).sort((a,b)=> (a.puesto_id?0:1)-(b.puesto_id?0:1) || String(a.categoria).localeCompare(String(b.categoria)) || (a.orden-b.orden));
   const { data:prev } = await sb.from("respuestas").select("competencia_id,puntaje").eq("evaluacion_id",evalId);
   const { data:comPrev } = await sb.from("comentarios").select("*").eq("evaluacion_id",evalId).maybeSingle();
   const yaResp={}; (prev||[]).forEach(r=>yaResp[r.competencia_id]=r.puntaje);
