@@ -571,9 +571,16 @@ async function cargarUsuarios(){
   const rec=$("rec-user");
   if(rec) rec.innerHTML=`<option value="">—</option>`+otros.map(u=>`<option value="${u.id}">${esc(u.nombre)} (${esc(u.usuario)})</option>`).join("");
   if(!otros.length){ cont.innerHTML=`<div class="vacio">Aún no hay evaluadores ni evaluados.</div>`; return; }
-  cont.innerHTML=`<table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Departamento</th><th>Puesto</th></tr></thead><tbody>${
-    otros.map(u=>`<tr><td><b>${esc(u.nombre)}</b></td><td>${esc(u.usuario)}</td><td>${esc(u.rol)}</td><td>${esc(u.departamento)||"-"}</td><td>${esc(u.puesto)||"-"}</td></tr>`).join("")
+  cont.innerHTML=`<table><thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Departamento</th><th>Puesto</th><th></th></tr></thead><tbody>${
+    otros.map(u=>`<tr><td><b>${esc(u.nombre)}</b></td><td>${esc(u.usuario)}</td><td>${esc(u.rol)}</td><td>${esc(u.departamento)||"-"}</td><td>${esc(u.puesto)||"-"}</td>
+      <td style="text-align:right"><button class="btn btn-mini btn-peligro" data-delu="${u.id}">Eliminar</button></td></tr>`).join("")
   }</tbody></table>`;
+  cont.querySelectorAll("[data-delu]").forEach(b=>b.addEventListener("click",async()=>{
+    if(!confirm("¿Eliminar a este usuario? Se borrará su acceso y las evaluaciones asociadas. Esta acción no se puede deshacer.")) return;
+    const { error } = await sb.from("perfiles").delete().eq("id",b.dataset.delu);
+    if(error){ alert("No se pudo eliminar: "+error.message); return; }
+    cargarUsuarios();
+  }));
 }
 
 // ---- Tab Evaluaciones (asignar) ----
