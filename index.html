@@ -362,6 +362,7 @@ async function tabUsuarios(){
       <form id="f-user">
         <div class="fila">
           <div class="campo" style="flex:2"><label>Nombre completo</label><input id="u-nombre" required placeholder="Ej. Juan Carlos Pérez López"></div>
+          <div class="campo"><label>Correo electrónico</label><input id="u-correo" type="email" placeholder="persona@etinar.com"></div>
           <div class="campo"><label>Rol</label><select id="u-rol"><option value="evaluado">Evaluado</option><option value="evaluador">Evaluador</option></select></div>
         </div>
         <div class="fila" style="margin-top:12px">
@@ -448,6 +449,7 @@ function mapFila(row){
     else if(nk.startsWith('depart')||nk.startsWith('area')) o.departamento=row[k];
     else if(nk.startsWith('puesto')||nk.startsWith('cargo')) o.puesto=row[k];
     else if(nk.startsWith('rol')) o.rol=row[k];
+    else if(nk.startsWith('correo')||nk.startsWith('email')||nk.startsWith('mail')) o.correo=row[k];
     else if(nk.startsWith('usuario')) o.usuario=row[k];
   }
   return o;
@@ -492,7 +494,7 @@ async function previewMasivo(){
     if(f.usuario) usados.add(usuario);
     let rol=normTxt(f.rol); rol = rol.startsWith('evaluador')?'evaluador':'evaluado';
     LISTA_MASIVA.push({ usuario, cedula, nombre:(nombres+" "+apellidos).trim(),
-      rol, departamento:(f.departamento||"").toString().trim(), puesto:(f.puesto||"").toString().trim() });
+      rol, correo:(f.correo||"").toString().trim(), departamento:(f.departamento||"").toString().trim(), puesto:(f.puesto||"").toString().trim() });
   });
   if(!LISTA_MASIVA.length){ cont.innerHTML=`<div class="msg error">No encontré filas válidas. Revisa que el Excel tenga las columnas Nombres, Apellidos, Cedula...</div>`; return; }
   const sinCed=LISTA_MASIVA.filter(r=>r.cedula.length<6).length;
@@ -523,7 +525,7 @@ async function crearMasivo(){
       else { errores.push(`${r.usuario}: ${error.message}`); }
       await sleep(200); continue;
     }
-    const { error:e2 } = await sb.from("perfiles").insert({ id:data.user.id, usuario:r.usuario, nombre:r.nombre, rol:r.rol, departamento:r.departamento, puesto:r.puesto||null });
+    const { error:e2 } = await sb.from("perfiles").insert({ id:data.user.id, usuario:r.usuario, nombre:r.nombre, rol:r.rol, correo:r.correo||null, departamento:r.departamento, puesto:r.puesto||null });
     if(e2){ errores.push(`${r.usuario}: perfil ${e2.message}`); } else { ok++; await sb.from("accesos_temp").insert({ perfil_id:data.user.id, usuario:r.usuario, clave:r.cedula }); }
     await sleep(200);
   }
@@ -550,8 +552,9 @@ async function crearUsuario(e){
     msg.textContent = /registered|exists|already/i.test(error.message) ? "Ese usuario ya existe, intenta con otro nombre." : ("Error: "+error.message);
     btn.disabled=false; btn.textContent="Crear usuario"; return;
   }
+  const correo=$("u-correo").value.trim()||null;
   const { error:e2 } = await sb.from("perfiles").insert({
-    id:data.user.id, usuario, nombre, rol:$("u-rol").value,
+    id:data.user.id, usuario, nombre, rol:$("u-rol").value, correo,
     departamento:$("u-depto").value||null, puesto:$("u-puesto").value||null
   });
   if(e2){ msg.className="msg error"; msg.textContent="Se creó el acceso pero falló el perfil: "+e2.message; btn.disabled=false; btn.textContent="Crear usuario"; return; }
@@ -649,41 +652,78 @@ async function cargarEvalAdmin(){
 // ---- Tab Resultados ----
 async function tabResultados(){
   const { data } = await sb.from("evaluaciones")
-    .select("id,tipo,estado,codificacion,evaluado:perfiles!evaluado_id(nombre),puesto:puestos!puesto_id(nombre)")
-    .eq("estado","completada").order("id",{ascending:false});
-  $("zona-tab").innerHTML=`<div class="panel"><h1>Resultados</h1>
-    <div class="desc">Evaluaciones completadas. Haz clic en una para ver el detalle y los promedios.</div>
+    .select("evaluado_id,tipo,estado,evaluado:perfiles!evaluado_id(nombre,puesto)")
+    .eq("estado","completada");
+  $("zona-tab").innerHTML=`<div class="panel"><h1>Resultados — Comparativo 180°</h1>
+    <div class="desc">Personas con evaluaciones completadas. El comparativo muestra la <b>autoevaluación</b> frente a la <b>evaluación del jefe</b>, competencia por competencia.</div>
     <div id="lista-res"></div></div><div id="det-res"></div>`;
   const cont=$("lista-res");
   if(!data||!data.length){ cont.innerHTML=`<div class="vacio">Todavía no hay evaluaciones completadas.</div>`; return; }
-  cont.innerHTML=`<table><thead><tr><th>Cód.</th><th>Evaluado</th><th>Puesto</th><th>Tipo</th><th></th></tr></thead><tbody>${
-    data.map(e=>`<tr><td>${esc(e.codificacion)||"-"}</td><td><b>${esc(e.evaluado?.nombre)}</b></td><td>${esc(e.puesto?.nombre)||"-"}</td>
-      <td>${e.tipo==="autoevaluacion"?"Autoeval.":"Evaluación"}</td>
-      <td style="text-align:right"><button class="btn btn-mini btn-sec" data-ver="${e.id}">Ver detalle</button></td></tr>`).join("")
+  const map={};
+  data.forEach(e=>{ const id=e.evaluado_id; if(!map[id]) map[id]={nombre:e.evaluado?.nombre,puesto:e.evaluado?.puesto,tipos:new Set()}; map[id].tipos.add(e.tipo); });
+  const filas=Object.entries(map);
+  cont.innerHTML=`<table><thead><tr><th>Evaluado</th><th>Puesto</th><th style="text-align:center">Jefe</th><th style="text-align:center">Autoeval.</th><th></th></tr></thead><tbody>${
+    filas.map(([id,v])=>`<tr><td><b>${esc(v.nombre)}</b></td><td>${esc(v.puesto)||'-'}</td>
+      <td style="text-align:center">${v.tipos.has('evaluador')?'✅':'—'}</td>
+      <td style="text-align:center">${v.tipos.has('autoevaluacion')?'✅':'—'}</td>
+      <td style="text-align:right"><button class="btn btn-mini btn-sec" data-comp="${id}" data-n="${esc(v.nombre)}">Ver comparativo</button></td></tr>`).join("")
   }</tbody></table>`;
-  cont.querySelectorAll("[data-ver]").forEach(b=>b.addEventListener("click",()=>verDetalle(b.dataset.ver)));
+  cont.querySelectorAll("[data-comp]").forEach(b=>b.addEventListener("click",()=>verComparativo(b.dataset.comp,b.dataset.n)));
 }
-async function verDetalle(evalId){
-  const { data:ev } = await sb.from("evaluaciones").select("*,evaluado:perfiles!evaluado_id(nombre),evaluador:perfiles!evaluador_id(nombre),puesto:puestos!puesto_id(nombre)").eq("id",evalId).single();
-  const { data:resp } = await sb.from("respuestas").select("puntaje,competencia:competencias!competencia_id(categoria,texto,orden)").eq("evaluacion_id",evalId);
-  const { data:com } = await sb.from("comentarios").select("*").eq("evaluacion_id",evalId).maybeSingle();
-  const cats={};
-  (resp||[]).forEach(r=>{ const c=r.competencia?.categoria||"General"; (cats[c]=cats[c]||[]).push(r); });
-  let html=`<div class="panel"><h2>Detalle: ${esc(ev.evaluado?.nombre)} — ${esc(ev.puesto?.nombre)||""}</h2>`;
-  let total=0,n=0;
-  Object.keys(cats).forEach(cat=>{
-    const arr=cats[cat]; const prom=arr.reduce((s,r)=>s+r.puntaje,0)/arr.length;
-    total+=arr.reduce((s,r)=>s+r.puntaje,0); n+=arr.length;
-    html+=`<div class="resultado-cat">${esc(cat)}</div>
-      <div class="barra-prom"><div style="width:${prom/5*100}%"></div><span>Promedio: ${prom.toFixed(2)} / 5</span></div>`;
-    arr.forEach(r=>html+=`<div style="font-size:13px;display:flex;justify-content:space-between;padding:3px 0"><span>${esc(r.competencia?.texto)}</span><b>${r.puntaje}</b></div>`);
+async function verComparativo(evaluadoId,nombre){
+  const { data: evs } = await sb.from("evaluaciones")
+    .select("id,tipo,codificacion,puesto:puestos!puesto_id(nombre),evaluador:perfiles!evaluador_id(nombre)")
+    .eq("evaluado_id",evaluadoId).eq("estado","completada").order("id",{ascending:false});
+  const evalJefe=(evs||[]).find(e=>e.tipo==="evaluador");
+  const autoev=(evs||[]).find(e=>e.tipo==="autoevaluacion");
+  async function respMap(evId){
+    if(!evId) return {};
+    const { data } = await sb.from("respuestas").select("puntaje,competencia:competencias!competencia_id(id,categoria,texto,orden)").eq("evaluacion_id",evId);
+    const m={}; (data||[]).forEach(r=>{ if(r.competencia) m[r.competencia.id]={...r.competencia,puntaje:r.puntaje}; }); return m;
+  }
+  async function coment(evId){ if(!evId) return null; const {data}=await sb.from("comentarios").select("*").eq("evaluacion_id",evId).maybeSingle(); return data; }
+  const mJefe=await respMap(evalJefe?.id), mAuto=await respMap(autoev?.id);
+  const cJefe=await coment(evalJefe?.id), cAuto=await coment(autoev?.id);
+  const comps={};
+  Object.values(mAuto).forEach(c=>comps[c.id]={id:c.id,categoria:c.categoria,texto:c.texto,orden:c.orden});
+  Object.values(mJefe).forEach(c=>comps[c.id]=comps[c.id]||{id:c.id,categoria:c.categoria,texto:c.texto,orden:c.orden});
+  const lista=Object.values(comps).sort((a,b)=>String(a.categoria).localeCompare(String(b.categoria))||(a.orden-b.orden));
+  const puesto=(evalJefe?.puesto?.nombre)||(autoev?.puesto?.nombre)||"";
+
+  let html=`<div class="panel"><h2>Comparativo 180° — ${esc(nombre)} ${puesto?`· ${esc(puesto)}`:""}</h2>`;
+  if(!evalJefe) html+=`<div class="desc" style="color:#92400E">⚠️ Aún no hay evaluación del jefe para esta persona.</div>`;
+  if(!autoev) html+=`<div class="desc" style="color:#92400E">⚠️ Aún no hay autoevaluación de esta persona.</div>`;
+  if(!lista.length){ html+=`<div class="vacio">Sin datos.</div></div>`; $("det-res").innerHTML=html; $("det-res").scrollIntoView({behavior:"smooth"}); return; }
+  html+=`<table><thead><tr><th>Competencia</th><th style="text-align:center">Autoeval.</th><th style="text-align:center">Jefe</th><th style="text-align:center">Brecha</th></tr></thead><tbody>`;
+  let cat=null, sA=0,nA=0,sJ=0,nJ=0;
+  lista.forEach(c=>{
+    if(c.categoria!==cat){ cat=c.categoria; html+=`<tr><td colspan="4" style="background:#fafafa;font-weight:700">${esc(cat)}</td></tr>`; }
+    const a=mAuto[c.id]?.puntaje, j=mJefe[c.id]?.puntaje;
+    if(a!=null){sA+=a;nA++;} if(j!=null){sJ+=j;nJ++;}
+    const br=(a!=null&&j!=null)?(j-a):null;
+    const col=br==null?'inherit':(br>0?'var(--verde)':(br<0?'var(--rojo)':'var(--texto-suave)'));
+    html+=`<tr><td>${esc(c.texto)}</td>
+      <td style="text-align:center">${a??'-'}</td>
+      <td style="text-align:center">${j??'-'}</td>
+      <td style="text-align:center;color:${col};font-weight:700">${br==null?'-':(br>0?'+'+br:br)}</td></tr>`;
   });
-  const promG = n? (total/n):0;
-  html+=`<div class="categoria" style="margin-top:18px">Promedio general: ${promG.toFixed(2)} / 5</div>`;
-  if(com){
-    if(com.fortalezas) html+=`<p style="margin-top:12px"><b>Fortalezas:</b> ${esc(com.fortalezas)}</p>`;
-    if(com.areas_mejora) html+=`<p style="margin-top:6px"><b>Áreas de mejora:</b> ${esc(com.areas_mejora)}</p>`;
-    if(com.aspectos_mejorar_evaluador) html+=`<p style="margin-top:6px"><b>Aspectos a mejorar del evaluador:</b> ${esc(com.aspectos_mejorar_evaluador)}</p>`;
+  const pA=nA?(sA/nA):0, pJ=nJ?(sJ/nJ):0;
+  html+=`</tbody></table>
+    <div class="categoria" style="margin-top:16px;display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap">
+      <span>Prom. autoevaluación: ${pA.toFixed(2)}</span>
+      <span>Prom. jefe: ${pJ.toFixed(2)}</span>
+      <span>Brecha global: ${(pJ-pA>=0?'+':'')}${(pJ-pA).toFixed(2)}</span></div>
+    <div class="desc" style="margin-top:8px">La <b>brecha</b> = puntaje del jefe menos la autoevaluación. En <span style="color:var(--verde)">verde</span>: el jefe califica más alto que la persona. En <span style="color:var(--rojo)">rojo</span>: la persona se calificó más alto que el jefe.</div>`;
+  if(cJefe && (cJefe.fortalezas||cJefe.areas_mejora||cJefe.aspectos_mejorar_evaluador)){
+    html+=`<div class="resultado-cat" style="margin-top:16px">Comentarios del jefe</div>`;
+    if(cJefe.fortalezas) html+=`<p style="font-size:13px"><b>Fortalezas:</b> ${esc(cJefe.fortalezas)}</p>`;
+    if(cJefe.areas_mejora) html+=`<p style="font-size:13px"><b>Áreas de mejora:</b> ${esc(cJefe.areas_mejora)}</p>`;
+    if(cJefe.aspectos_mejorar_evaluador) html+=`<p style="font-size:13px"><b>Aspectos a mejorar del evaluador:</b> ${esc(cJefe.aspectos_mejorar_evaluador)}</p>`;
+  }
+  if(cAuto && (cAuto.fortalezas||cAuto.areas_mejora)){
+    html+=`<div class="resultado-cat" style="margin-top:12px">Comentarios de la autoevaluación</div>`;
+    if(cAuto.fortalezas) html+=`<p style="font-size:13px"><b>Fortalezas:</b> ${esc(cAuto.fortalezas)}</p>`;
+    if(cAuto.areas_mejora) html+=`<p style="font-size:13px"><b>Áreas de mejora:</b> ${esc(cAuto.areas_mejora)}</p>`;
   }
   html+=`</div>`;
   $("det-res").innerHTML=html;
