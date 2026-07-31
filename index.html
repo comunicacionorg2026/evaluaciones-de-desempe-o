@@ -99,6 +99,7 @@
         <input type="password" id="in-clave" placeholder="••••••••" autocomplete="current-password" required></div>
       <button type="submit" class="btn btn-full" id="btn-entrar">Ingresar</button>
       <div class="msg" id="msg-login"></div>
+      <a href="#" id="link-olvido" style="display:inline-block;margin-top:10px;font-size:12px;color:var(--azul)">¿Olvidaste tu contraseña?</a>
     </form>
   </div>
 </section>
@@ -114,6 +115,23 @@
     </div>
   </header>
   <main id="contenido"></main>
+</section>
+
+<!-- ==================== RESTABLECER CONTRASEÑA ==================== -->
+<section id="vista-recovery" class="oculto">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px">
+    <div class="login-card">
+      <div class="logo" style="justify-content:center;margin-bottom:6px"><div class="cuadro"></div><div class="marca">ETINAR</div></div>
+      <h2>Restablecer contraseña</h2>
+      <div class="sub">Escribe tu nueva contraseña</div>
+      <form id="form-recovery">
+        <div class="campo"><label>Nueva contraseña</label><input type="password" id="rec-p1" required minlength="6"></div>
+        <div class="campo"><label>Confirmar contraseña</label><input type="password" id="rec-p2" required minlength="6"></div>
+        <button type="submit" class="btn btn-full">Guardar contraseña</button>
+        <div class="msg" id="msg-recovery"></div>
+      </form>
+    </div>
+  </div>
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -817,8 +835,37 @@ async function guardarFormulario(evalId,tipo){
   setTimeout(renderEvaluaciones,1200);
 }
 
+// ==================== Recuperación de contraseña ====================
+$("link-olvido").addEventListener("click", async (e)=>{
+  e.preventDefault();
+  const msg=$("msg-login"); msg.className="msg";
+  const escrito=$("in-usuario").value.trim();
+  const u=(escrito || prompt("Escribe tu usuario o correo (el admin usa el correo corporativo):") || "").trim();
+  if(!u) return;
+  const email = u.includes("@") ? u : usuarioAEmail(u);
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href.split('#')[0] });
+  if(error){ msg.className="msg error"; msg.textContent="No se pudo enviar: "+error.message; }
+  else { msg.className="msg ok"; msg.textContent="Te enviamos un enlace a tu correo para restablecer la contraseña. Revisa tu bandeja (y spam)."; }
+});
+function mostrarRecovery(){
+  $("vista-login").classList.add("oculto"); $("vista-app").classList.add("oculto");
+  $("vista-recovery").classList.remove("oculto");
+}
+$("form-recovery").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const p1=$("rec-p1").value, p2=$("rec-p2").value, msg=$("msg-recovery"); msg.className="msg";
+  if(p1.length<6){ msg.className="msg error"; msg.textContent="Mínimo 6 caracteres."; return; }
+  if(p1!==p2){ msg.className="msg error"; msg.textContent="Las contraseñas no coinciden."; return; }
+  const { error } = await sb.auth.updateUser({ password:p1 });
+  if(error){ msg.className="msg error"; msg.textContent="Error: "+error.message; return; }
+  msg.className="msg ok"; msg.textContent="✅ Contraseña actualizada. Redirigiendo al inicio...";
+  setTimeout(async ()=>{ await sb.auth.signOut(); window.location.hash=""; mostrarLogin(); }, 1600);
+});
+sb.auth.onAuthStateChange((event)=>{ if(event==="PASSWORD_RECOVERY") mostrarRecovery(); });
+
 // ==================== Inicio ====================
 (async()=>{
+  if(window.location.hash.includes("type=recovery")){ mostrarRecovery(); return; }
   const { data:{ session } } = await sb.auth.getSession();
   if(session) await iniciarSesion(); else mostrarLogin();
 })();
