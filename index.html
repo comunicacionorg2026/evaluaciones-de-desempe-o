@@ -64,19 +64,39 @@ textarea.inp{resize:vertical;min-height:70px}
 .msg.error{color:var(--red)} .msg.ok{color:var(--ok)}
 .demo-box{margin-top:20px;border-top:1px dashed var(--line);padding-top:16px;text-align:left}
 
-/* ---------- BARRA SUPERIOR ---------- */
-.appbar{background:rgba(251,251,250,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
-.appbar .row{max-width:1320px;margin:0 auto;min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 20px}
-@media(max-width:980px){.appbar .row{flex-wrap:wrap}.appbar .tabs{order:3;flex-basis:100%}}
-.appbar .brandimg{height:30px;display:block}
-.tabs{display:flex;gap:3px;background:var(--line-2);padding:4px;border-radius:14px;overflow-x:auto;max-width:100%;scrollbar-width:none;min-width:0;flex:0 1 auto}
-.tab{border:none;background:transparent;font-size:13px;font-weight:600;color:var(--ink-2);padding:8px 14px;border-radius:10px;transition:.2s var(--ease);white-space:nowrap}
-.tab:hover{color:var(--ink)}
-.tab.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
-.userchip{display:flex;align-items:center;gap:8px;font-size:13px;flex-shrink:0}
-@media(max-width:1280px){.userchip .info{display:none}}
-.userchip .info{text-align:right;line-height:1.25}
-.userchip .info small{color:var(--muted);font-size:11.5px}
+/* ---------- MENÚ LATERAL ---------- */
+:root{--sb-w:236px}
+.sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sb-w);background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;z-index:40;padding:18px 12px 12px;padding-top:calc(18px + env(safe-area-inset-top,0px))}
+.sb-top{display:flex;align-items:center;justify-content:space-between;padding:0 8px 18px}
+.sidebar .brandimg{height:28px;display:block}
+.sb-x{display:none;border:none;background:none;font-size:18px;color:var(--ink-2);padding:4px 8px}
+.sidenav{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:thin}
+.sb-grupo{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;padding:16px 12px 6px}
+.tab{display:flex;align-items:center;gap:11px;width:100%;text-align:left;border:none;background:transparent;font-size:13.5px;font-weight:600;color:var(--ink-2);padding:9px 12px;border-radius:10px;transition:.15s var(--ease);white-space:nowrap;position:relative}
+.tab svg{width:18px;height:18px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.75}
+.tab:hover{background:var(--line-2);color:var(--ink)}
+.tab.on{background:var(--amber-soft);color:var(--ink)}
+.tab.on svg{opacity:1}
+.tab.on::before{content:"";position:absolute;left:-12px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.sb-user{border-top:1px solid var(--line);padding:12px 6px 4px;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;align-items:center}
+.sb-user .info{line-height:1.25;min-width:0}
+.sb-user .info b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user .info small{display:block;color:var(--muted);font-size:11.5px}
+.sb-acc{grid-column:1/-1;display:flex;gap:6px;margin-top:8px}.sb-acc .salir{flex:1}
+.app-col{margin-left:var(--sb-w);min-width:0}
+.topmovil{display:none}
+.sb-velo{display:none}
+@media(max-width:980px){
+  .sidebar{transform:translateX(-102%);transition:transform .25s var(--ease);box-shadow:var(--shadow-lg);width:min(280px,86vw)}
+  body.sb-abierto .sidebar{transform:none}
+  body.sb-abierto .sb-velo{display:block;position:fixed;inset:0;background:rgba(22,19,14,.4);z-index:35}
+  .sb-x{display:block}
+  .app-col{margin-left:0}
+  .topmovil{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:30;background:rgba(251,251,250,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px))}
+  .topmovil .brandimg{height:24px}
+  .topmovil-t{margin-left:auto;font-size:13px;font-weight:600;color:var(--ink-2)}
+  .sb-burger{border:1px solid var(--line);background:#fff;border-radius:10px;width:38px;height:38px;font-size:17px}
+}
 .avatar{width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:12.5px;flex-shrink:0}
 .salir{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 11px;font-size:12px;color:var(--ink-2)}
 .salir:hover{border-color:var(--ink-2)}
@@ -221,11 +241,13 @@ tr.bajo td{background:#FFF8F6}
 .cinta-demo{position:fixed;bottom:0;left:0;right:0;background:var(--ink);color:var(--amber);text-align:center;font-size:12px;font-weight:700;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:99;letter-spacing:.04em}
 
 @media print{
-  .appbar,.no-print,.cinta-demo,.sticky{display:none!important}
+  .sidebar,.topmovil,.sb-velo,.no-print,.cinta-demo,.sticky{display:none!important} .app-col{margin-left:0!important}
   body{background:#fff}
   .main{padding:0;max-width:none}
   .card{box-shadow:none;break-inside:avoid}
 }
+@media(min-width:981px){.cinta-demo{left:var(--sb-w)}}
+.es-demo .sidebar{padding-bottom:42px}
 
 </style>
 </head>
@@ -293,19 +315,20 @@ tr.bajo td{background:#FFF8F6}
 
 <!-- ==================== APLICACIÓN ==================== -->
 <section id="vista-app" class="oculto">
-  <div class="appbar">
-    <div class="row">
-      <img class="brandimg" alt="Etinar" src="data:image/png;base64,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">
-      <nav class="tabs" id="tabs"></nav>
-      <div class="userchip">
-        <span class="info"><b id="nombre-usuario" style="font-weight:600"></b><br><small id="rol-usuario"></small></span>
-        <div class="avatar" id="avatar"></div>
-        <button class="salir" id="btn-clave" title="Cambiar mi contraseña">Clave</button>
-        <button class="salir" id="btn-salir">Salir</button>
-      </div>
+  <aside class="sidebar" id="sidebar" aria-label="Menú principal">
+    <div class="sb-top"><img class="brandimg" id="logo-app" alt="Etinar" src="data:image/png;base64,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"><button class="sb-x" id="sb-cerrar" aria-label="Cerrar menú">✕</button></div>
+    <nav class="sidenav" id="tabs"></nav>
+    <div class="sb-user">
+      <div class="avatar" id="avatar"></div>
+      <div class="info"><b id="nombre-usuario"></b><small id="rol-usuario"></small></div>
+      <div class="sb-acc"><button class="salir" id="btn-clave" title="Cambiar mi contraseña">Clave</button><button class="salir" id="btn-salir">Salir</button></div>
     </div>
+  </aside>
+  <div class="sb-velo" id="sb-velo"></div>
+  <div class="app-col">
+    <div class="topmovil"><button class="sb-burger" id="sb-abrir" aria-label="Abrir menú">☰</button><img class="brandimg" alt="Etinar" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAe8AAABaCAYAAACR+d6/AAAZtElEQVR42u2debRkVXXGf7eqemJs7EYcEFpAAk6JwSjBeQAEIWZFRdTQ0DQNjUgWKyokqMFoNC4wS5KlCIIN2CKKMwoqiELAQFAhjIaAIIOKQDPTDa/rVeWPffaqQ/Xrd/et6U77W+uuB/2q6t0659zz7b3P3t9OHvrJkjWNRnezTgfHyJF05s6h+dT6zm1bPXjXS5IDmO5CkkDXx8bhcDgcg6IFzEuSZG6S+GCMGp0u3WYjSSCZO4aPb4TL4Rjpsg3XxvaLUX9m0dEEsuyO0+RrnLeGeG87b28njHeZ0Y0uxrkWWnTpdrvQdV9wLBPZ7ZKMaQLLvCE6yolhNvdxPQfjxnSN5qgIxNeu2DMTO1mdPmLPzUpz5LcYOsDLgH3CQvC4iWMUG2cCXAP8KFpnik2AI4F5GQ3MJnAp8PMZPrMMWA5sk2H8vgvcnON3PRJ4RkaCSIAngc8BT+XkcXeB5wIHl9C4exJ4HHgMWAM8ANwffk7NsA5a4ft2hiFyJ+/ykvergE/6cDhGjLP7yFs31k2Bzwz4mWuAFwP3lZDAjwd2yPD6e3Ig72b4W7sBpwzxObcAF4TPm6QH3AgkuEOF9rQnAoH/FrgJ+BXwC+DXfWPbYsCjFifv8mJdWARtn0fHCKDr6LFZPMs1wJZki/ZMA4uA04H9w98oE3k/CGwX7rmR8j2bOXmuOj+Hh/tYn3FP0Lk/HPhBjvOzPtxLWaOJSbgawdjdFFgCvD6ao/8Ffgp8B7gsIvImGY9ofNMvtwfe8nl0jBCtFIJq0Qv5JRk+sw3sh4R0vzDIRpUjmpHB0UjZuLMmt42KMKaBxcA7wz00Mt6HJontBTwfuCOnCEkywPoqKrp9l66PXcN1FHADsAo4E3gkIn/TuHu2ssPhmAQBTiNh913Cf/veM7qxBTgQWBgMpazEpwbAPGCpc8PIDJFGZPw16Z1zt8PPlwCfBa4DVka/N2Xc+wQ5HI5JbGQgSW9nRx6qJ1oODzWEVvSNdVYoFywF5obP9fkZD6G3oshGG9geiUhdAuwUxr5lnTCHw+EYt4fYBl4BnEDvjNgxvNf9GuClWby2jXBBB0ka26vv8x3jgRK5kvgbgavC+KfmMvlZaX0wsvpCt54zeSR5j3uRPFwNn38Y+DFSPlam8++iPtcrw3+nncunQasLVpBv4lrZ9rSk7+cgJN4IhL0Iyfh/G3DhbM+Hk7eTjsPHfdJj0QDOQrQK1lFeAZe8vbZpYFvgr8L4Desp6/v3Jt/EtbI+W92IaAdRwFQvvAl8A/hL4PqNzYGTd32wFrjbiWSojaIDPBvYgvSMWP39g0i9ZyMHgmohAiObUpwMXiWdnZBknRX0MtId2caxAxyE5BKMomQ0CZ8zL3zuxwtO3o8Dv8vp2VLMDeO/BTC/bw46AxhV+nxsAnwVeDki9LKBgevkXX3o2eJVwJ6UU+WqCFCCWQ28h/SkEv396YjQx6QJSjeM1cC7MCbBTPDe2sBhSGjwO3j4fJDnei5waLTpj8ooAElc+zRSe13UPe1i4B05r51WIO2FiELcixEBrdchNd5K4lmiBPp8vAg4NhhRG3xHJ+/6IJbj8xDlYBvGIHKGOu7TORhNnQITohqRpwFXAn90wzKT8dMJxvhO2M+6LSSic7Bj+PwLC2xYdaP1kte6mQrXo8BdYS2fHjznvYD3A2/qMzqyzPEHgC+G5+Np3rdnm9cLet6Y+JX5yip8kfe4Nyj2ebuGOrcOm13X96PMxHVkRuKyrmE1UleUwNAvyp7WX9O9FtG5fzNSg39vRiNIj+m2CBGqDcLv/rDU74H3a7irbONedA9S1dfeh0v9WglYcwb2xHamquR+GZKDYZkXkMS1JRRbVKco+4JGudr0auRV7e7rwO7AFRkJXA3cg4A59NXeO3k7HI68CTxWX2v7vpS6oYOcdWcVUzkKuJynZ0VvzOubRs5yD3KuGNio0KOyFnBn8MIvyEDgSt47A3/eH53yCXE4HOOCJZyrxLMAV1+zjJVmIltJVcn9GqS71fnGsdXPPRhXXBsWbXpNa94R5qJpfD70NXv2PS9O3g6HY6xeoiV0H6uvfQxXX5ttnLpIXfe22MPZCdKrO0HEVx6OPmu2udPEtTc7XwwNXdNPIpn8T0UeusW43aP/9T4ZDodjHFiLtD60dknSUOLxwKsjb8WxoRe20mgUqeDHvcA3w1zcFwhcCSXt/dpq1CtURkPgLSQCsope/oKFvHeh79zbydvhcIwD84BjkNIZ6yYVq69t1rd5udctZPpSRMsc7IlqX0b6tM8J47na6LyVKXGtTAZYApyCLcKk6//ZiOAS7nk7HI5xk81aJEQ4Ff4tzXtTfecdgZPx8PlMm/gKozGkczAFnBH+vx3m4DJs0qeeuDYe8iZ43zeRHpnS2u75wLPiOfCJcDgc48JWwG3AcdgzbFWJbjnwN3j4XDfwNqLidaDR69a+3j8Gbo3Gv4Wct57XRyazGVTw9FahjuEN2y7wK+Mc6O+f6Z63w+GYBNYHAjkZOWdtYS+R6QCnBm9j2G5ZVdjsAd4JLMaW+a3j9fmNEMFXsbUQ1bnYiV7imtfijwZ3GF+nEauFkTHn5O1wOMYGFbBoICpR92GTQI3V187A1deUrA83vl6NnZuBS+iFv+PfXQ/8ou93s31erLjmyWujwaMZX7/APW+HwzFJtBBt5sPIln3eBt5KvdXX1DPeHekwZfGWdXxPZ+ZjB933v9Ln2aXdw1uA7fHEtVHPrRXznbwdDsckocT7faTe2NphzdXXeuR6RB8xz/baFlLLfU7kuc9E7t8Cngivn43APXFtPNgi4+s7Tt4Oh2PS0MzxDwE3BsJII6JYfe3L4T11Ul9T0twGSd6z6JgrUZ+H9JGfSYxFvfc/ABeRLpcac8VSevXGjuGwdcbXP+bk7XA48vAeoacwNYXt/FTD538BnEC9ysf0e74X2BxbopqS9akGw0Brvi0GkZanvYBe4pqX8Q33LCzpM1LTDKc/xO938nY4HJP0vlvAtcA/YC8fUwL/MPVSX9PxWm50tnQsLw9jPFs9+HQggYuA32PT2lbSKUOr0KJCoylzkKOgNPLWZM31wO1O3g6HIy/o+fdngR9hKx+Lezafhaivdal2+FyNkzcAL8ReLpfQKw9rpJBCCznz/nb4t47hnrrAPnji2jDkTYhgLDGsYzWSfgPcFc+TD7zD4Zg0VCJyOfAAtgx09SJVfc2SdV12dBEdcwux6njchSQGWkrAlBi+0mcwpHmN84G/NUYDHBuuYxDJWV3TScq8doGf0YvE+MA7HI7cyLuBhGsPx1b7reRSB/U13dS3B/bFlqim43cmsI70rmFExPELpO7bakSBtAqdg7cKHdRwXWrkYI04fa3P4HLydjgcuUC9iO8gyVXW8jEl+tOQZg1VVF/T73NI8HLTCFLJfR3SrcriqccGUQc41/g+Hf8XAG8yeuwOgVZY7A/8GenHDnEv9ivoy2Fw8nY4HHkSeBP4e+DX2MrHVH1tMSJCUjX1NQ1NzwvkbdmndZP/PhI2tySf9XvsX0c0z5sZ3qOtQj15zWaQaYORk7DlbOhr/iXy2HHyrieSCl2O8kM3/XVIGLFNtvKxKqqvabh7X+xtOPX3pwzwbGjk4g6k25jlrFzv8S3AdnjimoW41Wv+PLAz6REjjUz9DIlObVA54ANer41SxRi6Fbgc1fG+W8AvgePJVj6m6mu7Uh31NfVqVxrXuRLntUiJGGQXUNFz1dUZowML8MS1tHHSaFIbOBE4lPRcDZ33tWEdzGiQeXeY+mAu8AzsyUFF3+AecRKvHIGfBOyFiICkibHE6mtnA3vQCzOWdV3os7kr8MbISLHg1PBea+5A//h3kc5va4BFpId148S1kwb4m1Ul6/hqh2tr4N+Bd9OXMb4R4tbXHAn838YMWifv6kMf/j2Qvr5lDjnrhnIvsBsSbi3zZu3ozaue6S0DrkPaH6aFFmP1tY8BHxmQvIpG3suj75G20TeRcrvzBvS64895GDk3P8RAMnqvOwdD46IMUZNRe7bNnPe1brSG471oYYhMHAdsi00dsI1k8X+KniRw2z3veqMVPO8qoI2fe1cNWqd8D9KE4xvYQuFKGMcjoi9X5EAioyKiaUQG9b193m1axOKcQLyjMFxWB/JuGOesgSSu/TiHMZuKvNui7LHPAV6G5APsDzw3mqu0ULkqr30OUROcdT6dvOvn4ZT9/hNEKtBRPSgZfRPp432YwfuMw5RnISU4ZYzIaBThr4FnGb00fc9pEZkOYzwlyLn5rUgpmCXyoYprzwPuZjLHcnpPrwzrJI+jQF1fDWBT4JmBqLfl6X23NSehmTL2yscnBk891QB18q4Xkop8B/e6q03gTeAY4LXYMnMbgcR2RM4Wl1O+8Llu4EdkHKdLkDK7YQlM5VLXI2VjHzGMu57rauLav06ISPX5X0JP971oa1iPIixhcpUIfj+Sja6lfl2LBeNwOBxFia6AaG4v5enVEWmOSBvJ5n075VJf0816N3qJd9Z7t+iYZzUgzsXevS0WlJm04lqXXtg872s6Itwmvfa1GNbt7YjgzecjIu9aB97hcDiK5Lm0gP8G/gn7GbZ6fadSTvW1w7HVWWt+wK3IWXMyoiiDjtfNwFXGe4kT194wYV7RhLUiXE16JXfWsX4CkbPdHamxzxQtcvJ2OBxFJvBPAZdi6z4Wq6+dQTnU15QgFwHvjDxxi4d8BpK0NcoIg47X6r5IiOV+DscrP6xrOwF+ikSK7kcU9dqDTJSj+ihSiGkUl6P661WTqA5BsqktSWiaxLUvcBTFV19T4n0XsBXplRQaln0MKSWKyXMU0M/6bvgbLeOYqyrc83DFNeuc7480hdkDkaZNsoybD3B9UKQQ06DXnPBzMZ60VgdoGPdORAa1QTb1tZMovvqaEt2K6Dm1eG3fRvQOsuiYW8e8CfwRKb3rYuu3ropr1jI3349lbF8O/Cfw8WguTZEUzzavhweTIO0Xf0j5RU2S4IV5uVg9oOHzc5EeyAdjKx+D4quv6Wb9aqTEzbJxxzrm437OvoyE8i2Gcpy49m9MJjrWpRhqkXEFTJLxfWqgfhQRuzkUUVVLPf928q6H99IEbkDqZqtonDiqT+AN4OhAdDtSHfW1Lr3yMEuziiZwJXB1hkjEIHtGFylDuxsJhVvK9TrAnyCJaxczfrGchOJVFExH42E1evRI81Vhbg9BlO5cpMUB9ELOVdA271I+BS3HcPPdQM5glyJCIl3S9beVwI9HsrIvpzjqa0q8zwHeRrbysNPC+8dpjMwBnkQ6Wv0dtsx9fc0KRC51nOshQRK9bsgxopIgiWZbIPrl2/TNobXcTo80pxEVzPMRXfNTZ1uvTt712gDbFSFvRz297xbwX8A/h8sSPlcP6ExEtnItxQif63N4EKLQlfZdNIL2WyQTvINkmo8LU5GhcJSRhPQ1+yJKY/eMab/RsbgUOKAg63NzYHsk0rM/Io+6IFpniXH8NOrxhWA8nYU3JnE4HBUh8E8AeyIh9DTvRj1cVV87lPzD55rgNSfcDwavVkngMiQ0PZfJafzfjk0uVevNN0EU1z49ZmdBI4l5R1M6SFToxnCdGcbrg0j5HNg1BxoRgZ8SIhi/n8ngdPJ2OBxlQdy5aSnwP8Bm2MPny4ALgG/lvOGrQbEnIm5i1TEnkOLBORhNFgMjfs0hSK/16Qmsh4T8o4matKZn2LciuQzfQxL/FmUkcJWdPQA4OVrDGwy0w+FwlAHas/oORAvamrRVRPW1lQO8J48ErSx/sz9xLa97zsuwVKnURoisXIj0p19DtuMafe1+0brHydvhcJQZej68Gvgq5VJfi8P4e1MOFbhBDCyQxLW6VoN0kHLWOUiE6ECylbZprsZuiHiPRhicvB0OR6mh3s37kCQuy9lqrL72fvJRX9M9dxlybj3JRh6T9tTfiiSu1VlxTQn8J0gS2gbh7xTPeyHwwpn42snb4XCUEXrO/Qi9M+DUNor0zrpPDJviJNXXNFFtk+ieq7gHx4lrrrjWM14+HtZr0xiR0GjSi6JxdfJ2OByV2BRbiLzkJ7GFz/vV17R14yS8X92096uBRxonrlnmpcrQkPd9wNewdWuLsfNsA+xwOBxlJfAmcAKiTmUhCg1dvhypF7eKaYxiEwdJVOtm/I5Fuqzk3QF2AV4fjXudkQDnDMC9zws/u07eDoejKlCltQ5SPvY42bqP/SPwmvDf4yQXFeB4CfDajGTWLNiV1VjxVqG9I51fAn/AlqOh0aBFM5G313k7HI4qbIwt4DZEynMV2dTXzkIagzzB+NTXdCM+LDIcLPtvF+nu9ST5KsPp356PqIdZFcO6SOLac4HfUV+FR60qWAdcE8bEOpdbOHk7HI6qQsnwTKQE613Y1NfawA6MV31NE7i2BN5t9Lr1PPxqJDu+SLgSeCXpXdD6E9dOpN7yzPrdbzCStxpIm85E3h42dzgcVfLAG0hTh7uMRKFkvQx4B+MpH1OCezvSwMJaHpYAp4fvMY/8w+Xzwr2swp7gpxyjhpE3FILfZHz9fKTcLCZ0J2+Hw1Ep8k6AhwIZq2xmmocTq689h9Fnget9HWF8vXYYewCRctUmJHknqk2Fe/l2GONmhrGtm+LaxuYV5MybDAbQgoi83fN2OByVhJaP/RRpjJFFfW0Ro1df00S1V4QrLdRMdL/nAQ+H71CEhC81KtYA3+271zTjBeqtuBbjESN56+/nhcvJ2+FwVJ7Am8BHkTPjLOVj+9BTXxtl7fcRfURmIfwz+jy2ImFVBg6JE9fqrrg2SORhLhI6d/J2OByVhpaPtZHysbVGElT1tZMQVasuw4V4VYzjmch5t2Xj1vPwK4FrsTdemaRhlCB91a/HXvKkynKuuCa9v7MYZfMi8vYzb4fDUWlo+dgtwDHYWoDqxjgfKR/TbPRhPax3I+U+Wbz5LxZ4j9bIwFkZogmuuPZ0db8sr58TDB/3vB0ORy2gmeOnI4lf1vD5NKK+dgLw6JBeahM567Xst+rp/5FsZ8p5GEYAX0dq47Mkrrni2gzJZylrAnrlYu55OxyO2njgDeTM2SoSop7lRwKJD7JXKqG9HgnBW/qHK1GfG4yGoiSqzTSmTeD3wAXYtbpdcS07dJw2d8/b4XDUjbwTJEP6ULKVjzWAzYb8+yv7iMvi9X8pw3vyRBLdqzVxDXqKa3VPXMtC3lu65+1wOOoGLR+7CPgM9jPX7hAe4hSwHT0lLWt52OXAjRRfiUzv92fArdgT17xVqKyNrOS90D1vh8NRVwJvAscj2tLW9qGDlot1kUz3BWRTVCtyotpMnvR6YHWGSEGdE9eUiNcN8N5FTt71RlLhy+GwbJzrgYOQRh8w+rPXOKN4mXGfjc+Qz+/zbIsMJetzgKfIlri2K/VNXHu8b61YsNjJ2zcwPe+r2uVwWLzvFnAz8AFs5WODeKMJ0kxkB2znujEJPkFxE9U2ZnTcDlySwfuuq+KaftdHBuDfrZ286+11N8LD1qjg5d63wwItHzsF+B6jD92qMbkyI+G3kY5oVgIs0r6iiWtJhu8LsB+SuLa+Zmvw4eg7WzuLbd3/em8JWn3og7J78DiqRnJagnMwcNWYvClHNdfMCqS15TbYSrkseBx4FtKEw5qo1kASv35N+VpmTofv+UPgHkT+NG0s48S19yCKdnXyvB8O3vdio3EE8Hz61PacvOuDTZDOPlXFZj7Fjgzk3QTuB5YjtcqjKltah5x1N7G3F+1PVCsTeXfDd1yH1Kd/yGgI6e+XAScHT7Qu0bNHkY5xi8P4JSlrowvsHAj89vBvHQ+b1wd63l21qx1+urftyOoxtoALA3loX+9BoRvwtkhCHNgT1e4mm9hJEY0hgLPpZfWnIU5cewO9Y72q78EqAHRt39jNtq6mEVW2A4k63jl51wf6cFT18jNvxyAE3gSOA65juPNvbSt6ACIBaiVvkFKrddiytYtK3g3gJuAKsiuurTB4oFXahwEu7vv/2aDr4mhgKx1vJ2+Hw1FXaHLZFFKT/VT074Nib7Ilbk2RrcFHUaFc8qUM74kV1xbS6/5WZegcXxrm3mKwqSrgNkiipZO3w+GoPbT72PXAsQyX8JjFc9S/cQl2hbKiRzFA6tTvz0BKbaQm/kB69c9VX28JcAcS7bEabbouDwQ+AbSdvB0OR92hiWX/gZw9T0r5KwFOoxrnvZq49gjwjT5Ct3jsy5CQcB2gEYcfRGNnfd800jDnS55tXm4Lrs1wSTZVGYcGkzsrnDaOezuDVV2W+9XPsZ5Pdku2jhLgsOARLULCmo0xrtk7gB9lILoyEDhIvfrKaI+yrNE/RRLX1gJzDa/vlnjM9Bn7FvDR8F2y7ONTwKFO3uXFgmDp+hwK5k7o72xpHHf9fd4lbFnvd/NZvMRFGf92mdamZn7fGwj8fMYv27kaOWcfNtO9KNByu18BNwRCzoJjkZJW67paWHKH4ybgamCPQT7EN/7yWm0/Bz5MfbI003DLmD3dTuRVXG0Yd/39lTl54Pr3ViHiNdb7vabv/epNPQF8EJiX4R5+VzIPXMnn+0gC23aRR56GeeG96wMRJ4bvvapCXnf/WjoaeA3ZxG/WRY4JhrV6S07P1ihxDLAnA4gEJQ9dvOSxRpPNOh0co1/BnQVzk8a6qc5tWz145y7JAUx3IUlci9vhKDIsxOtw5Ar3vMuLBl6n3+81TWLDbWaMdHRy9gxGeb+tgs7JODzHrONW5DVb1f2pzOfeQ4+Tk3d5kTcp1NlIqOv9tn2eHb4/FWOc/h+QfbEZJmQJuAAAAABJRU5ErkJggg=="><span class="topmovil-t" id="topmovil-t"></span></div>
+    <main class="main" id="contenido"></main>
   </div>
-  <main class="main" id="contenido"></main>
 </section>
 <div id="modal-root"></div>
 
@@ -407,6 +430,41 @@ DB.configuracion=[{clave:"umbral_brecha",valor:"0.50"},{clave:"brecha_significat
 DB.accesos_temp=DB.perfiles.filter(p=>p.rol!=="admin").map(p=>({perfil_id:p.id,usuario:p.usuario,clave:"demo2026"}));
 // acuses de la campaña cerrada más reciente para algunos
 DB.perfiles.filter(p=>p.jefe_id).forEach((p,i)=>{ if(i%3!==0) DB.acuses.push({id:id(),perfil_id:p.id,evaluado_id:p.id,periodo_id:102,tipo:"politicas",creado_en:"2026-05-05T10:00:00Z"}); if(i%4===1) DB.acuses.push({id:id(),perfil_id:p.id,evaluado_id:p.id,periodo_id:102,tipo:"resultado",comentario:i%8===1?"Considero que en conciliaciones sí cumplí la meta; adjunto los cuadres de abril y mayo.":null,creado_en:"2026-06-10T10:00:00Z"}); });
+// modelo v3.4: catálogo de políticas (sembrado desde el texto de las competencias)
+DB.politicas=[];
+{ const grupos={}; DB.competencias.forEach(c=>{ if(!c.politica) return; const k=c.politica.trim().toLowerCase(); (grupos[k]=grupos[k]||{nombre:c.politica.trim(),comps:[]}).comps.push(c); });
+  const cont={}; Object.values(grupos).forEach((g,i)=>{ const dep=(DB.puestos.find(p=>p.id===g.comps[0].puesto_id)||{}).departamento||"General"; const pre=dep.normalize("NFD").replace(/[^A-Za-z]/g,"").slice(0,3).toUpperCase()||"GEN"; cont[pre]=(cont[pre]||0)+1;
+    const sinAprob = i%7===3; const pol={id:id(),codigo:`POL-${pre}-${String(cont[pre]).padStart(3,"0")}`,nombre:g.nombre,descripcion:null,estandar:[g.comps[0].indicador,g.comps[0].meta].filter(Boolean).join(" · ")||null,departamento:dep,documento_ref:null,version:"1.0",estado:"vigente",vigente_desde:"2026-01-02",aprobada_por:sinAprob?null:"Gerencia General",aprobada_en:sinAprob?null:"2026-01-02",origen:"migracion",creado_en:"2026-01-02T10:00:00Z"};
+    DB.politicas.push(pol); g.comps.forEach((c,j)=>{ if(!(i%9===4&&j===0)) c.politica_id=pol.id; }); }); }
+function trigPol(t,r){
+  if(t==="competencias"&&r.politica_id!=null){ const p=DB.politicas.find(x=>x.id===Number(r.politica_id)); if(p) r.politica=p.nombre; }
+  if(t==="politicas"){ DB.competencias.filter(c=>c.politica_id===r.id).forEach(c=>{ c.politica=r.nombre; DB.conductas_competencia.filter(k=>k.competencia_id===c.id&&k.sincronizada).forEach(k=>k.politica=r.nombre); }); }
+}
+// campaña abierta: parte del equipo ya firmó las reglas (con la versión de cada política)
+DB.perfiles.filter(p=>p.jefe_id&&p.usuario!=="colaborador").forEach((p,i)=>{ if(i%5<3) DB.acuses.push({id:id(),perfil_id:p.id,evaluado_id:p.id,periodo_id:103,tipo:"politicas",detalle:{origen:"demo"},creado_en:"2026-09-20T10:00:00Z"}); });
+// Manuales con IA (simulación): un borrador listo para revisar y un manual por analizar
+DB.manuales_puesto=DB.manuales_puesto||[]; DB.borradores_manual=DB.borradores_manual||[];
+function propuestaDemo(nombreArchivo, puestoId){
+  const p=DB.puestos.find(x=>x.id===puestoId);
+  if(p&&p.nombre==="Asistente de TH") return {puesto:"Asistente de TH",departamento:"Talento Humano",reporta_a:"Gerente de Talento Humano",nivel:"Apoyo",mision:"Ejecutar los procesos de nómina, contratación y atención a organismos de control con exactitud y en plazo.",
+    funciones:["Elaborar los roles de pago y las cargas bancarias de la nómina.","Registrar ingresos y contratos en el ERP antes del inicio de labores.","Gestionar avisos de entrada y salida en el IESS dentro del plazo legal.","Mantener actualizados los expedientes del personal."],
+    competencias:[{nombre:"Gestión de nómina y pagos",definicion:"Procesa la nómina con exactitud y puntualidad.",conductas:["Elabora roles y pagos de nómina sin errores y en calendario.","Verifica novedades antes del cierre de nómina."],politica:"Exactitud y puntualidad en roles y pago de nómina",indicador:"Roles sin errores y en calendario",meta:"≥98%",nivel_esperado:4,peso:30,critico:true,justificacion:"Errores en nómina generan riesgo legal y financiero (sección 4.1).",fuente:"Sección 4.1"},
+      {nombre:"Afiliación y avisos al IESS",definicion:"Cumple los plazos legales de avisos al IESS.",conductas:["Registra avisos de entrada al IESS desde el primer día de labores."],politica:"Avisos al IESS dentro del plazo legal",indicador:"Avisos registrados en plazo",meta:"100%",nivel_esperado:4,peso:25,critico:true,justificacion:"Multas del IESS por avisos tardíos (sección 4.3).",fuente:"Sección 4.3"},
+      {nombre:"Contratación y ERP",definicion:"Formaliza ingresos antes de iniciar labores.",conductas:["Registra cada ingreso en el ERP con contrato firmado antes de iniciar."],politica:"Todo ingreso con contrato firmado y archivado",indicador:"Ingresos con contrato cargado en plazo",meta:"100%",nivel_esperado:3.5,peso:25,critico:false,fuente:"Sección 4.2"},
+      {nombre:"Gestión documental",definicion:"Mantiene los expedientes completos.",conductas:["Archiva la documentación del personal en el expediente digital dentro de 5 días."],politica:"",indicador:"Expedientes completos",meta:"≥95%",nivel_esperado:3.5,peso:20,critico:false,fuente:"Sección 4.5"}],
+    observaciones:"El manual no indica la política de gestión documental; se dejó vacía."};
+  return {puesto:"Analista de Compras",departamento:"Administrativo Financiero",reporta_a:"Gerente General",nivel:"Operativo",mision:"Asegurar el abastecimiento oportuno de materiales para las obras al mejor costo y calidad.",
+    funciones:["Cotizar con al menos tres proveedores calificados.","Emitir órdenes de compra aprobadas en el sistema.","Dar seguimiento a las entregas hasta su recepción en obra.","Evaluar trimestralmente a los proveedores."],
+    competencias:[{nombre:"Abastecimiento oportuno",definicion:"Garantiza que los materiales lleguen a tiempo a obra.",conductas:["Coloca las órdenes de compra dentro de las 48 horas de recibida la requisición.","Da seguimiento a cada entrega hasta su recepción."],politica:"Compras con requisición aprobada y entrega en plazo",indicador:"Órdenes entregadas en la fecha comprometida",meta:"≥95%",nivel_esperado:4,peso:35,critico:true,justificacion:"Retrasos detienen la obra (sección 5.2).",fuente:"Sección 5.2"},
+      {nombre:"Negociación con proveedores",definicion:"Obtiene condiciones convenientes para la empresa.",conductas:["Presenta tres cotizaciones comparables en cada compra mayor a USD 1.000."],politica:"Tres cotizaciones para compras mayores a USD 1.000",indicador:"Compras con tres cotizaciones",meta:"100%",nivel_esperado:3.5,peso:25,critico:false,fuente:"Sección 5.3"},
+      {nombre:"Control documental de compras",definicion:"Mantiene trazabilidad de cada compra.",conductas:["Archiva orden, factura y acta de recepción de cada compra."],politica:"",indicador:"Compras con expediente completo",meta:"≥98%",nivel_esperado:3.5,peso:20,critico:false,fuente:"Sección 5.5"},
+      {nombre:"Eficiencia",definicion:"Entrega en plazo cuidando los recursos.",conductas:["Entrega en plazo, sin reprocesos y cuidando los recursos."],politica:"Cumplimiento de plazos y aprovechamiento de recursos",indicador:"Entregables en plazo",meta:"≥95%",nivel_esperado:3.5,peso:20,critico:false,fuente:"Sección 3"}],
+    observaciones:"El manual menciona el cargo «Jefe Administrativo Financiero», que no existe en el organigrama; se sugiere reportar al Gerente General."};
+}
+{ const m1={id:id(),puesto_id:null,nombre_archivo:"Manual_Analista_de_Compras.pdf",version:"2026-1",estado:"borrador",archivo_path:"2026/demo_compras.pdf",hash_archivo:"demo1",mime_type:"application/pdf",tamano_bytes:482000,fecha_carga:"2026-09-28T15:00:00Z",creado_en:"2026-09-28T15:00:00Z"};
+  const m2={id:id(),puesto_id:pu("Asistente de TH"),nombre_archivo:"Manual_Asistente_TH_v3.pdf",version:"3",estado:"cargado",archivo_path:"2026/demo_th.pdf",hash_archivo:"demo2",mime_type:"application/pdf",tamano_bytes:356000,fecha_carga:"2026-09-30T10:00:00Z",creado_en:"2026-09-30T10:00:00Z"};
+  DB.manuales_puesto.push(m1,m2);
+  DB.borradores_manual.push({id:id(),manual_id:m1.id,puesto_id:null,estado:"pendiente",datos:propuestaDemo(m1.nombre_archivo,null),duplicados:[],modelo_ia:"gemini-3.8-flash (simulado)",creado_en:"2026-09-28T15:02:00Z"}); }
 window.__DB=DB;
 
 // ---- Cliente simulado con "RLS" ----
@@ -427,7 +485,7 @@ function proyectar(row,sel){ if(!sel||sel.trim()==="*") return {...row}; const o
 function bitacora(t,op,r){ if(["perfiles","periodos","competencias","evaluaciones","planes","acuses","acciones","configuracion"].includes(t)) DB.bitacora.unshift({id:id(),usuario:user?.id,tabla:t,operacion:op,registro:String(r.id??r.clave),detalle:r,creado_en:new Date().toISOString()}); }
 class Q{
   constructor(t){this.t=t;this.f=[];this.o=[];this.op="select";this.sel="*";this.one=null;this.rg=null;}
-  select(s){ if(this.op==="select") this.sel=s||"*"; return this; }
+  select(s){ this.sel=s||"*"; return this; }
   eq(c,v){this.f.push(r=>String(r[c])===String(v));return this;} neq(c,v){this.f.push(r=>String(r[c])!==String(v));return this;}
   is(c){this.f.push(r=>r[c]==null);return this;} not(c){this.f.push(r=>r[c]!=null);return this;}
   in(c,a){const s=a.map(String);this.f.push(r=>s.includes(String(r[c])));return this;}
@@ -442,9 +500,9 @@ class Q{
     if(this.op==="insert"){
       if(this.t==="acuses"){ for(const x of this.v){ if(T.some(a=>a.perfil_id===x.perfil_id&&a.evaluado_id===x.evaluado_id&&a.periodo_id===x.periodo_id&&a.tipo===x.tipo)) return {data:null,error:{message:"duplicate key value violates unique constraint"}}; } }
       const rows=this.v.map(x=>{ const r={id:x.id??id(),creado_en:new Date().toISOString(),...x}; if(this.t==="evaluaciones"&&!r.estado) r.estado="pendiente"; if(this.t==="planes"&&!r.estado) r.estado="propuesto"; if(this.t==="competencias"&&r.minimo==null) r.minimo=3.5; return r; });
-      T.push(...rows); rows.forEach(r=>bitacora(this.t,"INSERT",r)); return {data:rows,error:null}; }
+      T.push(...rows); rows.forEach(r=>{ trigPol(this.t,r); bitacora(this.t,"INSERT",r); }); const out=rows.map(r=>proyectar(r,this.sel)); if(this.one==="single"||this.one==="maybe") return {data:out[0]||null,error:null}; return {data:out,error:null}; }
     if(this.op==="upsert"){ this.v.forEach(x=>{ const ex=T.find(r=>this.conf.every(c=>String(r[c])===String(x[c]))); if(ex) Object.assign(ex,x); else T.push({id:id(),...x}); bitacora(this.t,"UPDATE",x); }); return {data:null,error:null}; }
-    if(this.op==="update"){ T.filter(ok).filter(r=>esAdmin||this.t!=="planes"||esJefeDe(r.evaluado_id)||true).forEach(r=>{ Object.assign(r,this.v); bitacora(this.t,"UPDATE",r); }); return {data:null,error:null}; }
+    if(this.op==="update"){ T.filter(ok).filter(r=>esAdmin||this.t!=="planes"||esJefeDe(r.evaluado_id)||true).forEach(r=>{ Object.assign(r,this.v); trigPol(this.t,r); bitacora(this.t,"UPDATE",r); }); return {data:null,error:null}; }
     if(this.op==="delete"){ T.filter(ok).forEach(r=>bitacora(this.t,"DELETE",r)); DB[this.t]=T.filter(r=>!ok(r)); if(this.t==="puestos"){ const ids=new Set(DB.puestos.map(p=>p.id)); DB.competencias=DB.competencias.filter(c=>c.puesto_id==null||ids.has(c.puesto_id)); } return {data:null,error:null}; }
     let rows=T.filter(ok).filter(r=>visible(this.t,r));
     for(const [c,asc] of [...this.o].reverse()) rows=[...rows].sort((a,b)=>(a[c]>b[c]?1:a[c]<b[c]?-1:0)*(asc?1:-1));
@@ -458,6 +516,13 @@ class Q{
 }
 const cliente={
   from:(t)=>new Q(t),
+  storage:{ from:()=>({ upload:async(path)=>({data:{path},error:null}), remove:async()=>({data:null,error:null}), download:async()=>({data:null,error:{message:"demo"}}) }) },
+  functions:{ invoke:async(nombre,{body})=>{ const m=yo(); if(!m||m.rol!=="admin") return {data:null,error:{message:"Solo Recursos Humanos puede analizar manuales"}};
+    const man=DB.manuales_puesto.find(x=>x.id===Number(body.manual_id)); if(!man) return {data:null,error:{message:"Manual no encontrado"}};
+    man.estado="procesando"; await new Promise(r=>setTimeout(r,1800));
+    const datos=propuestaDemo(man.nombre_archivo,man.puesto_id); const iguales=DB.puestos.filter(p=>p.nombre.toLowerCase()===datos.puesto.toLowerCase());
+    const b={id:id(),manual_id:man.id,puesto_id:man.puesto_id||iguales[0]?.id||null,estado:"pendiente",datos,duplicados:iguales.map(p=>({tipo:"puesto",id:p.id,nombre:p.nombre})),modelo_ia:"gemini-3.8-flash (simulado)",creado_en:new Date().toISOString()};
+    DB.borradores_manual.push(b); man.estado="borrador"; man.notas=null; return {data:{ok:true,borrador_id:b.id},error:null}; } },
   rpc:async(fn,a)=>{ const m=yo(); if(fn==="marcar_clave_cambiada"&&m){ m.debe_cambiar_clave=false; DB.accesos_temp=DB.accesos_temp.filter(x=>x.perfil_id!==m.id); } if(fn==="aceptar_privacidad"&&m){ m.acepto_privacidad_en=new Date().toISOString(); } if(fn==="eliminar_usuario"){ DB.perfiles=DB.perfiles.filter(p=>p.id!==a.uid); DB.evaluaciones=DB.evaluaciones.filter(e=>e.evaluado_id!==a.uid&&e.evaluador_id!==a.uid); } return {data:null,error:null}; },
   auth:{
     getSession:async()=>({data:{session:user?{user}:null}}), getUser:async()=>({data:{user}}),
@@ -597,6 +662,10 @@ async function cargarBase(){
     const [fun,con]=await Promise.all([traerTodo(()=>sb.from("funciones_puesto").select("*")),traerTodo(()=>sb.from("conductas_competencia").select("id,competencia_id,texto,orden,origen,sincronizada"))]);
     D.funciones=fun; D.conductas=con; D.v32=true;
   }catch(e){ D.funciones=[]; D.conductas=[]; D.v32=false; }
+  // Modelo v3.4: catálogo de políticas. Si el SQL v3.4 aún no se ejecutó, se usa el texto libre de cada competencia.
+  try{ D.politicas=await traerTodo(()=>sb.from("politicas").select("*")); D.v34=true; }
+  catch(e){ D.politicas=[]; D.v34=false; }
+  D.politicaPorId=Object.fromEntries(D.politicas.map(p=>[p.id,p]));
   D.perfilPorId=Object.fromEntries(perfiles.map(p=>[p.id,p]));
   D.puestoPorId=Object.fromEntries(puestos.map(p=>[p.id,p]));
   await cargarConfig();
@@ -677,7 +746,22 @@ function accionSugerida(c, nivelI){
 
 // ==================== Sesión y navegación ====================
 let PERFIL=null;
-const TABS_ADMIN=[["tablero","Tablero"],["periodos","Periodos"],["puestos","Estructura"],["usuarios","Usuarios"],["evaluaciones","Evaluaciones"],["resultados","Resultados"],["planes","Planes"],["analitica","Analítica"]];
+// Menú lateral de RRHH: las entradas que empiezan con "#" son títulos de grupo
+const TABS_ADMIN=[["tablero","Tablero"],["#","Organización"],["puestos","Estructura"],["politicas","Políticas"],["usuarios","Usuarios"],["#","Campañas"],["periodos","Periodos"],["evaluaciones","Evaluaciones"],["#","Resultados"],["resultados","Resultados"],["planes","Planes"],["analitica","Analítica"]];
+const ICONOS={
+  tablero:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  puestos:'<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/>',
+  politicas:'<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  usuarios:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 010 7M18.5 14.8c1.6.8 2.6 2.6 3 5.2"/>',
+  periodos:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  evaluaciones:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  resultados:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  planes:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+  analitica:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+  mis:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 12l2 2 4-4"/>',
+  equipo:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 010 7M18.5 14.8c1.6.8 2.6 2.6 3 5.2"/>',
+  miresultado:'<circle cx="12" cy="9" r="6"/><path d="M8.5 14l-1.5 7 5-3 5 3-1.5-7"/>'
+};
 const VISTAS={};   // se llenan en cada módulo: VISTAS.tablero = función
 
 $("form-login").addEventListener("submit", async (e)=>{
@@ -720,12 +804,14 @@ async function iniciarSesion(){
 }
 function montarTabs(lista, inicial){
   const nav=$("tabs");
-  nav.innerHTML=lista.map(([k,t])=>`<button class="tab" data-t="${k}">${t}</button>`).join("");
+  nav.innerHTML=lista.map(([k,t])=>k==="#"?`<div class="sb-grupo">${t}</div>`:`<button class="tab" data-t="${k}"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONOS[k]||""}</svg><span>${t}</span></button>`).join("");
   nav.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>irA(b.dataset.t)));
   irA(inicial);
 }
 async function irA(k, arg){
   document.querySelectorAll("#tabs .tab").forEach(x=>x.classList.toggle("on",x.dataset.t===k));
+  const activo=document.querySelector(`#tabs .tab[data-t="${k}"]`); if($("topmovil-t")) $("topmovil-t").textContent=activo?activo.textContent:"";
+  document.body.classList.remove("sb-abierto");
   const c=$("contenido"); c.innerHTML=`<div class="vacio">Cargando...</div>`;
   window.scrollTo(0,0);
   try{ await VISTAS[k](arg); c.firstElementChild?.classList.add("anim"); }
@@ -737,6 +823,10 @@ function mostrarLogin(){
   $("btn-entrar").disabled=false; $("btn-entrar").textContent="Ingresar";
   $("form-login").reset(); PERFIL=null;
 }
+// Menú lateral en celular: se abre con ☰ y se cierra al elegir una sección o tocar fuera
+$("sb-abrir").addEventListener("click",()=>document.body.classList.add("sb-abierto"));
+$("sb-cerrar").addEventListener("click",()=>document.body.classList.remove("sb-abierto"));
+$("sb-velo").addEventListener("click",()=>document.body.classList.remove("sb-abierto"));
 $("btn-salir").addEventListener("click", async ()=>{ await sb.auth.signOut(); mostrarLogin(); });
 $("btn-clave").addEventListener("click", ()=>{
   abrirModal(`<h3>Cambiar mi contraseña</h3><div class="cap" style="color:var(--muted);font-size:13px;margin-bottom:14px">Mínimo 8 caracteres. Evita usar tu cédula o tu nombre.</div>
@@ -813,7 +903,7 @@ function mostrarPrimer(html){
   $("vista-primer").classList.remove("oculto"); $("primer-card").innerHTML=html;
 }
 function pasoClave(){
-  mostrarPrimer(`<img class="brandimg" alt="Etinar" src="${document.querySelector(".appbar .brandimg").src}">
+  mostrarPrimer(`<img class="brandimg" alt="Etinar" src="${$("logo-app").src}">
     <div class="sub" style="margin:0 0 6px;font-weight:700;color:var(--ochre);text-transform:uppercase;font-size:11.5px;letter-spacing:.08em">Paso 1 de 2 · Primer ingreso</div>
     <h2>Crea tu nueva contraseña</h2><div class="sub">Hola ${esc((PERFIL.nombre||"").split(" ")[0])}. Por tu seguridad, reemplaza la contraseña inicial que te entregó RRHH.</div>
     <form id="f-pc" style="text-align:left">
@@ -836,7 +926,7 @@ function pasoClave(){
 }
 async function pasoPrivacidad(){
   const texto=await textoPolitica();
-  mostrarPrimer(`<img class="brandimg" alt="Etinar" src="${document.querySelector(".appbar .brandimg").src}">
+  mostrarPrimer(`<img class="brandimg" alt="Etinar" src="${$("logo-app").src}">
     <div class="sub" style="margin:0 0 6px;font-weight:700;color:var(--ochre);text-transform:uppercase;font-size:11.5px;letter-spacing:.08em">${PERFIL.debe_cambiar_clave===false?"Paso 2 de 2":"Antes de continuar"}</div>
     <h2>Política de datos y privacidad</h2><div class="sub">Lee cómo se usan tus datos en esta plataforma.</div>
     <div class="politica-txt">${esc(texto)}</div>
@@ -1038,7 +1128,7 @@ function camposCompHTML(c){
   c=c||{};
   return `<div class="fila"><div class="campo"><label>Competencia / categoría</label><input class="inp f-cat" value="${esc(c.categoria)}" placeholder="Ej. Gestión de nómina y pagos"></div>
       <div class="campo" style="flex:2"><label>Conducta a evaluar (enunciado)</label><input class="inp f-txt" value="${esc(c.texto)}" placeholder="Ej. Elabora roles y pagos sin errores y en calendario."></div></div>
-    <div class="fila" style="margin-top:12px"><div class="campo" style="flex:2"><label>Política interna (regla que fija el estándar)</label><input class="inp f-pol" value="${esc(c.politica)}"></div>
+    <div class="fila" style="margin-top:12px"><div class="campo" style="flex:2"><label>Política interna (regla que fija el estándar)</label>${D.v34&&D.politicas.length?`<select class="inp f-polid"><option value="">— Texto libre (sin política del catálogo) —</option>${D.politicas.filter(p=>p.estado!=="derogada"||p.id===c.politica_id).map(p=>`<option value="${p.id}" ${p.id===c.politica_id?"selected":""}>${esc((p.codigo?p.codigo+" · ":"")+p.nombre)}${p.estado!=="vigente"?" ("+p.estado+")":""}</option>`).join("")}</select>`:""}<input class="inp f-pol" value="${esc(c.politica)}" ${D.v34&&c.politica_id?"disabled":""} placeholder="${D.v34?"O escribe una regla propia":""}" style="${D.v34&&D.politicas.length?"margin-top:6px":""}"></div>
       <div class="campo" style="flex:2"><label>Indicador medible (qué se mide y cómo)</label><input class="inp f-ind" value="${esc(c.indicador)}"></div></div>
     <div class="fila" style="margin-top:12px"><div class="campo"><label>Meta</label><input class="inp f-meta" value="${esc(c.meta)}" placeholder="Ej. ≥98%"></div>
       <div class="campo"><label>Nivel esperado (1–5)</label><input class="inp f-min num" type="number" min="1" max="5" step="0.1" value="${esperadoDe(c)}"></div>
@@ -1054,6 +1144,7 @@ function leerComp(m){
   const o={ categoria:m.querySelector(".f-cat").value.trim(), texto:m.querySelector(".f-txt").value.trim(), politica:m.querySelector(".f-pol").value.trim()||null,
     indicador:m.querySelector(".f-ind").value.trim()||null, meta:m.querySelector(".f-meta").value.trim()||null,
     minimo:isNaN(v)?3.5:Math.min(5,Math.max(1,v)), critico:crit, orden:parseInt(m.querySelector(".f-ord").value)||0 };
+  const sp=m.querySelector(".f-polid"); if(sp){ o.politica_id=sp.value?Number(sp.value):null; if(o.politica_id) o.politica=D.politicaPorId[o.politica_id]?.nombre||o.politica; }
   if(D.v32){ const ps=m.querySelector(".f-peso").value; o.definicion=m.querySelector(".f-def").value.trim()||null; o.peso=ps===""?null:Math.min(100,Math.max(0,parseFloat(ps))); o.nivel_esperado=o.minimo; }
   const vp=m.querySelector(".f-vp").value.trim(), ve=m.querySelector(".f-ve").value;
   if(crit||vp||ve){ o.validada_por=crit?(vp||null):null; o.validada_en=crit?(ve||null):null; }
@@ -1065,6 +1156,7 @@ function editarComp(c, puestoId, alTerminar){
     ${camposCompHTML(c)}<div class="msg" id="ec-msg"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">${ed?`<button class="btn danger sm" id="ec-del" style="margin-right:auto">Eliminar</button>`:""}<button class="btn ghost sm" data-cerrar>Cancelar</button><button class="btn amber sm" id="ec-ok">Guardar</button></div>`, m=>{
     m.querySelector(".f-crit").onchange=e=>{ m.querySelector(".f-val-wrap").style.display=e.target.value==="si"?"":"none"; };
+    const sp=m.querySelector(".f-polid"); if(sp) sp.onchange=()=>{ const t=m.querySelector(".f-pol"), p=D.politicaPorId[Number(sp.value)]; t.disabled=!!p; if(p) t.value=p.nombre; };
     m.querySelector("#ec-ok").onclick=async()=>{
       const v=leerComp(m), msg=m.querySelector("#ec-msg");
       if(!v.categoria||!v.texto){ msg.className="msg error"; msg.textContent="Competencia y conducta son obligatorias."; return; }
@@ -1323,17 +1415,370 @@ function editarFuncion(f, puestoId){
     if(f) m.querySelector("#fn-del").onclick=async()=>{ await sb.from("funciones_puesto").delete().eq("id",f.id); cerrarModal(); await cargarBase(); irA("puestos",{}); };
   });
 }
-// Manuales con IA: por ahora solo informativo. Exclusivo de RRHH (admin).
+
+// ==================== POLÍTICAS: catálogo, vínculo con competencias y socialización ====================
+const EST_POL={vigente:["Vigente","b-ok"],borrador:["Borrador","b-wait"],derogada:["Derogada","b-gris"]};
+const compsDePolitica=(id)=>D.competencias.filter(c=>c.politica_id===id);
+function siguienteCodigo(dep){
+  const pref="POL-"+((dep&&soloAlnum(dep).slice(0,3).toUpperCase())||"GEN")+"-";
+  const n=D.politicas.filter(p=>(p.codigo||"").startsWith(pref)).map(p=>parseInt((p.codigo||"").slice(pref.length))||0);
+  return pref+String((n.length?Math.max(...n):0)+1).padStart(3,"0");
+}
+let POL={q:"",dep:"",est:"",per:null};
+VISTAS.politicas = async (arg)=>{
+  if(arg&&typeof arg==="object") Object.assign(POL,arg);
+  if(!D.v34){ $("contenido").innerHTML=encabezado("Políticas","")+`<div class="card"><div class="aviso amber">Ejecuta el SQL v3.4 en Supabase para activar el catálogo de políticas.</div></div>`; return; }
+  const sinPol=D.competencias.filter(c=>!c.politica_id);
+  const sinPolConTexto=sinPol.filter(c=>c.politica&&c.politica.trim());
+  const vig=D.politicas.filter(p=>p.estado==="vigente");
+  // socialización de la campaña
+  const pid=POL.per||periodoDefecto();
+  const per=D.periodos.find(p=>p.id===Number(pid));
+  let soc={tot:0,firm:0,dep:{},pend:[]};
+  if(per){
+    const evs=await cargarEvaluaciones(pid); const gente=[...new Set(evs.map(e=>e.evaluador_id))];
+    const { data:ac } = await sb.from("acuses").select("perfil_id,creado_en,detalle").eq("periodo_id",Number(pid)).eq("tipo","politicas");
+    const firmaron=new Set((ac||[]).map(a=>a.perfil_id));
+    gente.forEach(id=>{ const p=perfil(id); if(!p) return; const d=p.departamento||"Sin departamento"; soc.dep[d]=soc.dep[d]||{t:0,f:0}; soc.dep[d].t++; soc.tot++; if(firmaron.has(id)){ soc.dep[d].f++; soc.firm++; } else soc.pend.push(p); });
+  }
+  const q=normTxt(POL.q);
+  const lista=D.politicas.filter(p=>(!q||normTxt(p.nombre+" "+(p.codigo||"")+" "+(p.estandar||"")).includes(q))&&(!POL.dep||(POL.dep==="_empresa"?!p.departamento:p.departamento===POL.dep))&&(!POL.est||p.estado===POL.est))
+    .sort((a,b)=>String(a.codigo||"").localeCompare(String(b.codigo||""))||String(a.nombre).localeCompare(String(b.nombre)));
+  const pctSoc=soc.tot?Math.round(soc.firm*100/soc.tot):0;
+  $("contenido").innerHTML=`<div>
+    ${encabezado("Políticas de evaluación","Las reglas que fijan el estándar de cada competencia · se socializan antes de evaluar",`<button class="btn ghost sm" id="po-xls">Exportar Excel</button><button class="btn ghost sm" id="po-doc">Documento de socialización</button>${sinPolConTexto.length?`<button class="btn ghost sm" id="po-mig">Crear catálogo desde competencias (${sinPolConTexto.length})</button>`:""}<button class="btn amber sm" id="po-nueva">Nueva política</button>`)}
+    <div class="grid4">
+      <div class="card kpi"><div class="lbl">Políticas vigentes</div><div class="val">${vig.length}</div><div class="delta">${D.politicas.filter(p=>p.estado==="borrador").length} en borrador · ${D.politicas.filter(p=>p.estado==="derogada").length} derogadas</div></div>
+      <div class="card kpi"><div class="lbl">Competencias con política</div><div class="val">${D.competencias.length?Math.round((D.competencias.length-sinPol.length)*100/D.competencias.length):0}%</div><div class="bar"><div style="width:${D.competencias.length?Math.round((D.competencias.length-sinPol.length)*100/D.competencias.length):0}%"></div></div></div>
+      <div class="card kpi"><div class="lbl">Socialización ${per?"· "+esc(corto(per.nombre)):""}</div><div class="val">${pctSoc}%</div><div class="delta">${soc.firm} de ${soc.tot} firmaron las reglas</div></div>
+      <div class="card kpi"><div class="lbl">Sin aprobación registrada</div><div class="val" style="color:${vig.filter(p=>!p.aprobada_por).length?"var(--warn)":"inherit"}">${vig.filter(p=>!p.aprobada_por).length}</div><div class="delta">vigentes sin "aprobada por"</div></div>
+    </div>
+    <div class="card mt"><div class="fila">
+      <div class="campo"><label for="po-q">Buscar</label><input class="inp" id="po-q" value="${esc(POL.q)}" placeholder="Código, nombre o estándar"></div>
+      <div class="campo"><label for="po-dep">Alcance</label><select class="inp" id="po-dep">${opciones([["_empresa","Toda la empresa"],...departamentos().map(d=>[d,d])],POL.dep,"Todos")}</select></div>
+      <div class="campo"><label for="po-est">Estado</label><select class="inp" id="po-est">${opciones(Object.entries(EST_POL).map(([k,v])=>[k,v[0]]),POL.est,"Todos")}</select></div>
+    </div></div>
+    <div class="card mt" style="padding:0;overflow:hidden"><div class="tabla-wrap" style="margin:0;padding:0"><table><thead><tr><th style="padding-left:18px">Código</th><th>Política</th><th>Estándar</th><th>Alcance</th><th>Versión</th><th>Estado</th><th class="c">Competencias</th><th></th></tr></thead><tbody>${
+      lista.map(p=>`<tr><td style="padding-left:18px;white-space:nowrap" class="num"><b>${esc(p.codigo)||"—"}</b></td><td style="min-width:200px"><b>${esc(p.nombre)}</b>${p.descripcion?`<div class="sub-t">${esc(p.descripcion)}</div>`:""}</td><td style="min-width:180px">${esc(p.estandar)||'<span class="badge b-wait">sin estándar</span>'}</td><td>${esc(p.departamento)||"Toda la empresa"}</td><td class="num">${esc(p.version)}<div class="sub-t">${p.vigente_desde?"desde "+fmtFecha(p.vigente_desde):""}</div></td><td><span class="badge ${EST_POL[p.estado][1]}">${EST_POL[p.estado][0]}</span>${p.aprobada_por?`<div class="sub-t">✓ ${esc(p.aprobada_por)}</div>`:""}</td><td class="c num">${compsDePolitica(p.id).length}</td><td class="r"><button class="btn ghost xs" data-pol="${p.id}">Editar</button></td></tr>`).join("")||`<tr><td colspan="8" class="vacio">${D.politicas.length?"Sin políticas con estos filtros.":"Aún no hay políticas en el catálogo. Créalas una por una o usa “Crear catálogo desde competencias”."}</td></tr>`
+    }</tbody></table></div></div>
+    <div class="row2">
+      <div class="card"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><h3>Socialización por área</h3><div class="cap">Personas que firmaron las reglas antes de evaluar (constancia para auditoría)</div></div>${D.periodos.length?`<select class="inp" id="po-per" style="width:auto;padding:8px 10px">${opciones(D.periodos.map(p=>[p.id,p.nombre]),pid)}</select>`:""}</div>
+        ${Object.keys(soc.dep).length?Object.entries(soc.dep).sort().map(([d,v])=>{const p=Math.round(v.f*100/v.t);return `<div class="prog"><div class="name" title="${esc(d)}">${esc(d)}</div><div class="track"><div style="width:${p}%"></div></div><div class="pct">${p}% <span class="sub-t">${v.f}/${v.t}</span></div></div>`;}).join(""):`<div class="vacio">Sin evaluaciones asignadas en esta campaña.</div>`}
+        ${soc.pend.length?`<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600;font-size:13px">Pendientes de firmar (${soc.pend.length})</summary><div class="sub-t" style="margin-top:8px;line-height:1.8">${soc.pend.slice(0,300).map(p=>esc(p.nombre)).join(" · ")}</div></details>`:""}
+      </div>
+      <div class="card"><h3>Competencias sin política del catálogo</h3><div class="cap">Vincúlalas para que la evaluación sea defendible</div>
+        ${sinPol.length?`<div class="tabla-wrap" style="max-height:320px;overflow:auto"><table><thead><tr><th>Puesto</th><th>Competencia</th><th></th></tr></thead><tbody>${sinPol.slice(0,200).map(c=>`<tr><td>${esc(c.puesto_id?D.puestoPorId[c.puesto_id]?.nombre:"Valores Etinar")}</td><td>${esc(c.categoria)}${c.politica?`<div class="sub-t">Texto actual: ${esc(c.politica)}</div>`:""}</td><td class="r"><button class="btn ghost xs" data-vinc="${c.id}">Vincular</button></td></tr>`).join("")}</tbody></table></div>`:`<div class="vacio">✅ Todas las competencias están vinculadas a una política.</div>`}
+      </div>
+    </div></div>`;
+  const re=(o)=>irA("politicas",o||{});
+  $("po-q").onchange=e=>re({q:e.target.value}); $("po-q").onkeydown=e=>{ if(e.key==="Enter") re({q:e.target.value}); };
+  $("po-dep").onchange=e=>re({dep:e.target.value}); $("po-est").onchange=e=>re({est:e.target.value});
+  if($("po-per")) $("po-per").onchange=e=>re({per:Number(e.target.value)});
+  $("po-nueva").onclick=()=>editarPolitica(null);
+  document.querySelectorAll("[data-pol]").forEach(b=>b.onclick=()=>editarPolitica(D.politicas.find(p=>p.id===Number(b.dataset.pol))));
+  document.querySelectorAll("[data-vinc]").forEach(b=>b.onclick=()=>vincularCompetencia(D.competencias.find(c=>c.id===Number(b.dataset.vinc))));
+  if($("po-mig")) $("po-mig").onclick=migrarPoliticas;
+  $("po-xls").onclick=()=>exportarExcel("Politicas_Etinar",[{nombre:"Políticas",filas:D.politicas.map(p=>({Código:p.codigo||"",Política:p.nombre,Descripción:p.descripcion||"",Estándar:p.estandar||"",Alcance:p.departamento||"Toda la empresa","Documento de origen":p.documento_ref||"",Versión:p.version,"Vigente desde":p.vigente_desde||"",Estado:EST_POL[p.estado][0],"Aprobada por":p.aprobada_por||"","Aprobada en":p.aprobada_en||"",Competencias:compsDePolitica(p.id).map(c=>(c.puesto_id?D.puestoPorId[c.puesto_id]?.nombre:"Valores Etinar")+": "+c.categoria).join(" | ")}))}]);
+  $("po-doc").onclick=documentoSocializacion;
+};
+function editarPolitica(p){
+  const vinc=new Set(p?compsDePolitica(p.id).map(c=>c.id):[]);
+  const comps=D.competencias.slice().sort((a,b)=>String(a.puesto_id?D.puestoPorId[a.puesto_id]?.nombre:"").localeCompare(String(b.puesto_id?D.puestoPorId[b.puesto_id]?.nombre:""))||String(a.categoria).localeCompare(String(b.categoria)));
+  abrirModal(`<h3>${p?"Editar política":"Nueva política"}</h3>
+    <div class="fila" style="margin-top:12px"><div class="campo" style="max-width:170px"><label for="pe-c">Código</label><input class="inp" id="pe-c" value="${esc(p?.codigo||siguienteCodigo(""))}"></div><div class="campo" style="flex:3"><label for="pe-n">Nombre de la política</label><input class="inp" id="pe-n" value="${esc(p?.nombre)}"></div></div>
+    <div class="campo" style="margin-top:12px"><label for="pe-d">Qué regula (descripción)</label><textarea class="inp" id="pe-d" rows="2">${esc(p?.descripcion)}</textarea></div>
+    <div class="campo"><label for="pe-e">Estándar o parámetro que fija</label><input class="inp" id="pe-e" value="${esc(p?.estandar)}" placeholder="Ej. 100% de ingresos con contrato firmado antes del primer día"></div>
+    <div class="fila"><div class="campo"><label for="pe-a">Alcance</label><select class="inp" id="pe-a">${opciones(departamentos(),p?.departamento,"Toda la empresa")}</select></div><div class="campo"><label for="pe-r">Documento de origen</label><input class="inp" id="pe-r" value="${esc(p?.documento_ref)}" placeholder="Reglamento interno, procedimiento..."></div></div>
+    <div class="fila" style="margin-top:12px"><div class="campo"><label for="pe-v">Versión</label><input class="inp" id="pe-v" value="${esc(p?.version||"1.0")}"></div><div class="campo"><label for="pe-s">Estado</label><select class="inp" id="pe-s">${opciones(Object.entries(EST_POL).map(([k,v])=>[k,v[0]]),p?.estado||"vigente")}</select></div><div class="campo"><label for="pe-vd">Vigente desde</label><input class="inp" type="date" id="pe-vd" value="${esc(p?.vigente_desde||"")}"></div></div>
+    <div class="fila" style="margin-top:12px"><div class="campo" style="flex:2"><label for="pe-ap">Aprobada por</label><input class="inp" id="pe-ap" value="${esc(p?.aprobada_por)}" placeholder="Nombre y cargo"></div><div class="campo"><label for="pe-ae">Fecha de aprobación</label><input class="inp" type="date" id="pe-ae" value="${esc(p?.aprobada_en||"")}"></div></div>
+    <div class="lbl-campo" style="margin-top:6px">Competencias que se rigen por esta política</div>
+    <input class="inp" id="pe-bq" placeholder="Filtrar competencias" style="margin-bottom:6px">
+    <div id="pe-lista" style="max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:6px 10px">${comps.map(c=>`<label class="pe-it" data-q="${esc(normTxt((c.puesto_id?D.puestoPorId[c.puesto_id]?.nombre:"valores etinar")+" "+c.categoria))}" style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-weight:500;font-size:13px;margin:0"><input type="checkbox" value="${c.id}" ${vinc.has(c.id)?"checked":""} style="margin-top:3px"> <span><b>${esc(c.categoria)}</b> <span class="sub-t">· ${esc(c.puesto_id?D.puestoPorId[c.puesto_id]?.nombre:"Valores Etinar")}${c.politica_id&&!vinc.has(c.id)?" · ya vinculada a otra":""}</span></span></label>`).join("")}</div>
+    <div class="msg" id="pe-msg"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">${p?`<button class="btn danger sm" id="pe-del" style="margin-right:auto">Eliminar</button>`:""}<button class="btn ghost sm" data-cerrar>Cancelar</button><button class="btn amber sm" id="pe-ok">Guardar</button></div>`, m=>{
+    const q=s=>m.querySelector(s);
+    q("#pe-a").onchange=e=>{ if(!p) q("#pe-c").value=siguienteCodigo(e.target.value); };
+    q("#pe-bq").oninput=e=>{ const t=normTxt(e.target.value); m.querySelectorAll(".pe-it").forEach(l=>l.style.display=l.dataset.q.includes(t)?"":"none"); };
+    q("#pe-ok").onclick=async()=>{ const v={codigo:q("#pe-c").value.trim()||null,nombre:q("#pe-n").value.trim(),descripcion:q("#pe-d").value.trim()||null,estandar:q("#pe-e").value.trim()||null,departamento:q("#pe-a").value||null,documento_ref:q("#pe-r").value.trim()||null,version:q("#pe-v").value.trim()||"1.0",estado:q("#pe-s").value,vigente_desde:q("#pe-vd").value||null,aprobada_por:q("#pe-ap").value.trim()||null,aprobada_en:q("#pe-ae").value||null};
+      if(!v.nombre){ q("#pe-msg").className="msg error"; q("#pe-msg").textContent="Escribe el nombre de la política."; return; }
+      const dup=D.politicas.find(x=>x.id!==p?.id&&normTxt(x.nombre)===normTxt(v.nombre));
+      if(dup&&!await new Promise(r=>{ q("#pe-msg").className="msg error"; q("#pe-msg").innerHTML=`Ya existe «${esc(dup.nombre)}» (${esc(dup.codigo||"")}). <a href="#" id="pe-igual">Guardar igual</a>`; q("#pe-igual").onclick=e=>{e.preventDefault();r(true);}; setTimeout(()=>r(false),15000); })) return;
+      let id=p?.id;
+      if(p){ const { error } = await sb.from("politicas").update(v).eq("id",p.id); if(error){ q("#pe-msg").className="msg error"; q("#pe-msg").textContent=error.message; return; } }
+      else { const { data, error } = await sb.from("politicas").insert(v).select("id").single(); if(error){ q("#pe-msg").className="msg error"; q("#pe-msg").textContent=error.message; return; } id=data.id; }
+      const marcados=new Set([...m.querySelectorAll("#pe-lista input:checked")].map(i=>Number(i.value)));
+      const agregar=[...marcados].filter(c=>!vinc.has(c)), quitar=[...vinc].filter(c=>!marcados.has(c));
+      if(agregar.length) await sb.from("competencias").update({politica_id:id}).in("id",agregar);
+      if(quitar.length) await sb.from("competencias").update({politica_id:null}).in("id",quitar);
+      cerrarModal(); await cargarBase(); irA("politicas"); };
+    if(p) q("#pe-del").onclick=async()=>{ cerrarModal(); if(!await confirmar(`Se eliminará la política <b>${esc(p.nombre)}</b>. Sus ${compsDePolitica(p.id).length} competencias conservan el texto pero quedan sin vínculo al catálogo. Si solo dejó de aplicar, mejor márcala como <b>Derogada</b>.`,"Eliminar",true)) return;
+      await sb.from("politicas").delete().eq("id",p.id); await cargarBase(); irA("politicas"); };
+  });
+}
+function vincularCompetencia(c){
+  abrirModal(`<h3>Vincular a una política</h3><div style="color:var(--muted);font-size:12.5px;margin-bottom:12px">${esc(c.puesto_id?D.puestoPorId[c.puesto_id]?.nombre:"Valores Etinar")} · ${esc(c.categoria)}${c.politica?` · texto actual: «${esc(c.politica)}»`:""}</div>
+    <div class="campo"><label for="vc-pol">Política del catálogo</label><select class="inp" id="vc-pol">${opciones(D.politicas.filter(p=>p.estado!=="derogada").map(p=>[p.id,(p.codigo?p.codigo+" · ":"")+p.nombre]),"","— Elegir —")}</select></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><button class="btn ghost sm" id="vc-nueva" style="margin-right:auto">Crear política con el texto actual</button><button class="btn ghost sm" data-cerrar>Cancelar</button><button class="btn amber sm" id="vc-ok">Vincular</button></div>`, m=>{
+    m.querySelector("#vc-ok").onclick=async()=>{ const v=m.querySelector("#vc-pol").value; if(!v) return; await sb.from("competencias").update({politica_id:Number(v)}).eq("id",c.id); cerrarModal(); await cargarBase(); irA("politicas"); };
+    m.querySelector("#vc-nueva").onclick=async()=>{ const dep=c.puesto_id?D.puestoPorId[c.puesto_id]?.departamento:null;
+      const { data, error } = await sb.from("politicas").insert({codigo:siguienteCodigo(dep),nombre:c.politica||c.categoria,departamento:dep||null,estandar:c.meta?`${c.indicador||""} ${c.meta}`.trim():null,estado:"vigente",origen:"migracion"}).select("id").single();
+      if(error){ aviso(esc(error.message)); return; } await sb.from("competencias").update({politica_id:data.id}).eq("id",c.id); cerrarModal(); await cargarBase(); irA("politicas"); };
+  });
+}
+// Crea el catálogo a partir de los textos de política que ya existen en las competencias (sin duplicar)
+async function migrarPoliticas(){
+  const cand=D.competencias.filter(c=>!c.politica_id&&c.politica&&c.politica.trim());
+  const grupos={}; cand.forEach(c=>{ const k=normTxt(c.politica); (grupos[k]=grupos[k]||{nombre:c.politica.trim(),comps:[]}).comps.push(c); });
+  const existentes=Object.fromEntries(D.politicas.map(p=>[normTxt(p.nombre),p]));
+  const nuevos=Object.entries(grupos).filter(([k])=>!existentes[k]);
+  if(!await confirmar(`Se crearán <b>${nuevos.length}</b> políticas nuevas y se vincularán <b>${cand.length}</b> competencias. Las políticas que ya existen en el catálogo con el mismo nombre se reutilizan. Luego podrás completar el estándar, la versión y la aprobación de cada una.`,"Crear catálogo")) return;
+  for(const [k,g] of Object.entries(grupos)){
+    let pol=existentes[k];
+    if(!pol){ const c0=g.comps[0]; const deps=[...new Set(g.comps.map(c=>c.puesto_id?D.puestoPorId[c.puesto_id]?.departamento:null))]; const dep=deps.length===1?deps[0]:null;
+      D.politicas=D.politicas||[]; const cod=siguienteCodigo(dep);
+      const { data, error } = await sb.from("politicas").insert({codigo:cod,nombre:g.nombre,departamento:dep||null,estandar:[c0.indicador,c0.meta].filter(Boolean).join(" · ")||null,estado:"vigente",origen:"migracion"}).select("*").single();
+      if(error){ aviso("Error: "+esc(error.message)); return; } pol=data; D.politicas.push(data); }
+    await sb.from("competencias").update({politica_id:pol.id}).in("id",g.comps.map(c=>c.id));
+  }
+  await cargarBase(); irA("politicas");
+}
+// Documento Word para socializar: políticas por puesto, con competencias, conductas, indicadores y metas
+function documentoSocializacion(){
+  const vig=D.politicas.filter(p=>p.estado==="vigente");
+  const porPuesto=D.puestos.slice().sort((a,b)=>String(a.departamento).localeCompare(String(b.departamento))||String(a.nombre).localeCompare(String(b.nombre)));
+  const cuerpo=`<p>Este documento comunica las políticas y los criterios con los que se realiza la Evaluación de Desempeño 180°. Se socializa con jefaturas y colaboradores antes de abrir la campaña.</p>
+    <h3>1. Catálogo de políticas vigentes</h3>${tablaWord(["Código","Política","Estándar","Alcance","Versión","Aprobada por"],vig.map(p=>[p.codigo,p.nombre,p.estandar,p.departamento||"Toda la empresa",p.version,p.aprobada_por?(p.aprobada_por+(p.aprobada_en?" ("+fmtFecha(p.aprobada_en)+")":"")):"Pendiente"]))}
+    <h3>2. Competencias por puesto</h3>${porPuesto.map(pu=>{ const cs=compsDelPuesto(pu.id); if(!cs.length) return ""; return `<h4>${esc(pu.nombre)} · ${esc(pu.departamento||"")}</h4>${tablaWord(["Competencia","Conducta evaluada","Política","Indicador","Meta"],cs.map(c=>[c.categoria,c.texto,(D.politicas.find(p=>p.id===c.politica_id)?.codigo?D.politicas.find(p=>p.id===c.politica_id).codigo+" · ":"")+(c.politica||""),c.indicador,c.meta]))}`; }).join("")}
+    <h3>3. Escala de calificación</h3><p>1 Deficiente · 2 Regular · 3 Bueno · 4 Muy bueno · 5 Excelente. La valoración se basa en hechos del periodo y en el indicador de cada competencia.</p>
+    <br><p>Recibí y conozco las políticas con las que seré evaluado(a):</p><br><table width="100%" style="font-size:10pt"><tr><td style="text-align:center">_________________________<br>Colaborador(a)</td><td style="text-align:center">_________________________<br>Jefe directo</td><td style="text-align:center">_________________________<br>Talento Humano</td></tr></table>`;
+  exportarWord("Socializacion_Politicas_Etinar","Políticas de la Evaluación de Desempeño 180°",cuerpo);
+}
+
+// ==================== MANUALES CON IA (Gemini) · exclusivo de RRHH ====================
+// Flujo: Manual (PDF) → Gemini propone → BORRADOR → RRHH revisa y corrige → Aprobar y aplicar.
+// La IA nunca escribe en la estructura definitiva: solo la Edge Function crea borradores, y
+// los cambios reales se hacen aquí, con la sesión de RRHH, cuando aprueba.
+const EST_MAN={cargado:["Cargado","b-gris"],procesando:["Analizando…","b-blue"],borrador:["Borrador listo","b-wait"],en_revision:["En revisión","b-wait"],aprobado:["Aplicado","b-ok"],rechazado:["Rechazado","b-red"],archivado:["Archivado","b-gris"]};
+const MAX_MANUAL_MB=15;
+const nrm=(t)=>normTxt(t||"").replace(/[^a-z0-9 ]/g," ").replace(/\s+/g," ").trim();
+async function hashArchivo(file){ const b=await crypto.subtle.digest("SHA-256",await file.arrayBuffer()); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
+function errorFuncion(error){ // supabase-js: el detalle viene en error.context (Response)
+  return (async()=>{ try{ const j=await error.context.json(); return j.error||error.message; }catch(e){ return error.message||String(error); } })();
+}
+
 async function modalManualesIA(){
   if(!PERFIL||PERFIL.rol!=="admin") return;
-  let conteo="";
-  if(D.v32){ const { data } = await sb.from("manuales_puesto").select("id,estado"); const l=data||[]; conteo=`<div class="grid3" style="grid-template-columns:repeat(3,minmax(0,1fr));margin:12px 0"><div class="kpi"><div class="lbl">Manuales registrados</div><div class="val">${l.length}</div></div><div class="kpi"><div class="lbl">Funciones cargadas</div><div class="val">${D.funciones.length}</div></div><div class="kpi"><div class="lbl">Conductas</div><div class="val">${D.conductas.length}</div></div></div>`; }
-  const pasos=[["Manual de funciones","RRHH sube el PDF o Word del manual."],["Análisis con IA","Extrae puesto, departamento, reporta a, nivel, misión, funciones, competencias, conductas, nivel esperado y peso."],["Borrador","La propuesta se guarda como borrador. La IA nunca escribe en la estructura definitiva."],["Revisión de RRHH","Se comparan los datos con los puestos y competencias existentes para detectar duplicados."],["Aprobación","RRHH aprueba o corrige cada dato."],["Actualización","Se actualizan puesto, funciones, competencias, conductas y el organigrama."]];
-  abrirModal(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3>Manuales con IA</h3><div style="color:var(--muted);font-size:12.5px">Funcionalidad en preparación · exclusiva de Recursos Humanos</div></div><span class="badge b-wait">En preparación</span></div>
-    ${conteo}
-    <div style="margin-top:14px">${pasos.map((p,i)=>`<div style="display:flex;gap:12px;padding:9px 0;${i?"border-top:1px solid var(--line-2)":""}"><div class="avatar" style="width:28px;height:28px;font-size:12px;background:${i===2||i===4?"var(--amber)":"var(--ink)"};color:${i===2||i===4?"var(--ink)":"#fff"}">${i+1}</div><div><b>${p[0]}</b><div class="sub-t" style="font-size:12.5px">${p[1]}</div></div></div>`).join("")}</div>
-    <div class="explbox">${D.v32?"La base de datos ya está preparada: manuales, funciones, competencias con peso y conductas observables, borradores con revisión y aprobación, y detección de duplicados.":"Ejecuta el SQL v3.2 para preparar la base de datos de esta función."} La conexión con la IA se activará en una siguiente fase.</div>
-    <div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="btn sm" data-cerrar>Entendido</button></div>`);
+  if(!D.v32){ aviso("Ejecuta el SQL v3.2 (o superior) en Supabase para activar Manuales con IA."); return; }
+  const [{ data:mans, error }, { data:bors }] = await Promise.all([
+    sb.from("manuales_puesto").select("*").order("id",{ascending:false}),
+    sb.from("borradores_manual").select("id,manual_id,estado,modelo_ia,creado_en").order("id",{ascending:false}) ]);
+  if(error){ aviso("No se pudo leer los manuales: "+esc(error.message)); return; }
+  const ultimoBor=(mid)=>(bors||[]).find(b=>b.manual_id===mid);
+  const l=mans||[];
+  abrirModal(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3>✦ Manuales con IA</h3><div style="color:var(--muted);font-size:12.5px">Exclusivo de Recursos Humanos · la IA propone, RRHH revisa y aprueba</div></div><button class="btn ghost xs" data-cerrar>Cerrar</button></div>
+    <div class="grid3" style="grid-template-columns:repeat(4,minmax(0,1fr));margin:14px 0;gap:10px">
+      ${[["Manuales",l.length],["Por revisar",l.filter(m=>["borrador","en_revision"].includes(m.estado)).length],["Aplicados",l.filter(m=>m.estado==="aprobado").length],["Funciones cargadas",D.funciones.length]].map(([a,b])=>`<div class="kpi" style="border:1px solid var(--line);border-radius:14px;padding:12px"><div class="lbl">${a}</div><div class="val" style="font-size:24px;margin-top:4px">${b}</div></div>`).join("")}
+    </div>
+    <div class="card" style="padding:14px;box-shadow:none;border:1px dashed var(--line)">
+      <b style="font-size:13.5px">Subir manual de funciones</b>
+      <div class="fila" style="margin-top:8px"><div class="campo" style="flex:2"><label for="mi-f">Archivo PDF (máx. ${MAX_MANUAL_MB} MB)</label><input class="inp" type="file" id="mi-f" accept="application/pdf,.pdf"></div>
+        <div class="campo" style="flex:2"><label for="mi-p">Puesto</label><select class="inp" id="mi-p">${opciones(D.puestos.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>[p.id,p.nombre]),"","Detectar del manual (puesto nuevo o existente)")}</select></div>
+        <div class="campo" style="max-width:110px"><label for="mi-v">Versión</label><input class="inp" id="mi-v" placeholder="2026-1"></div></div>
+      <div class="msg" id="mi-msg"></div>
+      <div style="text-align:right"><button class="btn amber sm" id="mi-subir">Subir manual</button></div>
+    </div>
+    <div class="tabla-wrap" style="margin-top:12px;max-height:300px;overflow:auto"><table><thead><tr><th>Archivo</th><th>Puesto</th><th>Estado</th><th>Cargado</th><th></th></tr></thead><tbody>${
+      l.map(m=>{ const b=ultimoBor(m.id); const est=EST_MAN[m.estado]||[m.estado,"b-gris"];
+        const atascado=m.estado==="procesando"&&(Date.now()-new Date(m.fecha_carga||m.creado_en).getTime())>5*60*1000;
+        const acc = m.estado==="cargado"||m.estado==="rechazado"||atascado ? `<button class="btn amber xs" data-mi-an="${m.id}">${m.estado==="cargado"&&!m.notas?"✦ Analizar":"Reintentar"}</button>`
+          : (["borrador","en_revision"].includes(m.estado)&&b) ? `<button class="btn amber xs" data-mi-rev="${b.id}">Revisar</button>`
+          : (m.estado==="aprobado"&&b) ? `<button class="btn ghost xs" data-mi-rev="${b.id}">Ver</button>` : "";
+        return `<tr><td style="min-width:160px"><b>${esc(m.nombre_archivo)}</b>${m.version?`<div class="sub-t">v${esc(m.version)}</div>`:""}${m.notas?`<div class="sub-t" style="color:var(--red)">${esc(m.notas)}</div>`:""}</td><td>${esc(D.puestoPorId[m.puesto_id]?.nombre)||'<span class="sub-t">por detectar</span>'}</td><td><span class="badge ${est[1]}">${est[0]}</span>${b?.modelo_ia?`<div class="sub-t">${esc(b.modelo_ia)}</div>`:""}</td><td class="num sub-t">${fmtFecha(m.fecha_carga||m.creado_en)}</td><td class="r" style="white-space:nowrap">${acc} ${m.estado!=="procesando"?`<button class="btn ghost xs" data-mi-del="${m.id}" title="Eliminar manual">✕</button>`:""}</td></tr>`; }).join("")||`<tr><td colspan="5" class="vacio">Aún no hay manuales. Sube el primero arriba.</td></tr>`
+    }</tbody></table></div>
+    <div class="explbox" style="margin-top:12px">🔒 A Gemini solo se envía el <b>manual del puesto</b> y los nombres del catálogo de políticas y competencias. <b>Nunca</b> se envían evaluaciones, puntajes ni datos personales. La clave de la IA está guardada como secreto en Supabase, no en esta página.</div>`, m=>{
+    m.querySelector("#mi-subir").onclick=()=>subirManual(m);
+    m.querySelectorAll("[data-mi-an]").forEach(b=>b.onclick=()=>analizarManual(Number(b.dataset.miAn), b));
+    m.querySelectorAll("[data-mi-rev]").forEach(b=>b.onclick=()=>revisarBorrador(Number(b.dataset.miRev)));
+    m.querySelectorAll("[data-mi-del]").forEach(b=>b.onclick=async()=>{ const man=l.find(x=>x.id===Number(b.dataset.miDel));
+      cerrarModal(); if(!await confirmar(`Se eliminará el manual <b>${esc(man.nombre_archivo)}</b> y sus borradores. Lo que ya se aplicó a la estructura <b>no</b> se borra.`,"Eliminar",true)) return modalManualesIA();
+      if(man.archivo_path) await sb.storage.from("manuales").remove([man.archivo_path]);
+      await sb.from("manuales_puesto").delete().eq("id",man.id); modalManualesIA(); });
+  });
+  m_ancho(760);
+}
+function m_ancho(px){ const md=document.querySelector("#modal-root .modal"); if(md) md.style.maxWidth=px+"px"; }
+
+async function subirManual(m){
+  const msg=m.querySelector("#mi-msg"), f=m.querySelector("#mi-f").files[0];
+  const err=(t)=>{ msg.className="msg error"; msg.textContent=t; };
+  if(!f) return err("Elige el archivo PDF del manual.");
+  if(!/pdf$/i.test(f.type)&&!/\.pdf$/i.test(f.name)) return err("Por ahora solo se aceptan manuales en PDF (si lo tienes en Word: Archivo → Guardar como PDF).");
+  if(f.size>MAX_MANUAL_MB*1024*1024) return err(`El archivo pesa ${(f.size/1048576).toFixed(1)} MB; el máximo es ${MAX_MANUAL_MB} MB.`);
+  msg.className="msg"; msg.textContent="Subiendo…";
+  const hash=await hashArchivo(f);
+  const { data:ig } = await sb.from("manuales_puesto").select("id,nombre_archivo,estado").eq("hash_archivo",hash);
+  if(ig&&ig.length){ msg.className="msg error"; msg.innerHTML=`Este mismo archivo ya fue subido como «${esc(ig[0].nombre_archivo)}». <a href="#" id="mi-igual">Subir de todas formas</a>`;
+    if(!await new Promise(r=>{ m.querySelector("#mi-igual").onclick=e=>{e.preventDefault();r(true);}; setTimeout(()=>r(false),20000); })) return; }
+  const limpio=f.name.normalize("NFD").replace(/[^\w.\-]/g,"_").slice(-80);
+  const ruta=`${new Date().getFullYear()}/${hash.slice(0,16)}_${limpio}`;
+  const up=await sb.storage.from("manuales").upload(ruta,f,{contentType:"application/pdf",upsert:true});
+  if(up.error) return err("No se pudo subir: "+up.error.message+" (¿ejecutaste el SQL v3.2 que crea el bucket «manuales»?)");
+  const pid=m.querySelector("#mi-p").value;
+  const { error } = await sb.from("manuales_puesto").insert({puesto_id:pid?Number(pid):null,nombre_archivo:f.name,version:m.querySelector("#mi-v").value.trim()||null,estado:"cargado",archivo_path:ruta,hash_archivo:hash,mime_type:"application/pdf",tamano_bytes:f.size,subido_por:PERFIL.id});
+  if(error) return err(error.message);
+  modalManualesIA();
+}
+
+async function analizarManual(id, boton){
+  boton.disabled=true; boton.textContent="Gemini está leyendo…";
+  const fila=boton.closest("tr"); if(fila) fila.querySelector(".badge").outerHTML='<span class="badge b-blue">Analizando… (30–90 s)</span>';
+  const { data, error } = await sb.functions.invoke("analizar-manual",{ body:{ manual_id:id } });
+  if(error){ const t=await errorFuncion(error);
+    const ayuda=/GEMINI_API_KEY/.test(t)?"<br><br>Falta guardar la clave de Gemini como secreto en Supabase (Edge Functions → Secrets).":/Failed to send|404|not found/i.test(t)?"<br><br>¿Ya publicaste la función <b>analizar-manual</b> en Supabase?":"";
+    aviso("No se pudo analizar el manual: "+esc(t)+ayuda); return; }
+  revisarBorrador(data.borrador_id);
+}
+
+// ---------- Revisión del borrador ----------
+async function revisarBorrador(borId){
+  const { data:b, error } = await sb.from("borradores_manual").select("*").eq("id",borId).single();
+  if(error||!b){ aviso("No se encontró el borrador."); return; }
+  const { data:man } = await sb.from("manuales_puesto").select("*").eq("id",b.manual_id).maybeSingle();
+  const d=JSON.parse(JSON.stringify(b.datos||{})); d.funciones=d.funciones||[]; d.competencias=d.competencias||[];
+  const soloVer=b.estado==="aplicado"||b.estado==="rechazado";
+  // puesto destino: el del manual, el sugerido por la función o el que coincide por nombre
+  const coincide=D.puestos.find(p=>nrm(p.nombre)===nrm(d.puesto));
+  const destino=d._destino!=null?d._destino:(man?.puesto_id||b.puesto_id||coincide?.id||"");
+  const jefeSug=d._reporta_a_id??(D.puestos.find(p=>nrm(p.nombre)===nrm(d.reporta_a))?.id||"");
+  const polSug=(t)=>{ const n=nrm(t); return n?D.politicas?.find(p=>nrm(p.nombre)===n):null; };
+  const dis=soloVer?"disabled":"";
+  const compHTML=(c,i)=>{ const pm=c._pol??(polSug(c.politica)?.id?String(polSug(c.politica).id):(c.politica?"nueva":""));
+    return `<div class="br-c" data-i="${i}" style="border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;gap:10px;align-items:center;justify-content:space-between"><label style="display:flex;gap:8px;align-items:center;margin:0;font-weight:700"><input type="checkbox" class="br-inc" ${c._excluir?"":"checked"} ${dis}> Incluir</label><span class="br-dup"></span></div>
+      <div class="fila" style="margin-top:8px"><div class="campo" style="flex:2"><label>Competencia</label><input class="inp br-n" value="${esc(c.nombre)}" ${dis}></div>
+        <div class="campo" style="max-width:110px"><label>Nivel esperado</label><input class="inp br-ne" type="number" min="1" max="5" step="0.5" value="${esc(c.nivel_esperado)}" ${dis}></div>
+        <div class="campo" style="max-width:90px"><label>Peso %</label><input class="inp br-pe" type="number" min="0" max="100" value="${esc(c.peso)}" ${dis}></div></div>
+      <div class="campo"><label>Definición</label><input class="inp br-de" value="${esc(c.definicion)}" ${dis}></div>
+      <div class="campo"><label>Conductas observables (una por línea · la primera es la que se califica hoy)</label><textarea class="inp br-co" rows="2" ${dis}>${esc((c.conductas||[]).join("\n"))}</textarea></div>
+      <div class="fila"><div class="campo" style="flex:2"><label>Política</label>${D.v34?`<select class="inp br-po" ${dis}><option value="">— Sin política —</option>${c.politica?`<option value="nueva" ${pm==="nueva"?"selected":""}>➕ Crear: ${esc(c.politica)}</option>`:""}${D.politicas.filter(p=>p.estado!=="derogada").map(p=>`<option value="${p.id}" ${String(pm)===String(p.id)?"selected":""}>${esc((p.codigo?p.codigo+" · ":"")+p.nombre)}</option>`).join("")}</select>`:`<input class="inp br-pt" value="${esc(c.politica)}" ${dis}>`}</div></div>
+      <div class="fila"><div class="campo" style="flex:2"><label>Indicador</label><input class="inp br-in" value="${esc(c.indicador)}" ${dis}></div><div class="campo"><label>Meta</label><input class="inp br-me" value="${esc(c.meta)}" ${dis}></div></div>
+      <label style="display:flex;gap:8px;align-items:flex-start;margin:0;font-weight:500;font-size:13px"><input type="checkbox" class="br-cr" ${c.critico?"checked":""} ${dis} style="margin-top:3px"> <span><b>Competencia crítica</b>${c.justificacion?` <span class="sub-t">· IA: ${esc(c.justificacion)}</span>`:""}${c.fuente?` <span class="sub-t">· Fuente: ${esc(c.fuente)}</span>`:""}</span></label>
+    </div>`; };
+  abrirModal(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3>Borrador del manual · ${esc(man?.nombre_archivo||"")}</h3><div style="color:var(--muted);font-size:12.5px">Propuesta de ${esc(b.modelo_ia||"la IA")} · ${soloVer?(b.estado==="aplicado"?"ya aplicado a la estructura":"rechazado"):"revisa y corrige: nada se aplica hasta que apruebes"}</div></div><span class="badge ${b.estado==="aplicado"?"b-ok":b.estado==="rechazado"?"b-red":"b-wait"}">${esc(b.estado)}</span></div>
+    ${d.observaciones?`<div class="explbox" style="margin-top:10px">⚠ <b>La IA advierte:</b> ${esc(d.observaciones)}</div>`:""}
+    <div style="max-height:62vh;overflow:auto;padding-right:6px;margin-top:12px">
+      <div class="lbl-campo">1 · Puesto</div>
+      <div class="fila"><div class="campo" style="flex:2"><label for="br-dest">Aplicar a</label><select class="inp" id="br-dest" ${dis}><option value="">➕ Crear puesto nuevo</option>${D.puestos.slice().sort((a,c)=>a.nombre.localeCompare(c.nombre)).map(p=>`<option value="${p.id}" ${String(destino)===String(p.id)?"selected":""}>Actualizar: ${esc(p.nombre)}</option>`).join("")}</select></div>
+        <div class="campo" style="flex:2"><label for="br-pn">Nombre del puesto</label><input class="inp" id="br-pn" value="${esc(d.puesto)}" ${dis}></div></div>
+      <div id="br-pdup"></div>
+      <div class="fila"><div class="campo"><label for="br-dep">Departamento</label><input class="inp" id="br-dep" value="${esc(d.departamento)}" list="br-deps" ${dis}><datalist id="br-deps">${departamentos().map(x=>`<option value="${esc(x)}">`).join("")}</datalist></div>
+        <div class="campo"><label for="br-niv">Nivel</label><select class="inp" id="br-niv" ${dis}>${opciones(NIVELES_PUESTO,d.nivel,"—")}</select></div></div>
+      <div class="campo"><label for="br-jefe">Reporta a ${d.reporta_a?`<span class="sub-t">(el manual dice: «${esc(d.reporta_a)}»)</span>`:""}</label><select class="inp" id="br-jefe" ${dis}>${opciones(D.puestos.map(p=>[p.id,p.nombre]),jefeSug,"— Nadie / definir después —")}</select></div>
+      <div class="campo"><label for="br-mis">Misión del puesto</label><textarea class="inp" id="br-mis" rows="2" ${dis}>${esc(d.mision)}</textarea></div>
+      <div class="lbl-campo" style="margin-top:8px">2 · Funciones (una por línea)</div>
+      <textarea class="inp" id="br-fun" rows="5" ${dis}>${esc(d.funciones.join("\n"))}</textarea>
+      <label style="display:flex;gap:8px;align-items:center;margin:6px 0 0;font-weight:500;font-size:13px" id="br-reemp-w"><input type="checkbox" id="br-reemp" ${d._reemplazar?"checked":""} ${dis}> Reemplazar las funciones actuales del puesto (si no, se agregan solo las nuevas)</label>
+      <div class="lbl-campo" style="margin-top:14px;display:flex;justify-content:space-between">3 · Competencias <span id="br-suma"></span></div>
+      <div id="br-comps">${d.competencias.map(compHTML).join("")}</div>
+    </div>
+    <div class="msg" id="br-msg"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">${soloVer?`<button class="btn sm" data-cerrar>Cerrar</button>`:`<button class="btn danger sm" id="br-rech" style="margin-right:auto">Rechazar</button><button class="btn ghost sm" id="br-guardar">Guardar revisión</button><button class="btn amber sm" id="br-ok">Aprobar y aplicar</button>`}</div>`, m=>{
+    const q=s=>m.querySelector(s);
+    const compsDestino=()=>{ const v=q("#br-dest").value; return v?D.competencias.filter(c=>c.puesto_id===Number(v)):[]; };
+    const refrescar=()=>{
+      const v=q("#br-dest").value, nom=nrm(q("#br-pn").value);
+      const otro=D.puestos.find(p=>nrm(p.nombre)===nom&&String(p.id)!==v);
+      q("#br-pdup").innerHTML=otro?`<div class="msg error" style="display:block">Ya existe un puesto llamado «${esc(otro.nombre)}». ${v?"":"Elige “Actualizar” arriba para no duplicarlo."}</div>`:"";
+      q("#br-reemp-w").style.display=v&&D.funciones.some(f=>f.puesto_id===Number(v))?"flex":"none";
+      const ex=compsDestino(); let suma=0;
+      m.querySelectorAll(".br-c").forEach(el=>{ const inc=el.querySelector(".br-inc").checked; el.style.opacity=inc?1:.5; if(inc) suma+=parseFloat(el.querySelector(".br-pe").value)||0;
+        const n=nrm(el.querySelector(".br-n").value); const e=ex.find(c=>nrm(c.nombre||c.categoria)===n||nrm(c.categoria)===n);
+        const glob=!e&&D.competencias.find(c=>nrm(c.nombre||c.categoria)===n);
+        el.querySelector(".br-dup").innerHTML=e?'<span class="badge b-blue">Ya existe en el puesto · se actualizará</span>':glob?`<span class="badge b-gris">Nombre usado en otro puesto</span>`:'<span class="badge b-ok">Nueva</span>'; });
+      q("#br-suma").innerHTML=`<span class="badge ${Math.round(suma)===100?"b-ok":"b-red"}">Pesos: ${Math.round(suma)}%</span>`;
+    };
+    if(!soloVer){ m.addEventListener("input",refrescar); m.addEventListener("change",refrescar); }
+    q("#br-dest").addEventListener("change",e=>{ const p=D.puestoPorId[Number(e.target.value)]; if(p){ q("#br-pn").value=p.nombre; if(!q("#br-dep").value) q("#br-dep").value=p.departamento||""; } });
+    refrescar();
+    if(soloVer) return;
+    const leer=()=>{ const nd={...d, puesto:q("#br-pn").value.trim(), departamento:q("#br-dep").value.trim(), nivel:q("#br-niv").value, mision:q("#br-mis").value.trim(),
+        funciones:q("#br-fun").value.split("\n").map(x=>x.trim()).filter(Boolean), _destino:q("#br-dest").value, _reporta_a_id:q("#br-jefe").value, _reemplazar:q("#br-reemp").checked };
+      nd.competencias=[...m.querySelectorAll(".br-c")].map(el=>{ const c=d.competencias[Number(el.dataset.i)]; const g=s=>el.querySelector(s);
+        return {...c, _excluir:!g(".br-inc").checked, nombre:g(".br-n").value.trim(), definicion:g(".br-de").value.trim(), conductas:g(".br-co").value.split("\n").map(x=>x.trim()).filter(Boolean),
+          _pol:g(".br-po")?g(".br-po").value:undefined, politica:g(".br-pt")?g(".br-pt").value.trim():c.politica, indicador:g(".br-in").value.trim(), meta:g(".br-me").value.trim(),
+          nivel_esperado:Math.min(5,Math.max(1,parseFloat(g(".br-ne").value)||3.5)), peso:parseFloat(g(".br-pe").value)||0, critico:g(".br-cr").checked }; });
+      return nd; };
+    const err=(t)=>{ q("#br-msg").className="msg error"; q("#br-msg").textContent=t; };
+    q("#br-guardar").onclick=async()=>{ const { error } = await sb.from("borradores_manual").update({datos:leer(),estado:"en_revision",revisado_por:PERFIL.id,revisado_en:new Date().toISOString()}).eq("id",b.id);
+      if(error) return err(error.message); await sb.from("manuales_puesto").update({estado:"en_revision"}).eq("id",b.manual_id); cerrarModal(); modalManualesIA(); };
+    q("#br-rech").onclick=async()=>{ const motivo=q("#br-msg"); motivo.className="msg"; motivo.innerHTML=`<input class="inp" id="br-mot" placeholder="Motivo del rechazo (opcional)"> <button class="btn danger xs" id="br-rok" style="margin-top:6px">Confirmar rechazo</button>`;
+      q("#br-rok").onclick=async()=>{ await sb.from("borradores_manual").update({estado:"rechazado",comentario:q("#br-mot").value.trim()||null,revisado_por:PERFIL.id,revisado_en:new Date().toISOString()}).eq("id",b.id);
+        await sb.from("manuales_puesto").update({estado:"rechazado"}).eq("id",b.manual_id); cerrarModal(); modalManualesIA(); }; };
+    q("#br-ok").onclick=async()=>{ const nd=leer(); const inc=nd.competencias.filter(c=>!c._excluir);
+      if(!nd.puesto) return err("Falta el nombre del puesto.");
+      if(!nd._destino&&D.puestos.some(p=>nrm(p.nombre)===nrm(nd.puesto))) return err("Ya existe un puesto con ese nombre: elige «Actualizar» para no duplicarlo.");
+      if(!inc.length) return err("Incluye al menos una competencia.");
+      if(inc.some(c=>!c.nombre||!c.conductas.length)) return err("Cada competencia incluida necesita nombre y al menos una conducta.");
+      const suma=Math.round(inc.reduce((a,c)=>a+c.peso,0)); if(suma!==100) return err(`Los pesos de las competencias incluidas suman ${suma}%; deben sumar 100%.`);
+      const nombres=inc.map(c=>nrm(c.nombre)); if(new Set(nombres).size!==nombres.length) return err("Hay dos competencias con el mismo nombre en el borrador.");
+      q("#br-ok").disabled=true; q("#br-ok").textContent="Aplicando…";
+      try{ const res=await aplicarBorrador(b, nd); cerrarModal(); await cargarBase(); irA("puestos",{vista:"competencias",puesto:res.puestoId});
+        aviso(`✅ Manual aplicado a <b>${esc(nd.puesto)}</b>: ${res.fn} funciones, ${res.nuevas} competencias nuevas, ${res.act} actualizadas${res.pols?`, ${res.pols} políticas creadas (quedan como «sin aprobación registrada» en Políticas)`:""}.${res.fuera.length?`<br><br>⚠ El puesto tiene ${res.fuera.length} competencia(s) que el manual no menciona: <b>${res.fuera.map(esc).join(", ")}</b>. No se borraron; revisa si siguen aplicando y ajusta los pesos.`:""}`); }
+      catch(e){ q("#br-ok").disabled=false; q("#br-ok").textContent="Aprobar y aplicar"; err("Se detuvo: "+(e.message||e)+". Revisa la estructura antes de reintentar."); }
+    };
+  });
+  m_ancho(820);
+}
+
+// ---------- Aplicar (solo con aprobación de RRHH) ----------
+async function aplicarBorrador(b, d){
+  const ok=(r)=>{ if(r.error) throw new Error(r.error.message); return r.data; };
+  const hoy=hoyISO(), inc=d.competencias.filter(c=>!c._excluir);
+  // 1. Puesto
+  const vP={nombre:d.puesto, departamento:d.departamento||null, nivel:d.nivel||null, mision:d.mision||null, reporta_a:d._reporta_a_id?Number(d._reporta_a_id):null};
+  let puestoId=d._destino?Number(d._destino):null;
+  if(puestoId){ const ant=D.puestoPorId[puestoId]; const upd={};
+    Object.entries(vP).forEach(([k,v])=>{ if(v!=null&&v!=="") upd[k]=v; }); if(upd.reporta_a===puestoId) delete upd.reporta_a;
+    if(ant&&upd.nombre&&ant.nombre!==upd.nombre) ok(await sb.from("perfiles").update({puesto:upd.nombre}).eq("puesto",ant.nombre));
+    ok(await sb.from("puestos").update(upd).eq("id",puestoId)); }
+  else puestoId=ok(await sb.from("puestos").insert(vP).select("id").single()).id;
+  // 2. Funciones
+  let actuales=D.funciones.filter(f=>f.puesto_id===puestoId);
+  if(d._reemplazar&&actuales.length){ ok(await sb.from("funciones_puesto").delete().eq("puesto_id",puestoId)); actuales=[]; }
+  const ya=new Set(actuales.map(f=>nrm(f.funcion))); let orden=Math.max(0,...actuales.map(f=>f.orden||0));
+  const nuevasF=d.funciones.filter(f=>!ya.has(nrm(f))).map(f=>({puesto_id:puestoId,funcion:f,orden:++orden,origen:"ia_aprobada",manual_id:b.manual_id}));
+  if(nuevasF.length) ok(await sb.from("funciones_puesto").insert(nuevasF));
+  // 3. Políticas nuevas (solo si el catálogo existe)
+  let pols=0; const polCreada={};
+  for(const c of inc){ if(!D.v34||c._pol!=="nueva"||!c.politica) continue; const k=nrm(c.politica);
+    if(polCreada[k]){ c._polId=polCreada[k]; continue; }
+    const ex=D.politicas.find(p=>nrm(p.nombre)===k); if(ex){ c._polId=ex.id; continue; }
+    const r=ok(await sb.from("politicas").insert({codigo:siguienteCodigo(d.departamento),nombre:c.politica,departamento:d.departamento||null,estandar:[c.indicador,c.meta].filter(Boolean).join(" · ")||null,documento_ref:"Manual de funciones",estado:"vigente",origen:"ia_aprobada"}).select("*").single());
+    D.politicas.push(r); polCreada[k]=r.id; c._polId=r.id; pols++; }
+  // 4. Competencias y conductas
+  const ex=D.competencias.filter(c=>c.puesto_id===puestoId); let nuevas=0, act=0, ordC=Math.max(0,...ex.map(c=>c.orden||0));
+  for(const c of inc){
+    const polId=c._polId||(c._pol&&c._pol!=="nueva"?Number(c._pol):null);
+    const polTxt=polId?(D.politicaPorId?.[polId]?.nombre||D.politicas.find(p=>p.id===polId)?.nombre):(D.v34?(c._pol===""?null:c.politica):c.politica)||null;
+    const v={categoria:c.nombre, texto:c.conductas[0], definicion:c.definicion||null, indicador:c.indicador||null, meta:c.meta||null, minimo:c.nivel_esperado, nivel_esperado:c.nivel_esperado, peso:c.peso, critico:!!c.critico, politica:polTxt};
+    if(D.v34) v.politica_id=polId||null;
+    if(c.critico){ v.validada_por=`${PERFIL.nombre} (aprobación de manual)`; v.validada_en=hoy; }
+    const e=ex.find(x=>nrm(x.nombre||x.categoria)===nrm(c.nombre)||nrm(x.categoria)===nrm(c.nombre));
+    let compId;
+    if(e){ ok(await sb.from("competencias").update(v).eq("id",e.id)); compId=e.id; act++; }
+    else { compId=ok(await sb.from("competencias").insert({...v,nombre:c.nombre,puesto_id:puestoId,orden:++ordC,origen:"ia_aprobada",manual_id:b.manual_id}).select("id").single()).id; nuevas++; }
+    // conductas adicionales (la primera ya es el texto de la competencia)
+    const extra=c.conductas.slice(1); if(extra.length){ const tiene=new Set(D.conductas.filter(k=>k.competencia_id===compId).map(k=>nrm(k.texto)));
+      const filas=extra.filter(t=>!tiene.has(nrm(t))).map((t,i)=>({competencia_id:compId,texto:t,politica:polTxt,indicador:c.indicador||null,meta:c.meta||null,orden:i+2,origen:"ia_aprobada",sincronizada:false}));
+      if(filas.length) ok(await sb.from("conductas_competencia").insert(filas)); }
+  }
+  // 5. Cierre: borrador aplicado + manual aprobado (queda en bitácora)
+  const ahora=new Date().toISOString();
+  ok(await sb.from("borradores_manual").update({datos:d,estado:"aplicado",puesto_id:puestoId,revisado_por:PERFIL.id,revisado_en:ahora,aprobado_por:PERFIL.id,aprobado_en:ahora}).eq("id",b.id));
+  ok(await sb.from("manuales_puesto").update({estado:"aprobado",puesto_id:puestoId}).eq("id",b.manual_id));
+  const tocadas=new Set(inc.map(c=>nrm(c.nombre)));
+  const fuera=ex.filter(x=>!tocadas.has(nrm(x.nombre||x.categoria))&&!tocadas.has(nrm(x.categoria))).map(x=>x.categoria);
+  return {puestoId, fn:nuevasF.length, nuevas, act, pols, fuera};
 }
 
 // ==================== USUARIOS (con organigrama) ====================
@@ -2160,7 +2605,8 @@ VISTAS.mis = async ()=>{
 //  · valoración del jefe: además indicador y meta, para calificar con evidencias
 function fichaUsuario(c, conIndicadores){
   const p=[];
-  if(c.politica) p.push(`<b>Política:</b> ${esc(c.politica)}`);
+  const pc=c.politica_id&&D.politicaPorId?.[c.politica_id];
+  if(c.politica) p.push(`<b>Política${pc&&pc.codigo?` ${esc(pc.codigo)} v${esc(pc.version||"1.0")}`:""}:</b> ${esc(c.politica)}`);
   if(conIndicadores){ if(c.indicador) p.push(`<b>Indicador:</b> ${esc(c.indicador)}`); if(c.meta) p.push(`<b>Meta:</b> ${esc(c.meta)}`); }
   return p.length?`<div class="ficha">${p.join(" · ")}</div>`:"";
 }
@@ -2178,7 +2624,14 @@ function reglasDelJuego(e, evsPeriodo, continuar){
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px"><button class="btn ghost sm" data-cerrar>Cancelar</button><button class="btn amber sm" id="rg-si">Firmar y continuar</button></div>`, m=>{
     m.querySelector("#rg-si").onclick=async()=>{
       if(!m.querySelector("#rg-ok").checked){ m.querySelector("#rg-msg").className="msg error"; m.querySelector("#rg-msg").textContent="Marca la casilla para continuar."; return; }
-      const { error } = await sb.from("acuses").insert({perfil_id:PERFIL.id,evaluado_id:PERFIL.id,periodo_id:e.periodo_id,tipo:"politicas"});
+      // Evidencia para auditoría: qué versión de cada política se socializó en esta firma
+      const comps=puestos.flatMap(pid=>compsDelPuesto(pid));
+      const detalle={ fecha:new Date().toISOString(), puestos, competencias:comps.length,
+        politicas:[...new Map(comps.filter(c=>c.politica).map(c=>{ const p=c.politica_id&&D.politicaPorId?.[c.politica_id];
+          return [p?"id"+p.id:"t"+c.politica, p?{id:p.id,codigo:p.codigo,nombre:p.nombre,version:p.version}:{nombre:c.politica}]; })).values()] };
+      const base={perfil_id:PERFIL.id,evaluado_id:PERFIL.id,periodo_id:e.periodo_id,tipo:"politicas"};
+      let { error } = await sb.from("acuses").insert(D.v34?{...base,detalle}:base);
+      if(error&&/detalle/i.test(error.message)) ({ error } = await sb.from("acuses").insert(base));
       if(error&&!/duplicate|unique/i.test(error.message)){ m.querySelector("#rg-msg").className="msg error"; m.querySelector("#rg-msg").textContent=error.message; return; }
       cerrarModal(); continuar();
     };
@@ -2199,7 +2652,7 @@ async function abrirFormulario(evalId){
       ${!esAuto&&c.indicador?`<div class="evid"><label for="ev-${c.id}">Resultado real del indicador</label><input class="inp" id="ev-${c.id}" data-evid="${c.id}" value="${esc(ya[c.id]?.evidencia)}" placeholder="Ej. 97% · 2 errores en el mes" ${solo?"disabled":""}></div>`:""}</div>`; });
   $("contenido").innerHTML=`<div class="formwrap">
     <button class="btn ghost sm" id="fm-volver" style="margin-bottom:14px">← Volver</button>
-    <div class="evhead"><img class="brandimg" alt="Etinar" src="${document.querySelector(".appbar .brandimg").src}" style="height:26px">
+    <div class="evhead"><img class="brandimg" alt="Etinar" src="${$("logo-app").src}" style="height:26px">
       <div class="who2" style="margin-top:12px">${esAuto?"Tu autoevaluación":"Estás evaluando a "+esc(perfil(ev.evaluado_id)?.nombre)}</div>
       <div class="meta"><span><b>Puesto:</b> ${esc(D.puestoPorId[ev.puesto_id]?.nombre)}</span><span><b>Campaña:</b> ${esc(per.nombre)}</span><span><b>Fecha límite:</b> ${fmtFecha(per.fecha_fin)}</span></div>
       <div class="progtop"><div id="fm-bar" style="width:0%"></div></div></div>
@@ -2306,7 +2759,7 @@ function exportarWord(nombre, titulo, cuerpo){
   const fecha=new Date().toLocaleDateString("es-EC",{year:"numeric",month:"long",day:"numeric"});
   const doc=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${esc(titulo)}</title></head>
   <body style="font-family:Calibri,Arial,sans-serif;color:#16130E;font-size:11pt">
-  <table width="100%"><tr><td><img src="${document.querySelector(".appbar .brandimg")?.src||""}" height="34"></td><td style="text-align:right;font-size:9pt;color:#777">Generado: ${fecha}</td></tr></table>
+  <table width="100%"><tr><td><img src="${$("logo-app")?.src||""}" height="34"></td><td style="text-align:right;font-size:9pt;color:#777">Generado: ${fecha}</td></tr></table>
   <hr style="border:none;border-top:2px solid #EEBC1F"><h2 style="font-size:16pt">${esc(titulo)}</h2>${cuerpo}
   <p style="font-size:8pt;color:#999;margin-top:24px">Documento generado por el Portal de Evaluación de Desempeño 180° · Etinar S.A.</p></body></html>`;
   descargarBlob(new Blob(["﻿"+doc],{type:"application/msword"}), `${nombre}_${hoyISO()}.doc`);
@@ -2350,7 +2803,7 @@ async function respaldoCompleto(){
 if(window.MODO_DEMO){
   $("demo-box").classList.remove("oculto");
   document.querySelectorAll("[data-demo]").forEach(b=>b.addEventListener("click",()=>{ $("in-usuario").value=b.dataset.demo; $("in-clave").value="demo2026"; $("form-login").requestSubmit(); }));
-  const cinta=document.createElement("div"); cinta.className="cinta-demo"; cinta.textContent="MODO DEMOSTRACIÓN — datos ficticios, no se guarda nada"; document.body.appendChild(cinta);
+  const cinta=document.createElement("div"); cinta.className="cinta-demo"; cinta.textContent="MODO DEMOSTRACIÓN — datos ficticios, no se guarda nada"; document.body.appendChild(cinta); document.body.classList.add("es-demo");
 }
 (async()=>{
   if(window.location.hash.includes("type=recovery")){ mostrarRecovery(); return; }
