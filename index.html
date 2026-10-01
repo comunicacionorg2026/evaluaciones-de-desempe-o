@@ -1555,7 +1555,7 @@ function documentoSocializacion(){
 }
 
 // ==================== MANUALES CON IA (Gemini) · exclusivo de RRHH ====================
-// Flujo: Manual (PDF) → Gemini propone → BORRADOR → RRHH revisa y corrige → Aprobar y aplicar.
+// Flujo: Manual (PDF o Word .docx) → Gemini propone → BORRADOR → RRHH revisa y corrige → Aprobar y aplicar.
 // La IA nunca escribe en la estructura definitiva: solo la Edge Function crea borradores, y
 // los cambios reales se hacen aquí, con la sesión de RRHH, cuando aprueba.
 const EST_MAN={cargado:["Cargado","b-gris"],procesando:["Analizando…","b-blue"],borrador:["Borrador listo","b-wait"],en_revision:["En revisión","b-wait"],aprobado:["Aplicado","b-ok"],rechazado:["Rechazado","b-red"],archivado:["Archivado","b-gris"]};
@@ -1581,7 +1581,7 @@ async function modalManualesIA(){
     </div>
     <div class="card" style="padding:14px;box-shadow:none;border:1px dashed var(--line)">
       <b style="font-size:13.5px">Subir manual de funciones</b>
-      <div class="fila" style="margin-top:8px"><div class="campo" style="flex:2"><label for="mi-f">Archivo PDF (máx. ${MAX_MANUAL_MB} MB)</label><input class="inp" type="file" id="mi-f" accept="application/pdf,.pdf"></div>
+      <div class="fila" style="margin-top:8px"><div class="campo" style="flex:2"><label for="mi-f">Archivo PDF o Word .docx (máx. ${MAX_MANUAL_MB} MB)</label><input class="inp" type="file" id="mi-f" accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"></div>
         <div class="campo" style="flex:2"><label for="mi-p">Puesto</label><select class="inp" id="mi-p">${opciones(D.puestos.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>[p.id,p.nombre]),"","Detectar del manual (puesto nuevo o existente)")}</select></div>
         <div class="campo" style="max-width:110px"><label for="mi-v">Versión</label><input class="inp" id="mi-v" placeholder="2026-1"></div></div>
       <div class="msg" id="mi-msg"></div>
@@ -1608,11 +1608,31 @@ async function modalManualesIA(){
 }
 function m_ancho(px){ const md=document.querySelector("#modal-root .modal"); if(md) md.style.maxWidth=px+"px"; }
 
+// Texto de un .docx (es un ZIP con word/document.xml). Respeta el orden de párrafos y tablas.
+async function textoDocx(file){
+  if(!window.XLSX||!XLSX.CFB) throw new Error("lector no disponible");
+  const zip=XLSX.CFB.read(new Uint8Array(await file.arrayBuffer()),{type:"array"});
+  const ent=XLSX.CFB.find(zip,"word/document.xml")||XLSX.CFB.find(zip,"/word/document.xml");
+  if(!ent||!ent.content) throw new Error("no es un documento de Word válido");
+  const xml=new TextDecoder("utf-8").decode(ent.content instanceof Uint8Array?ent.content:new Uint8Array(ent.content));
+  const doc=new DOMParser().parseFromString(xml,"application/xml");
+  const W="http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+  const txtP=(p)=>{ let t=""; p.getElementsByTagNameNS(W,"*")&&[...p.getElementsByTagNameNS(W,"*")].forEach(n=>{ if(n.localName==="t") t+=n.textContent; else if(n.localName==="tab") t+="\t"; else if(n.localName==="br") t+="\n"; }); return t.trim(); };
+  const body=doc.getElementsByTagNameNS(W,"body")[0]; if(!body) throw new Error("documento vacío");
+  const out=[];
+  [...body.children].forEach(el=>{
+    if(el.localName==="p"){ const t=txtP(el); if(t) out.push(t); }
+    else if(el.localName==="tbl"){ [...el.getElementsByTagNameNS(W,"tr")].forEach(tr=>{ const celdas=[...tr.children].filter(c=>c.localName==="tc").map(tc=>[...tc.getElementsByTagNameNS(W,"p")].map(txtP).filter(Boolean).join(" ")); if(celdas.some(Boolean)) out.push(celdas.join(" | ")); }); out.push(""); }
+  });
+  return out.join("\n").replace(/\n{3,}/g,"\n\n").slice(0,300000);
+}
 async function subirManual(m){
   const msg=m.querySelector("#mi-msg"), f=m.querySelector("#mi-f").files[0];
   const err=(t)=>{ msg.className="msg error"; msg.textContent=t; };
-  if(!f) return err("Elige el archivo PDF del manual.");
-  if(!/pdf$/i.test(f.type)&&!/\.pdf$/i.test(f.name)) return err("Por ahora solo se aceptan manuales en PDF (si lo tienes en Word: Archivo → Guardar como PDF).");
+  if(!f) return err("Elige el archivo del manual (PDF o Word).");
+  const esPdf=/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name), esDocx=/\.docx$/i.test(f.name);
+  if(/\.doc$/i.test(f.name)) return err("Ese es un Word antiguo (.doc). Ábrelo en Word y usa Archivo → Guardar como → Documento de Word (.docx) o PDF.");
+  if(!esPdf&&!esDocx) return err("Solo se aceptan manuales en PDF o Word (.docx).");
   if(f.size>MAX_MANUAL_MB*1024*1024) return err(`El archivo pesa ${(f.size/1048576).toFixed(1)} MB; el máximo es ${MAX_MANUAL_MB} MB.`);
   msg.className="msg"; msg.textContent="Subiendo…";
   const hash=await hashArchivo(f);
@@ -1621,10 +1641,15 @@ async function subirManual(m){
     if(!await new Promise(r=>{ m.querySelector("#mi-igual").onclick=e=>{e.preventDefault();r(true);}; setTimeout(()=>r(false),20000); })) return; }
   const limpio=f.name.normalize("NFD").replace(/[^\w.\-]/g,"_").slice(-80);
   const ruta=`${new Date().getFullYear()}/${hash.slice(0,16)}_${limpio}`;
-  const up=await sb.storage.from("manuales").upload(ruta,f,{contentType:"application/pdf",upsert:true});
+  // Word: se extrae el texto aquí mismo (párrafos y tablas) para que la IA lo lea
+  let texto=null;
+  if(esDocx){ try{ texto=await textoDocx(f); }catch(e){ return err("No se pudo leer el Word: "+(e.message||e)+". Prueba guardándolo como PDF."); }
+    if(!texto||texto.length<200) return err("El Word casi no tiene texto (¿es una imagen escaneada?). Guárdalo como PDF y súbelo así."); }
+  const mime=esDocx?"application/vnd.openxmlformats-officedocument.wordprocessingml.document":"application/pdf";
+  const up=await sb.storage.from("manuales").upload(ruta,f,{contentType:mime,upsert:true});
   if(up.error) return err("No se pudo subir: "+up.error.message+" (¿ejecutaste el SQL v3.2 que crea el bucket «manuales»?)");
   const pid=m.querySelector("#mi-p").value;
-  const { error } = await sb.from("manuales_puesto").insert({puesto_id:pid?Number(pid):null,nombre_archivo:f.name,version:m.querySelector("#mi-v").value.trim()||null,estado:"cargado",archivo_path:ruta,hash_archivo:hash,mime_type:"application/pdf",tamano_bytes:f.size,subido_por:PERFIL.id});
+  const { error } = await sb.from("manuales_puesto").insert({puesto_id:pid?Number(pid):null,nombre_archivo:f.name,version:m.querySelector("#mi-v").value.trim()||null,estado:"cargado",archivo_path:ruta,hash_archivo:hash,mime_type:mime,texto_extraido:texto,tamano_bytes:f.size,subido_por:PERFIL.id});
   if(error) return err(error.message);
   modalManualesIA();
 }
