@@ -1697,8 +1697,15 @@ async function modalManualesIA(){
       ${[["Manuales",l.length],["Por revisar",l.filter(m=>["borrador","en_revision"].includes(m.estado)).length],["Aplicados",l.filter(m=>m.estado==="aprobado").length],["Funciones cargadas",D.funciones.length]].map(([a,b])=>`<div class="kpi" style="border:1px solid var(--line);border-radius:14px;padding:12px"><div class="lbl">${a}</div><div class="val" style="font-size:24px;margin-top:4px">${b}</div></div>`).join("")}
     </div>
     <div class="card" style="padding:14px;box-shadow:none;border:1px dashed var(--line)">
-      <b style="font-size:13.5px">Subir manuales de funciones</b> <span class="sub-t">· puedes elegir varios a la vez (Ctrl o Shift + clic)</span>
-      <div class="fila" style="margin-top:8px"><div class="campo" style="flex:2"><label for="mi-f">Archivos PDF o Word .docx (máx. ${MAX_MANUAL_MB} MB c/u)</label><input class="inp" type="file" id="mi-f" multiple accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"></div>
+      <b style="font-size:13.5px">Subir manuales de funciones</b>
+      <div id="mi-drop" tabindex="0" role="button" aria-label="Elegir o arrastrar manuales" style="margin-top:10px;border:2px dashed var(--line);border-radius:14px;padding:22px 14px;text-align:center;cursor:pointer;background:var(--bg,#fbfbfa);transition:.15s">
+        <div style="font-size:26px;line-height:1">📄</div>
+        <div style="font-weight:700;margin-top:6px">Arrastra aquí los manuales</div>
+        <div class="sub-t">o <u>haz clic para elegirlos</u> · PDF o Word .docx · varios a la vez · máx. ${MAX_MANUAL_MB} MB c/u</div>
+        <input type="file" id="mi-f" multiple accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx" style="display:none">
+      </div>
+      <div id="mi-sel" style="margin-top:8px"></div>
+      <div class="fila" style="margin-top:8px">
         <div class="campo" style="flex:2" id="mi-p-w"><label for="mi-p">Puesto</label><select class="inp" id="mi-p">${opciones(D.puestos.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>[p.id,p.nombre]),"","Detectar del manual (puesto nuevo o existente)")}</select></div>
         <div class="campo" style="max-width:110px"><label for="mi-v">Versión</label><input class="inp" id="mi-v" placeholder="2026-1"></div></div>
       <div class="msg" id="mi-msg"></div>
@@ -1716,7 +1723,27 @@ async function modalManualesIA(){
     }</tbody></table></div>
     <div class="explbox" style="margin-top:12px">🔒 A Gemini solo se envía el <b>manual del puesto</b> y los nombres del catálogo de políticas y competencias. <b>Nunca</b> se envían evaluaciones, puntajes ni datos personales. La clave de la IA está guardada como secreto en Supabase, no en esta página.</div>`, m=>{
     m.querySelector("#mi-subir").onclick=()=>subirManual(m);
-    m.querySelector("#mi-f").onchange=e=>{ const n=e.target.files.length; m.querySelector("#mi-p-w").style.display=n>1?"none":""; m.querySelector("#mi-subir").textContent=n>1?`Subir ${n} manuales`:"Subir"; };
+    // Zona para arrastrar o elegir archivos: se acumulan en una lista que se puede revisar antes de subir
+    m._files=[]; const drop=m.querySelector("#mi-drop"), inp=m.querySelector("#mi-f");
+    const tam=(b)=>b>1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round(b/1024))+" KB";
+    const pintarSel=()=>{ const n=m._files.length;
+      m.querySelector("#mi-sel").innerHTML=n?`<div style="border:1px solid var(--line);border-radius:12px;max-height:190px;overflow:auto">${m._files.map((f,k)=>{ const okT=/\.(pdf|docx)$/i.test(f.name), grande=f.size>MAX_MANUAL_MB*1048576;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:7px 12px;${k?"border-top:1px solid var(--line-2)":""}"><span style="font-size:11px;font-weight:800;padding:2px 6px;border-radius:6px;background:${/\.pdf$/i.test(f.name)?"#FDE7E4;color:#B42318":/\.docx$/i.test(f.name)?"#E7EEFE;color:#1D4ED8":"var(--line-2);color:var(--ink-2)"}">${esc((f.name.split(".").pop()||"").toUpperCase())}</span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px">${esc(f.name)}</span><span class="sub-t">${tam(f.size)}</span>${!okT?'<span class="badge b-red">formato no válido</span>':grande?'<span class="badge b-red">muy pesado</span>':""}<button class="btn ghost xs" data-quitar="${k}" title="Quitar">✕</button></div>`; }).join("")}</div><div class="sub-t" style="margin-top:4px">${n} archivo${n===1?"":"s"} listo${n===1?"":"s"} · <a href="#" id="mi-limpiar">quitar todos</a></div>`:"";
+      m.querySelectorAll("[data-quitar]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); m._files.splice(Number(b.dataset.quitar),1); pintarSel(); });
+      if(m.querySelector("#mi-limpiar")) m.querySelector("#mi-limpiar").onclick=e=>{ e.preventDefault(); m._files=[]; pintarSel(); };
+      m.querySelector("#mi-p-w").style.display=n>1?"none":"";
+      m.querySelector("#mi-subir").textContent=n>1?`Subir ${n} manuales`:"Subir";
+      m.querySelector("#mi-subir").disabled=!n; };
+    const agregar=(lista)=>{ [...lista].forEach(f=>{ if(!m._files.some(x=>x.name===f.name&&x.size===f.size)) m._files.push(f); }); m.querySelector("#mi-msg").textContent=""; pintarSel(); };
+    drop.onclick=()=>inp.click(); drop.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); inp.click(); } };
+    inp.onchange=()=>{ agregar(inp.files); inp.value=""; };
+    const resaltar=(on)=>{ drop.style.borderColor=on?"var(--amber)":"var(--line)"; drop.style.background=on?"var(--amber-soft)":"var(--bg,#fbfbfa)"; };
+    ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); resaltar(true); }));
+    ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{ e.preventDefault(); resaltar(false); }));
+    drop.addEventListener("drop",e=>agregar(e.dataTransfer.files));
+    // si se suelta el archivo fuera de la zona, que el navegador no lo abra
+    m.addEventListener("dragover",e=>e.preventDefault()); m.addEventListener("drop",e=>{ if(!drop.contains(e.target)) e.preventDefault(); });
+    pintarSel();
     if(m.querySelector("#mi-antodos")) m.querySelector("#mi-antodos").onclick=()=>analizarLote(l.filter(x=>x.estado==="cargado").map(x=>x.id).reverse());
     if(m.querySelector("#mi-revtodos")) m.querySelector("#mi-revtodos").onclick=async()=>{ const p=await borradoresPendientes(); if(p.length) revisarBorrador(p[0]); };
     m.querySelectorAll("[data-mi-an]").forEach(b=>b.onclick=()=>analizarManual(Number(b.dataset.miAn), b));
@@ -1769,7 +1796,7 @@ async function subirUno(f, pid, version, preguntarDuplicado){
   return {ok:true,id:data.id};
 }
 async function subirManual(m){
-  const msg=m.querySelector("#mi-msg"), files=[...m.querySelector("#mi-f").files];
+  const msg=m.querySelector("#mi-msg"), files=[...(m._files||[])];
   if(!files.length){ msg.className="msg error"; msg.textContent="Elige uno o varios manuales (PDF o Word)."; return; }
   const auto=m.querySelector("#mi-auto").checked, version=m.querySelector("#mi-v").value.trim();
   const pid=files.length===1&&m.querySelector("#mi-p").value?Number(m.querySelector("#mi-p").value):null;
@@ -2008,6 +2035,8 @@ async function aplicarBorrador(b, d){
   const fuera=ex.filter(x=>!tocadas.has(nrm(x.nombre||x.categoria))&&!tocadas.has(nrm(x.categoria))).map(x=>x.categoria);
   return {puestoId, fn:nuevasF.length, nuevas, act, pols, fuera, enlaces};
 }
+// Evita que el navegador abra un archivo soltado fuera de una zona de carga
+["dragover","drop"].forEach(ev=>window.addEventListener(ev,e=>{ if(!(e.target&&e.target.type==="file")) e.preventDefault(); }));
 
 // ==================== USUARIOS (con organigrama) ====================
 const ROL_TXT={admin:"RRHH",evaluador:"Evaluador",evaluado:"Evaluado"};
