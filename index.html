@@ -248,6 +248,7 @@ tr.bajo td{background:#FFF8F6}
 }
 @media(min-width:981px){.cinta-demo{left:var(--sb-w)}}
 .es-demo .sidebar{padding-bottom:42px}
+.err-t{color:var(--red)}
 
 </style>
 </head>
@@ -341,7 +342,11 @@ if(!window.FORZAR_DEMO && !/[?&]demo\b/.test(location.search)) return;
 window.MODO_DEMO=true;
 let semilla=20260930; const rnd=()=>{ semilla|=0; semilla=semilla+0x6D2B79F5|0; let t=Math.imul(semilla^semilla>>>15,1|semilla); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; };
 const cl=(v)=>Math.max(1,Math.min(5,Math.round(v)));
-const DB={funciones_puesto:[],conductas_competencia:[],manuales_puesto:[],borradores_manual:[],perfiles:[],puestos:[],competencias:[],periodos:[],evaluaciones:[],respuestas:[],comentarios:[],planes:[],acuses:[],acciones:[],configuracion:[],accesos_temp:[],bitacora:[]};
+// Resultado real del indicador coherente con el puntaje (para la conversión KPI → nota)
+function realDemo(meta,v){ const t=(meta||"").toLowerCase(); const n=parseFloat((t.match(/\d+(\.\d+)?/)||[])[0]);
+  if(/^(0|cero|sin)/.test(t.trim())){ const k=[3,2,1,1,0][v-1]; return k+(k===1?" caso":" casos"); }
+  if(isNaN(n)) return null; const f=[0.62,0.78,0.9,0.97,1][v-1]; const r=Math.round(n*f*10)/10; return /%/.test(t)?r+"%":String(r); }
+const DB={competencia_funcion:[],funciones_puesto:[],conductas_competencia:[],manuales_puesto:[],borradores_manual:[],perfiles:[],puestos:[],competencias:[],periodos:[],evaluaciones:[],respuestas:[],comentarios:[],planes:[],acuses:[],acciones:[],configuracion:[],accesos_temp:[],bitacora:[]};
 let nid=1; const id=()=>nid++;
 // ---- Estructura ----
 const PUESTOS=[
@@ -416,7 +421,7 @@ const compsDe=(pid)=>DB.competencias.filter(c=>c.puesto_id===pid||c.puesto_id==n
     DB.evaluaciones.push(ej,ea);
     const hacer=(e,auto)=>{ if(rnd()>avance && !(per===103&&auto&&p.usuario==="colaborador"&&false)) return; e.estado="completada"; e.completada_en=new Date(Date.parse(DB.periodos.find(x=>x.id===per).fecha_inicio)+rnd()*20*864e5).toISOString();
       compsDe(pid).forEach(c=>{ const base=habil[p.id]+delta+(rnd()-0.5)*1.3+(c.critico?0.2:0)+(auto?0:(infla[p.jefe_id]||0));
-        const v=auto?cl(base+0.55+(rnd()-0.3)*0.8):cl(base); DB.respuestas.push({id:id(),evaluacion_id:e.id,competencia_id:c.id,puntaje:v,evidencia:!auto&&c.indicador&&rnd()<.5?(v>=4?"Cumple la meta":"Por debajo de la meta")+(c.meta?" ("+c.meta+")":""):null}); });
+        const v=auto?cl(base+0.55+(rnd()-0.3)*0.8):cl(base); DB.respuestas.push({id:id(),evaluacion_id:e.id,competencia_id:c.id,puntaje:v,evidencia:!auto&&c.indicador&&rnd()<.7?realDemo(c.meta,v):null}); });
       DB.comentarios.push({id:id(),evaluacion_id:e.id,fortalezas:auto?"Compromiso con el equipo y disposición.":"Buena disposición y conocimiento del puesto.",areas_mejora:auto?"Organizar mejor mis tiempos.":"Exactitud en registros y cumplimiento de plazos.",aspectos_mejorar_evaluador:auto?null:"Seguimiento quincenal breve."}); };
     hacer(ej,false); hacer(ea,true);
   });
@@ -426,7 +431,19 @@ DB.competencias.forEach(c=>{ c.nombre=c.puesto_id?c.categoria:c.categoria; c.niv
 [["Asistente de TH",["Elaborar los roles de pago y las cargas bancarias de la nómina.","Registrar ingresos y contratos en el ERP antes del inicio de labores.","Conciliar mensualmente las cuentas de pensiones, préstamos y fondos con Contabilidad.","Atender los requerimientos de IESS, MDT, auditores e INEC."]],
  ["Jefe de Obra",["Planificar y controlar el avance físico de la obra.","Asegurar el cumplimiento de las normas de seguridad en obra.","Coordinar cuadrillas, materiales y subcontratistas."]]]
  .forEach(([pn,fs])=>fs.forEach((f,i)=>DB.funciones_puesto.push({id:id(),puesto_id:pu(pn),funcion:f,orden:i+1,origen:"manual_rrhh"})));
-DB.configuracion=[{clave:"umbral_brecha",valor:"0.50"},{clave:"brecha_significativa",valor:"0.50"},{clave:"brecha_critica",valor:"1.00"},{clave:"peso_jefe",valor:"1.00"},{clave:"umbral_colectivo",valor:"4"}];
+// v3.5: cada competencia respalda funciones del puesto, y los pesos del puesto suman 100%
+{ const nrmD=t=>(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  DB.puestos.forEach(p=>{ const fs=DB.funciones_puesto.filter(f=>f.puesto_id===p.id); if(!fs.length) return;
+    const cs=DB.competencias.filter(c=>c.puesto_id===p.id);
+    cs.forEach((c,i)=>{ const pal=nrmD(c.categoria+" "+c.texto).split(/[^a-z]+/).filter(w=>w.length>5);
+      let hits=fs.filter(f=>pal.some(w=>nrmD(f.funcion).includes(w.slice(0,6))));
+      if(!hits.length&&fs[i]) hits=[fs[i]];
+      hits.forEach(f=>DB.competencia_funcion.push({id:id(),competencia_id:c.id,funcion_id:f.id,origen:"manual_rrhh"})); });
+    const n=cs.length; cs.forEach((c,i)=>c.peso=Math.floor(100/n)+(i<100%n?1:0));
+  });
+  const PES={"Gestión de nómina y pagos":35,"Contratación y ERP":20,"Cuadres y conciliaciones":30,"Atención a organismos":15};
+  DB.competencias.filter(c=>c.puesto_id===pu("Asistente de TH")).forEach(c=>{ if(PES[c.categoria]) c.peso=PES[c.categoria]; }); }
+DB.configuracion=[{clave:"usar_pesos",valor:"0"},{clave:"umbral_brecha",valor:"0.50"},{clave:"brecha_significativa",valor:"0.50"},{clave:"brecha_critica",valor:"1.00"},{clave:"peso_jefe",valor:"1.00"},{clave:"umbral_colectivo",valor:"4"}];
 DB.accesos_temp=DB.perfiles.filter(p=>p.rol!=="admin").map(p=>({perfil_id:p.id,usuario:p.usuario,clave:"demo2026"}));
 // acuses de la campaña cerrada más reciente para algunos
 DB.perfiles.filter(p=>p.jefe_id).forEach((p,i)=>{ if(i%3!==0) DB.acuses.push({id:id(),perfil_id:p.id,evaluado_id:p.id,periodo_id:102,tipo:"politicas",creado_en:"2026-05-05T10:00:00Z"}); if(i%4===1) DB.acuses.push({id:id(),perfil_id:p.id,evaluado_id:p.id,periodo_id:102,tipo:"resultado",comentario:i%8===1?"Considero que en conciliaciones sí cumplí la meta; adjunto los cuadres de abril y mayo.":null,creado_en:"2026-06-10T10:00:00Z"}); });
@@ -445,6 +462,11 @@ DB.perfiles.filter(p=>p.jefe_id&&p.usuario!=="colaborador").forEach((p,i)=>{ if(
 // Manuales con IA (simulación): un borrador listo para revisar y un manual por analizar
 DB.manuales_puesto=DB.manuales_puesto||[]; DB.borradores_manual=DB.borradores_manual||[];
 function propuestaDemo(nombreArchivo, puestoId){
+  const d=propuestaDemoBase(nombreArchivo, puestoId);
+  const REL={"Gestión de nómina y pagos":[1],"Afiliación y avisos al IESS":[3],"Contratación y ERP":[2],"Gestión documental":[4],"Abastecimiento oportuno":[2,3],"Negociación con proveedores":[1],"Control documental de compras":[2],"Eficiencia":[]};
+  d.competencias.forEach(c=>c.funciones_relacionadas=REL[c.nombre]||[]); return d;
+}
+function propuestaDemoBase(nombreArchivo, puestoId){
   const p=DB.puestos.find(x=>x.id===puestoId);
   if(p&&p.nombre==="Asistente de TH") return {puesto:"Asistente de TH",departamento:"Talento Humano",reporta_a:"Gerente de Talento Humano",nivel:"Apoyo",mision:"Ejecutar los procesos de nómina, contratación y atención a organismos de control con exactitud y en plazo.",
     funciones:["Elaborar los roles de pago y las cargas bancarias de la nómina.","Registrar ingresos y contratos en el ERP antes del inicio de labores.","Gestionar avisos de entrada y salida en el IESS dentro del plazo legal.","Mantener actualizados los expedientes del personal."],
@@ -453,6 +475,8 @@ function propuestaDemo(nombreArchivo, puestoId){
       {nombre:"Contratación y ERP",definicion:"Formaliza ingresos antes de iniciar labores.",conductas:["Registra cada ingreso en el ERP con contrato firmado antes de iniciar."],politica:"Todo ingreso con contrato firmado y archivado",indicador:"Ingresos con contrato cargado en plazo",meta:"100%",nivel_esperado:3.5,peso:25,critico:false,fuente:"Sección 4.2"},
       {nombre:"Gestión documental",definicion:"Mantiene los expedientes completos.",conductas:["Archiva la documentación del personal en el expediente digital dentro de 5 días."],politica:"",indicador:"Expedientes completos",meta:"≥95%",nivel_esperado:3.5,peso:20,critico:false,fuente:"Sección 4.5"}],
     observaciones:"El manual no indica la política de gestión documental; se dejó vacía."};
+  const base=nombreArchivo.replace(/\.(pdf|docx)$/i,"").replace(/^manual[_\s-]*(de[_\s-]*funciones[_\s-]*)?/i,"").replace(/[_-]+/g," ").replace(/\bv?\d+$/,"").trim();
+  if(base&&!/compras/i.test(base)){ const d=propuestaDemoBase("Manual_Analista_de_Compras.pdf",null); d.puesto=base.charAt(0).toUpperCase()+base.slice(1); d.departamento="Operaciones"; d.reporta_a="Jefe de Obra"; d.observaciones="(Demostración) Propuesta de ejemplo: en la plataforma real Gemini lee el contenido del manual."; return d; }
   return {puesto:"Analista de Compras",departamento:"Administrativo Financiero",reporta_a:"Gerente General",nivel:"Operativo",mision:"Asegurar el abastecimiento oportuno de materiales para las obras al mejor costo y calidad.",
     funciones:["Cotizar con al menos tres proveedores calificados.","Emitir órdenes de compra aprobadas en el sistema.","Dar seguimiento a las entregas hasta su recepción en obra.","Evaluar trimestralmente a los proveedores."],
     competencias:[{nombre:"Abastecimiento oportuno",definicion:"Garantiza que los materiales lleguen a tiempo a obra.",conductas:["Coloca las órdenes de compra dentro de las 48 horas de recibida la requisición.","Da seguimiento a cada entrega hasta su recepción."],politica:"Compras con requisición aprobada y entrega en plazo",indicador:"Órdenes entregadas en la fecha comprometida",meta:"≥95%",nivel_esperado:4,peso:35,critico:true,justificacion:"Retrasos detienen la obra (sección 5.2).",fuente:"Sección 5.2"},
@@ -490,7 +514,7 @@ class Q{
   is(c){this.f.push(r=>r[c]==null);return this;} not(c){this.f.push(r=>r[c]!=null);return this;}
   in(c,a){const s=a.map(String);this.f.push(r=>s.includes(String(r[c])));return this;}
   or(str){const ps=str.split(",").map(p=>p.split("."));this.f.push(r=>ps.some(([c,op,v])=>op==="eq"?String(r[c])===v:r[c]==null));return this;}
-  order(c,o){this.o.push([c,!(o&&o.ascending===false)]);return this;} range(a,b){this.rg=[a,b];return this;}
+  order(c,o){this.o.push([c,!(o&&o.ascending===false)]);return this;} range(a,b){this.rg=[a,b];return this;} limit(n){this.rg=[0,n-1];return this;}
   single(){this.one="single";return this;} maybeSingle(){this.one="maybe";return this;}
   insert(v){this.op="insert";this.v=Array.isArray(v)?v:[v];return this;} update(v){this.op="update";this.v=v;return this;}
   delete(){this.op="delete";return this;} upsert(v,o){this.op="upsert";this.v=Array.isArray(v)?v:[v];this.conf=(o&&o.onConflict||"id").split(",");return this;}
@@ -608,7 +632,7 @@ function confirmar(texto, etiqueta="Confirmar", peligro=false){
 function aviso(texto){ abrirModal(`<p style="margin-bottom:16px">${texto}</p><div style="text-align:right"><button class="btn sm" data-cerrar>Entendido</button></div>`); }
 
 // ==================== Parámetros de la metodología ====================
-const CFG={ umbral_brecha:0.5, brecha_significativa:0.5, brecha_critica:1.0, peso_jefe:1.0, umbral_colectivo:5 };
+const CFG={ umbral_brecha:0.5, brecha_significativa:0.5, brecha_critica:1.0, peso_jefe:1.0, umbral_colectivo:5, usar_pesos:0, kpi_modo:1, kpi_t5:100, kpi_t4:95, kpi_t3:85, kpi_t2:70, kpi_desvio:1 };
 async function cargarConfig(){
   const { data } = await sb.from("configuracion").select("clave,valor");
   (data||[]).forEach(r=>{ const v=parseFloat(r.valor); if(r.clave in CFG && !isNaN(v)) CFG[r.clave]=v; });
@@ -666,6 +690,11 @@ async function cargarBase(){
   try{ D.politicas=await traerTodo(()=>sb.from("politicas").select("*")); D.v34=true; }
   catch(e){ D.politicas=[]; D.v34=false; }
   D.politicaPorId=Object.fromEntries(D.politicas.map(p=>[p.id,p]));
+  // Modelo v3.6: nota del KPI y justificación en cada respuesta
+  try{ const { error } = await sb.from("respuestas").select("nota_kpi").limit(1); D.v36=!error; }catch(e){ D.v36=false; }
+  // Modelo v3.5: qué funciones del puesto respalda cada competencia
+  try{ D.compFun=await traerTodo(()=>sb.from("competencia_funcion").select("id,competencia_id,funcion_id")); D.v35=true; }
+  catch(e){ D.compFun=[]; D.v35=false; }
   D.perfilPorId=Object.fromEntries(perfiles.map(p=>[p.id,p]));
   D.puestoPorId=Object.fromEntries(puestos.map(p=>[p.id,p]));
   await cargarConfig();
@@ -684,7 +713,7 @@ async function cargarEvaluaciones(periodoId){
 }
 async function cargarRespuestas(evalIds){
   if(!evalIds.length) return [];
-  return traerPorLotes(evalIds, lote=>sb.from("respuestas").select("id,evaluacion_id,competencia_id,puntaje,evidencia").in("evaluacion_id",lote));
+  return traerPorLotes(evalIds, lote=>sb.from("respuestas").select("id,evaluacion_id,competencia_id,puntaje,evidencia"+(D.v36?",resultado_kpi,nota_kpi,justificacion":"")).in("evaluacion_id",lote));
 }
 
 // ==================== Motor de análisis 180° + Armstrong ====================
@@ -703,6 +732,15 @@ async function analizarPeriodo(periodoId, opts={}){
   });
   return Object.values(grupos).map(g=>construirPersona(g, porEval));
 }
+function pesosDe(comps){
+  if(!(CFG.usar_pesos>=1)) return comps.map(()=>1);
+  const con=comps.filter(c=>c.puesto_id!=null&&Number(c.peso)>0);
+  if(!con.length) return comps.map(()=>1);
+  const medio=con.reduce((s,c)=>s+Number(c.peso),0)/con.length;
+  return comps.map(c=>c.puesto_id!=null&&Number(c.peso)>0?Number(c.peso):medio);
+}
+function promPond(vals, ws){ let s=0,t=0; vals.forEach((v,i)=>{ if(v!=null&&!isNaN(v)){ s+=v*ws[i]; t+=ws[i]; } }); return t?s/t:null; }
+const funcionesDeComp=(cid)=>new Set((D.compFun||[]).filter(x=>x.competencia_id===cid).map(x=>x.funcion_id));
 function construirPersona(g, porEval){
   const per=perfil(g.evaluado_id)||{nombre:"(usuario eliminado)"};
   const puesto=D.puestoPorId[g.puesto_id]||{};
@@ -714,12 +752,18 @@ function construirPersona(g, porEval){
     const esperado=esperadoDe(c);
     const bd = r==null?null:+(esperado-r).toFixed(2);
     const ba = (a!=null&&j!=null)?+(a-j).toFixed(2):null;
-    return {c,a,j,r,esperado,bd,nb:nivelBrecha(bd),ba,sigBA:ba!=null&&Math.abs(ba)>=CFG.umbral_brecha-1e-9,evidencia:mJ[c.id]?.evidencia||""};
+    return {c,a,j,r,esperado,bd,nb:nivelBrecha(bd),ba,sigBA:ba!=null&&Math.abs(ba)>=CFG.umbral_brecha-1e-9,evidencia:mJ[c.id]?.evidencia||"", kpi:mJ[c.id]?(mJ[c.id].nota_kpi!=null?{nota:mJ[c.id].nota_kpi}:null)||notaKPI(c.meta,mJ[c.id].evidencia):null, justificacion:mJ[c.id]?.justificacion||""};
   });
   const x={ ...g, id:g.evaluado_id, nombre:per.nombre, perfil:per, puesto:puesto.nombre||per.puesto||"—",
     departamento:puesto.departamento||per.departamento||"Sin departamento",
     jefe:perfil(g.evaluador_id||g.evalJ?.evaluador_id)||perfil(per.jefe_id), filas };
-  x.promA=prom(filas.map(f=>f.a)); x.promJ=prom(filas.map(f=>f.j)); x.prom180=prom(filas.map(f=>f.r));
+  // Pesos: con "nota ponderada" activa, cada competencia pesa según su % en el puesto.
+  // Las que no tienen peso (p. ej. Valores Etinar) cuentan con el peso promedio de las demás.
+  const ws=pesosDe(filas.map(f=>f.c)); filas.forEach((f,i)=>f.w=ws[i]);
+  const sw=filas.reduce((s,f)=>s+(f.r!=null?f.w:0),0);
+  filas.forEach(f=>{ f.pesoEf=f.r!=null&&sw?f.w*100/sw:null; f.aporte=f.r!=null&&sw?f.r*f.w/sw:null; });
+  x.ponderado=CFG.usar_pesos>=1&&ws.some(v=>v!==1);
+  x.promA=promPond(filas.map(f=>f.a),ws); x.promJ=promPond(filas.map(f=>f.j),ws); x.prom180=promPond(filas.map(f=>f.r),ws);
   x.brechaAuto = (x.promA!=null&&x.promJ!=null)?+(x.promA-x.promJ).toFixed(2):null;
   x.nSig=filas.filter(f=>f.nb.i===2).length; x.nCrit=filas.filter(f=>f.nb.i===3).length;
   x.nCritComp=filas.filter(f=>f.nb.i===3&&f.c.critico).length; x.nSigBA=filas.filter(f=>f.sigBA).length;
@@ -742,6 +786,49 @@ function accionSugerida(c, nivelI){
   if(mejor) return mejor;
   const gen=D.acciones.filter(a=>normTxt(a.competencia)==="general");
   return gen.find(a=>a.nivel===quiere)||gen[0]||null;
+}
+
+// ==================== CONVERSIÓN DEL RESULTADO DEL KPI A NOTA 1-5 ====================
+// Regla de Etinar (configurable en Periodos → Reglas):
+//  · Metas "mayor es mejor" (≥95%, 100%, ≥20 visitas) y "menor es mejor" (≤2 días):
+//      % de cumplimiento de la meta → nota  (≥100% = 5 · ≥95% = 4 · ≥85% = 3 · ≥70% = 2 · menos = 1)
+//  · Metas "cero" (0 multas, sin incidentes): 0 = 5 · 1 = 3 · 2 = 2 · 3 o más = 1
+//  · Modo: 0 = solo referencia · 1 = nota sugerida (si el jefe se aparta, justifica) · 2 = la nota es la del KPI
+const NIV_TXT=["Deficiente","Regular","Bueno","Muy bueno","Excelente"];
+const numDe=(t)=>{ const m=String(t??"").replace(/(\d)\.(\d{3})(?!\d)/g,"$1$2").replace(",",".").match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null; };
+function interpretarMeta(meta){
+  const t=normTxt(meta||"").trim(); if(!t) return null;
+  const pct=/%/.test(meta);
+  if(/^(0|cero|sin|ningun|ninguna|ningún)\b/.test(t)||/^0\s*[a-z]/.test(t)) return {tipo:"cero",valor:0,pct:false,txt:"cero (0 es lo esperado)"};
+  const v=numDe(t); if(v==null) return null;
+  if(/(≤|<=|<|maximo|max\.?|hasta|menos de|no mas de|como maximo)/.test(t)) return {tipo:"menor",valor:v,pct,txt:`menor o igual a ${v}${pct?"%":""} (menos es mejor)`};
+  return {tipo:"mayor",valor:v,pct,txt:`mayor o igual a ${v}${pct?"%":""} (más es mejor)`};
+}
+function notaDeCumplimiento(cumpl){
+  if(cumpl>=CFG.kpi_t5-1e-9) return 5; if(cumpl>=CFG.kpi_t4-1e-9) return 4; if(cumpl>=CFG.kpi_t3-1e-9) return 3; if(cumpl>=CFG.kpi_t2-1e-9) return 2; return 1;
+}
+// Devuelve {nota, cumpl, m, real} o null si la meta o el resultado no son numéricos
+function notaKPI(meta, realTxt){
+  const m=interpretarMeta(meta), real=numDe(realTxt);
+  if(!m||real==null||real<0) return null;
+  if(m.tipo==="cero"){ const n=Math.round(real); return {nota:n<=0?5:n===1?3:n===2?2:1, cumpl:null, m, real}; }
+  let cumpl;
+  if(m.tipo==="mayor") cumpl=m.valor>0?real*100/m.valor:100;
+  else cumpl=real<=m.valor?100:(real>0?m.valor*100/real:100);
+  return {nota:notaDeCumplimiento(cumpl), cumpl:Math.round(cumpl*10)/10, m, real};
+}
+const modoKPI=()=>Math.round(CFG.kpi_modo||0);
+function textoNotaKPI(k){
+  if(!k) return "";
+  return k.m.tipo==="cero"?`${k.real} ${k.real===1?"caso":"casos"} (meta: cero) → nota <b>${k.nota}</b> · ${NIV_TXT[k.nota-1]}`
+    :`cumplimiento ${k.cumpl}% de la meta → nota <b>${k.nota}</b> · ${NIV_TXT[k.nota-1]}`;
+}
+// Tabla de conversión para mostrar (reglas, Periodos, documento de socialización)
+function tablaConversionHTML(compacta){
+  const filas=[[`${CFG.kpi_t5}% o más`,5],[`${CFG.kpi_t4}% a ${(CFG.kpi_t5-0.1).toFixed(1).replace(/\.0$/,"")}%`,4],[`${CFG.kpi_t3}% a ${(CFG.kpi_t4-0.1).toFixed(1).replace(/\.0$/,"")}%`,3],[`${CFG.kpi_t2}% a ${(CFG.kpi_t3-0.1).toFixed(1).replace(/\.0$/,"")}%`,2],[`Menos de ${CFG.kpi_t2}%`,1]];
+  const cero=[["0 casos",5],["1 caso",3],["2 casos",2],["3 o más",1]];
+  const t=(cab,l)=>`<table style="width:100%;font-size:12.5px;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:4px 6px">${cab}</th><th style="text-align:center;padding:4px 6px">Nota</th></tr></thead><tbody>${l.map(([a,n])=>`<tr><td style="padding:4px 6px;border-top:1px solid var(--line-2,#eee)">${a}</td><td style="text-align:center;padding:4px 6px;border-top:1px solid var(--line-2,#eee)"><b>${n}</b> ${compacta?"":"· "+NIV_TXT[n-1]}</td></tr>`).join("")}</tbody></table>`;
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">${t("Cumplimiento de la meta",filas)}${t("Metas “cero” (multas, incidentes…)",cero)}</div>`;
 }
 
 // ==================== Sesión y navegación ====================
@@ -1069,6 +1156,19 @@ VISTAS.periodos = async ()=>{
           <div class="campo"><label for="cf-peso">Peso del jefe en el resultado</label><select class="inp" id="cf-peso">${opciones([["1","100% jefe"],["0.8","80% jefe · 20% auto"],["0.7","70% jefe · 30% auto"],["0.6","60% jefe · 40% auto"]],String(CFG.peso_jefe))}</select></div>
           <div class="campo"><label for="cf-col">Programa grupal desde (personas)</label><input class="inp num" id="cf-col" type="number" step="1" min="2" value="${CFG.umbral_colectivo}"></div>
         </div>
+        <div class="fila" style="margin-top:12px">
+          <div class="campo"><label for="cf-pond">Cálculo de la nota</label><select class="inp" id="cf-pond">${opciones([["0","Promedio simple (todas las competencias pesan igual)"],["1","Ponderado por el peso % de cada competencia"]],String(CFG.usar_pesos>=1?1:0))}</select>
+            <div class="sub-t" style="margin-top:6px">Ponderado: cada competencia del puesto pesa según su %. Las que no tienen peso (como Valores Etinar) cuentan con el peso promedio. Revisa en Estructura que los pesos de cada puesto sumen 100%.</div></div>
+        </div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line-2)"><b style="font-size:13.5px">Conversión del resultado del indicador (KPI) a nota</b>
+          <div class="fila" style="margin-top:8px">
+            <div class="campo" style="flex:2"><label for="cf-kmodo">Uso del KPI al evaluar</label><select class="inp" id="cf-kmodo">${opciones([["0","Solo referencia (el jefe califica libre)"],["1","Nota sugerida: si el jefe se aparta, justifica"],["2","Obligatoria: la nota es la del KPI"]],String(Math.round(CFG.kpi_modo)))}</select></div>
+            <div class="campo"><label for="cf-kdev">Justificar desde</label><select class="inp" id="cf-kdev">${opciones([["1","1 punto de diferencia"],["2","2 puntos de diferencia"]],String(Math.round(CFG.kpi_desvio)))}</select></div>
+          </div>
+          <div class="fila" style="margin-top:10px">${[["cf-t5","Nota 5 desde (%)",CFG.kpi_t5],["cf-t4","Nota 4 desde (%)",CFG.kpi_t4],["cf-t3","Nota 3 desde (%)",CFG.kpi_t3],["cf-t2","Nota 2 desde (%)",CFG.kpi_t2]].map(([i,l,v])=>`<div class="campo"><label for="${i}">${l}</label><input class="inp num" id="${i}" type="number" step="1" min="1" max="200" value="${v}"></div>`).join("")}</div>
+          <div class="sub-t" style="margin:4px 0 10px">% de cumplimiento = resultado real ÷ meta (o meta ÷ real cuando menos es mejor). Debajo del umbral de nota 2 → nota 1.</div>
+          <div id="cf-ktabla">${tablaConversionHTML(false)}</div>
+        </div>
         <button class="btn sm" id="cf-guardar" style="margin-top:14px">Guardar reglas</button><span class="msg" id="cf-msg" style="margin-left:10px"></span>
         <div class="explbox">Brecha de desempeño = <b>nivel esperado − resultado</b>. Sin brecha (≤ 0) · Leve · <b>Significativa</b> → acción de desarrollo · <b>Crítica</b> → PDI. Una brecha crítica en una competencia marcada como crítica activa un PDI prioritario sin importar el promedio.</div>
       </div>
@@ -1098,12 +1198,14 @@ VISTAS.periodos = async ()=>{
     await cargarBase(); irA("periodos");
   });
   $("cf-guardar").onclick=async()=>{
-    const vals={brecha_significativa:$("cf-sig").value,brecha_critica:$("cf-crit").value,umbral_brecha:$("cf-auto").value,peso_jefe:$("cf-peso").value,umbral_colectivo:$("cf-col").value};
+    const vals={brecha_significativa:$("cf-sig").value,brecha_critica:$("cf-crit").value,umbral_brecha:$("cf-auto").value,peso_jefe:$("cf-peso").value,umbral_colectivo:$("cf-col").value,usar_pesos:$("cf-pond").value,kpi_modo:$("cf-kmodo").value,kpi_desvio:$("cf-kdev").value,kpi_t5:$("cf-t5").value,kpi_t4:$("cf-t4").value,kpi_t3:$("cf-t3").value,kpi_t2:$("cf-t2").value};
     const m=$("cf-msg");
     if(parseFloat(vals.brecha_critica)<=parseFloat(vals.brecha_significativa)){ m.className="msg error"; m.textContent="La brecha crítica debe ser mayor que la significativa."; return; }
+    const ts=["kpi_t5","kpi_t4","kpi_t3","kpi_t2"].map(k=>parseFloat(vals[k]));
+    if(ts.some(isNaN)||!(ts[0]>ts[1]&&ts[1]>ts[2]&&ts[2]>ts[3]&&ts[3]>0)){ m.className="msg error"; m.textContent="Los umbrales del KPI deben ir de mayor a menor (nota 5 > nota 4 > nota 3 > nota 2 > 0)."; return; }
     const { error } = await sb.from("configuracion").upsert(Object.entries(vals).map(([clave,valor])=>({clave,valor:String(valor)})),{onConflict:"clave"});
     if(error){ m.className="msg error"; m.textContent="Error: "+error.message; return; }
-    await cargarConfig(); m.className="msg ok"; m.textContent="✅ Reglas guardadas.";
+    await cargarConfig(); m.className="msg ok"; m.textContent="✅ Reglas guardadas."; if($("cf-ktabla")) $("cf-ktabla").innerHTML=tablaConversionHTML(false);
   };
 };
 
@@ -1130,7 +1232,7 @@ function camposCompHTML(c){
       <div class="campo" style="flex:2"><label>Conducta a evaluar (enunciado)</label><input class="inp f-txt" value="${esc(c.texto)}" placeholder="Ej. Elabora roles y pagos sin errores y en calendario."></div></div>
     <div class="fila" style="margin-top:12px"><div class="campo" style="flex:2"><label>Política interna (regla que fija el estándar)</label>${D.v34&&D.politicas.length?`<select class="inp f-polid"><option value="">— Texto libre (sin política del catálogo) —</option>${D.politicas.filter(p=>p.estado!=="derogada"||p.id===c.politica_id).map(p=>`<option value="${p.id}" ${p.id===c.politica_id?"selected":""}>${esc((p.codigo?p.codigo+" · ":"")+p.nombre)}${p.estado!=="vigente"?" ("+p.estado+")":""}</option>`).join("")}</select>`:""}<input class="inp f-pol" value="${esc(c.politica)}" ${D.v34&&c.politica_id?"disabled":""} placeholder="${D.v34?"O escribe una regla propia":""}" style="${D.v34&&D.politicas.length?"margin-top:6px":""}"></div>
       <div class="campo" style="flex:2"><label>Indicador medible (qué se mide y cómo)</label><input class="inp f-ind" value="${esc(c.indicador)}"></div></div>
-    <div class="fila" style="margin-top:12px"><div class="campo"><label>Meta</label><input class="inp f-meta" value="${esc(c.meta)}" placeholder="Ej. ≥98%"></div>
+    <div class="fila" style="margin-top:12px"><div class="campo"><label>Meta</label><input class="inp f-meta" value="${esc(c.meta)}" placeholder="Ej. ≥98% · 0 multas · ≤2 días"><div class="sub-t f-meta-hint" style="margin-top:4px">${hintMeta(c.meta)}</div></div>
       <div class="campo"><label>Nivel esperado (1–5)</label><input class="inp f-min num" type="number" min="1" max="5" step="0.1" value="${esperadoDe(c)}"></div>
       <div class="campo"><label>¿Competencia crítica?</label><select class="inp f-crit"><option value="no">No (estándar)</option><option value="si" ${c.critico?"selected":""}>Sí (técnico-legal / seguridad)</option></select></div>
       <div class="campo" style="max-width:100px"><label>Orden</label><input class="inp f-ord num" type="number" value="${c.orden??0}"></div></div>
@@ -1150,18 +1252,29 @@ function leerComp(m){
   if(crit||vp||ve){ o.validada_por=crit?(vp||null):null; o.validada_en=crit?(ve||null):null; }
   return o;
 }
+function hintMeta(meta){ if(!meta) return ""; const m=interpretarMeta(meta); return m?`✓ Se leerá como: ${esc(m.txt)}`:`<span style="color:var(--warn)">⚠ Sin un número la nota no se puede calcular desde el KPI (ej. «≥95%», «0 multas»)</span>`; }
 function editarComp(c, puestoId, alTerminar){
   const ed=!!(c&&c.id);
+  const pidF=(c&&c.puesto_id)||puestoId, funs=D.v35&&pidF?D.funciones.filter(f=>f.puesto_id===pidF).sort((a,b)=>(a.orden||0)-(b.orden||0)):[];
+  const ya=ed?funcionesDeComp(c.id):new Set();
   abrirModal(`<h3>${ed?"Editar competencia":"Nueva competencia"}</h3><div style="color:var(--muted);font-size:12.5px;margin-bottom:14px">${ed&&c.puesto_id?esc(D.puestoPorId[c.puesto_id]?.nombre)+" · ":""}Conducta, política e indicador son tres cosas distintas. El nivel esperado es el estándar contra el que se calcula la brecha.</div>
-    ${camposCompHTML(c)}<div class="msg" id="ec-msg"></div>
+    ${camposCompHTML(c)}
+    ${funs.length?`<div class="lbl-campo" style="margin-top:12px">Funciones del puesto que respalda esta competencia</div><div style="max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:6px 10px">${funs.map((f,i)=>`<label style="display:flex;gap:8px;align-items:flex-start;margin:0;padding:4px 0;font-weight:500;font-size:13px"><input type="checkbox" class="ec-fn" value="${f.id}" ${ya.has(f.id)?"checked":""} style="margin-top:3px"> <span><b>${i+1}.</b> ${esc(f.funcion)}</span></label>`).join("")}</div>`:""}
+    <div class="msg" id="ec-msg"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">${ed?`<button class="btn danger sm" id="ec-del" style="margin-right:auto">Eliminar</button>`:""}<button class="btn ghost sm" data-cerrar>Cancelar</button><button class="btn amber sm" id="ec-ok">Guardar</button></div>`, m=>{
     m.querySelector(".f-crit").onchange=e=>{ m.querySelector(".f-val-wrap").style.display=e.target.value==="si"?"":"none"; };
+    m.querySelector(".f-meta").oninput=e=>{ m.querySelector(".f-meta-hint").innerHTML=hintMeta(e.target.value); };
     const sp=m.querySelector(".f-polid"); if(sp) sp.onchange=()=>{ const t=m.querySelector(".f-pol"), p=D.politicaPorId[Number(sp.value)]; t.disabled=!!p; if(p) t.value=p.nombre; };
     m.querySelector("#ec-ok").onclick=async()=>{
       const v=leerComp(m), msg=m.querySelector("#ec-msg");
       if(!v.categoria||!v.texto){ msg.className="msg error"; msg.textContent="Competencia y conducta son obligatorias."; return; }
-      const r = ed ? await sb.from("competencias").update(v).eq("id",c.id) : await sb.from("competencias").insert({...v,puesto_id:puestoId});
+      const r = ed ? await sb.from("competencias").update(v).eq("id",c.id) : await sb.from("competencias").insert({...v,puesto_id:puestoId}).select("id").single();
       if(r.error){ msg.className="msg error"; msg.textContent="Error: "+r.error.message; return; }
+      if(funs.length){ const cid=ed?c.id:r.data.id; const marc=new Set([...m.querySelectorAll(".ec-fn:checked")].map(i=>Number(i.value)));
+        const quitar=[...ya].filter(x=>!marc.has(x)), poner=[...marc].filter(x=>!ya.has(x));
+        if(quitar.length) await sb.from("competencia_funcion").delete().eq("competencia_id",cid).in("funcion_id",quitar);
+        if(poner.length) await sb.from("competencia_funcion").insert(poner.map(fid=>({competencia_id:cid,funcion_id:fid})));
+      }
       cerrarModal(); await cargarBase(); alTerminar();
     };
     if(ed) m.querySelector("#ec-del").onclick=async()=>{ cerrarModal(); if(!await confirmar("Se eliminará la competencia y sus puntajes registrados.","Eliminar",true)) return; await sb.from("competencias").delete().eq("id",c.id); await cargarBase(); alTerminar(); };
@@ -1259,13 +1372,17 @@ function pintarCompetencias(lista, trans, faltan){
           ${sel.mision?`<div class="aviso"><b>Misión del puesto:</b> ${esc(sel.mision)}</div>`:""}
           ${(()=>{ const cs=D.competencias.filter(c=>c.puesto_id===sel.id), conPeso=cs.filter(c=>c.peso!=null&&c.peso!==""); if(!conPeso.length) return "";
             const suma=conPeso.reduce((s,c)=>s+Number(c.peso),0); const ok=Math.abs(suma-100)<0.01&&conPeso.length===cs.length;
-            return `<div class="aviso ${ok?"":"amber"}"><b>Pesos de las competencias:</b> ${suma}% de 100%${ok?" ✓":` · ${conPeso.length} de ${cs.length} competencias con peso`}. Los pesos todavía no se usan en el cálculo del resultado.</div>`; })()}
+            return `<div class="aviso ${ok?"":"amber"}"><b>Pesos de las competencias:</b> ${suma}% de 100%${ok?" ✓":` · ${conPeso.length} de ${cs.length} competencias con peso`}. ${CFG.usar_pesos>=1?"Se usan en la nota (cálculo ponderado activo en Periodos).":"Hoy la nota es promedio simple; actívalos en Periodos → Reglas → Cálculo de la nota."}</div>`; })()}
+          ${D.v35?(()=>{ const fsP=D.funciones.filter(f=>f.puesto_id===sel.id).sort((x,y)=>x.orden-y.orden||x.id-y.id); if(!fsP.length) return "";
+            const cub=new Set((D.compFun||[]).filter(x=>D.competencias.some(c=>c.id===x.competencia_id&&c.puesto_id===sel.id)).map(x=>x.funcion_id));
+            const falta=fsP.map((f,k)=>cub.has(f.id)?null:k+1).filter(Boolean);
+            return `<div class="aviso ${falta.length?"amber":""}"><b>Cobertura de funciones:</b> ${fsP.length-falta.length} de ${fsP.length} funciones respaldadas por alguna competencia${falta.length?` · sin respaldo: ${falta.join(", ")}`:" ✓"}.</div>`; })():""}
           ${(()=>{ const cs=D.competencias.filter(c=>c.puesto_id===sel.id).sort((a,b)=>String(a.categoria).localeCompare(String(b.categoria))||a.orden-b.orden);
-            return cs.length?cs.map(c=>`<div class="q" style="margin:10px 0 0"><div style="display:flex;justify-content:space-between;gap:10px"><div style="min-width:0"><div class="sub-t" style="font-weight:700;text-transform:uppercase;letter-spacing:.05em">${esc(c.categoria)}</div><div style="font-weight:600;margin-top:2px">${esc(c.texto)}</div>${c.definicion?`<div class="sub-t">${esc(c.definicion)}</div>`:""}${fichaHTML(c)}${D.v32?`<div class="sub-t" style="margin-top:4px">${D.conductas.filter(k=>k.competencia_id===c.id).length} conducta(s) observable(s)</div>`:""}</div><button class="btn ghost xs" data-edc="${c.id}">Editar</button></div></div>`).join(""):`<div class="vacio">Este puesto aún no tiene competencias. Agrégalas a mano, pega la lista o importa el Excel que prepare RRHH a partir del manual de funciones.</div>`; })()}
+            return cs.length?cs.map(c=>`<div class="q" style="margin:10px 0 0"><div style="display:flex;justify-content:space-between;gap:10px"><div style="min-width:0"><div class="sub-t" style="font-weight:700;text-transform:uppercase;letter-spacing:.05em">${esc(c.categoria)}</div><div style="font-weight:600;margin-top:2px">${esc(c.texto)}</div>${c.definicion?`<div class="sub-t">${esc(c.definicion)}</div>`:""}${D.v35?(()=>{ const fsP=D.funciones.filter(f=>f.puesto_id===sel.id).sort((x,y)=>x.orden-y.orden||x.id-y.id); const ids=funcionesDeComp(c.id); const nums=fsP.map((f,k)=>ids.has(f.id)?k+1:null).filter(Boolean); return fsP.length?`<div class="sub-t">${nums.length?"Respalda las funciones: "+nums.join(", "):'<span style="color:var(--warn)">No respalda ninguna función del puesto</span>'}</div>`:""; })():""}${fichaHTML(c)}${D.v32?`<div class="sub-t" style="margin-top:4px">${D.conductas.filter(k=>k.competencia_id===c.id).length} conducta(s) observable(s)</div>`:""}</div><button class="btn ghost xs" data-edc="${c.id}">Editar</button></div></div>`).join(""):`<div class="vacio">Este puesto aún no tiene competencias. Agrégalas a mano, pega la lista o importa el Excel que prepare RRHH a partir del manual de funciones.</div>`; })()}
         </div>
         <div class="card mt"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><h3>Funciones del puesto</h3><div class="cap">Las responsabilidades del manual de funciones. Son la base para definir las competencias.</div></div>${D.v32?`<button class="btn ghost sm" id="fn-nueva">Agregar función</button>`:""}</div>
           ${!D.v32?`<div class="aviso amber">Ejecuta el SQL v3.2 para activar las funciones del puesto.</div>`:(()=>{ const fs=D.funciones.filter(f=>f.puesto_id===sel.id).sort((a,b)=>a.orden-b.orden||a.id-b.id);
-            return fs.length?`<ol style="margin-left:20px;font-size:13.5px;line-height:1.5">${fs.map((f,i)=>`<li style="padding:6px 0;border-bottom:1px solid var(--line-2)"><div style="display:flex;justify-content:space-between;gap:10px"><span>${esc(f.funcion)}${f.origen!=="manual_rrhh"?` <span class="badge b-gris">${f.origen==="ia_aprobada"?"IA aprobada":"importada"}</span>`:""}</span><span style="white-space:nowrap">${i?`<button class="btn ghost xs" data-fn-up="${f.id}" title="Subir">↑</button>`:""} <button class="btn ghost xs" data-fn-ed="${f.id}">Editar</button></span></div></li>`).join("")}</ol>`:`<div class="vacio">Aún no hay funciones registradas para este puesto.</div>`; })()}
+            return fs.length?`<ol style="margin-left:20px;font-size:13.5px;line-height:1.5">${fs.map((f,i)=>`<li style="padding:6px 0;border-bottom:1px solid var(--line-2)"><div style="display:flex;justify-content:space-between;gap:10px"><span>${esc(f.funcion)}${f.origen!=="manual_rrhh"?` <span class="badge b-gris">${f.origen==="ia_aprobada"?"IA aprobada":"importada"}</span>`:""}${D.v35&&!(D.compFun||[]).some(x=>x.funcion_id===f.id)?' <span class="badge b-wait">sin competencia</span>':""}</span><span style="white-space:nowrap">${i?`<button class="btn ghost xs" data-fn-up="${f.id}" title="Subir">↑</button>`:""} <button class="btn ghost xs" data-fn-ed="${f.id}">Editar</button></span></div></li>`).join("")}</ol>`:`<div class="vacio">Aún no hay funciones registradas para este puesto.</div>`; })()}
         </div>
         <div class="card mt"><h3>Manuales de funciones</h3><div class="cap">Versiones del manual asociadas a este puesto.</div>
           ${!D.v32?`<div class="aviso amber">Ejecuta el SQL v3.2 para activar los manuales.</div>`:`<div id="mn-lista"><div class="vacio">Cargando...</div></div>`}
@@ -1549,7 +1666,7 @@ function documentoSocializacion(){
   const cuerpo=`<p>Este documento comunica las políticas y los criterios con los que se realiza la Evaluación de Desempeño 180°. Se socializa con jefaturas y colaboradores antes de abrir la campaña.</p>
     <h3>1. Catálogo de políticas vigentes</h3>${tablaWord(["Código","Política","Estándar","Alcance","Versión","Aprobada por"],vig.map(p=>[p.codigo,p.nombre,p.estandar,p.departamento||"Toda la empresa",p.version,p.aprobada_por?(p.aprobada_por+(p.aprobada_en?" ("+fmtFecha(p.aprobada_en)+")":"")):"Pendiente"]))}
     <h3>2. Competencias por puesto</h3>${porPuesto.map(pu=>{ const cs=compsDelPuesto(pu.id); if(!cs.length) return ""; return `<h4>${esc(pu.nombre)} · ${esc(pu.departamento||"")}</h4>${tablaWord(["Competencia","Conducta evaluada","Política","Indicador","Meta"],cs.map(c=>[c.categoria,c.texto,(D.politicas.find(p=>p.id===c.politica_id)?.codigo?D.politicas.find(p=>p.id===c.politica_id).codigo+" · ":"")+(c.politica||""),c.indicador,c.meta]))}`; }).join("")}
-    <h3>3. Escala de calificación</h3><p>1 Deficiente · 2 Regular · 3 Bueno · 4 Muy bueno · 5 Excelente. La valoración se basa en hechos del periodo y en el indicador de cada competencia.</p>
+    <h3>3. Escala de calificación</h3><p>1 Deficiente · 2 Regular · 3 Bueno · 4 Muy bueno · 5 Excelente. La valoración se basa en hechos del periodo y en el indicador de cada competencia.</p>${modoKPI()?`<h3>4. Conversión del resultado del indicador a nota</h3><p>% de cumplimiento = resultado real ÷ meta (o meta ÷ resultado cuando menos es mejor). ${modoKPI()===1?`La nota del indicador es la sugerida; si el jefe se aparta ${CFG.kpi_desvio} punto o más, debe justificarlo por escrito.`:"La nota de cada competencia es la que da el indicador."}</p>${tablaWord(["Cumplimiento de la meta","Nota"],[[`${CFG.kpi_t5}% o más`,"5 · Excelente"],[`${CFG.kpi_t4}% a menos de ${CFG.kpi_t5}%`,"4 · Muy bueno"],[`${CFG.kpi_t3}% a menos de ${CFG.kpi_t4}%`,"3 · Bueno"],[`${CFG.kpi_t2}% a menos de ${CFG.kpi_t3}%`,"2 · Regular"],[`Menos de ${CFG.kpi_t2}%`,"1 · Deficiente"]])}${tablaWord(["Metas “cero” (multas, incidentes)","Nota"],[["0 casos","5"],["1 caso","3"],["2 casos","2"],["3 o más","1"]])}`:""}
     <br><p>Recibí y conozco las políticas con las que seré evaluado(a):</p><br><table width="100%" style="font-size:10pt"><tr><td style="text-align:center">_________________________<br>Colaborador(a)</td><td style="text-align:center">_________________________<br>Jefe directo</td><td style="text-align:center">_________________________<br>Talento Humano</td></tr></table>`;
   exportarWord("Socializacion_Politicas_Etinar","Políticas de la Evaluación de Desempeño 180°",cuerpo);
 }
@@ -1580,14 +1697,16 @@ async function modalManualesIA(){
       ${[["Manuales",l.length],["Por revisar",l.filter(m=>["borrador","en_revision"].includes(m.estado)).length],["Aplicados",l.filter(m=>m.estado==="aprobado").length],["Funciones cargadas",D.funciones.length]].map(([a,b])=>`<div class="kpi" style="border:1px solid var(--line);border-radius:14px;padding:12px"><div class="lbl">${a}</div><div class="val" style="font-size:24px;margin-top:4px">${b}</div></div>`).join("")}
     </div>
     <div class="card" style="padding:14px;box-shadow:none;border:1px dashed var(--line)">
-      <b style="font-size:13.5px">Subir manual de funciones</b>
-      <div class="fila" style="margin-top:8px"><div class="campo" style="flex:2"><label for="mi-f">Archivo PDF o Word .docx (máx. ${MAX_MANUAL_MB} MB)</label><input class="inp" type="file" id="mi-f" accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"></div>
-        <div class="campo" style="flex:2"><label for="mi-p">Puesto</label><select class="inp" id="mi-p">${opciones(D.puestos.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>[p.id,p.nombre]),"","Detectar del manual (puesto nuevo o existente)")}</select></div>
+      <b style="font-size:13.5px">Subir manuales de funciones</b> <span class="sub-t">· puedes elegir varios a la vez (Ctrl o Shift + clic)</span>
+      <div class="fila" style="margin-top:8px"><div class="campo" style="flex:2"><label for="mi-f">Archivos PDF o Word .docx (máx. ${MAX_MANUAL_MB} MB c/u)</label><input class="inp" type="file" id="mi-f" multiple accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.docx"></div>
+        <div class="campo" style="flex:2" id="mi-p-w"><label for="mi-p">Puesto</label><select class="inp" id="mi-p">${opciones(D.puestos.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>[p.id,p.nombre]),"","Detectar del manual (puesto nuevo o existente)")}</select></div>
         <div class="campo" style="max-width:110px"><label for="mi-v">Versión</label><input class="inp" id="mi-v" placeholder="2026-1"></div></div>
       <div class="msg" id="mi-msg"></div>
-      <div style="text-align:right"><button class="btn amber sm" id="mi-subir">Subir manual</button></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><label style="display:flex;gap:8px;align-items:center;margin:0;font-weight:500;font-size:13px"><input type="checkbox" id="mi-auto" checked> Analizar con IA apenas se suban</label><button class="btn amber sm" id="mi-subir">Subir</button></div>
     </div>
-    <div class="tabla-wrap" style="margin-top:12px;max-height:300px;overflow:auto"><table><thead><tr><th>Archivo</th><th>Puesto</th><th>Estado</th><th>Cargado</th><th></th></tr></thead><tbody>${
+    ${(()=>{ const pend=l.filter(x=>x.estado==="cargado").length, rev=l.filter(x=>["borrador","en_revision"].includes(x.estado)).length;
+      return (pend>1||rev)?`<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap">${rev?`<button class="btn ghost sm" id="mi-revtodos">Revisar borradores (${rev})</button>`:""}${pend>1?`<button class="btn amber sm" id="mi-antodos">✦ Analizar todos los cargados (${pend})</button>`:""}</div>`:""; })()}
+    <div class="tabla-wrap" style="margin-top:12px;max-height:340px;overflow:auto"><table><thead><tr><th>Archivo</th><th>Puesto</th><th>Estado</th><th>Cargado</th><th></th></tr></thead><tbody>${
       l.map(m=>{ const b=ultimoBor(m.id); const est=EST_MAN[m.estado]||[m.estado,"b-gris"];
         const atascado=m.estado==="procesando"&&(Date.now()-new Date(m.fecha_carga||m.creado_en).getTime())>5*60*1000;
         const acc = m.estado==="cargado"||m.estado==="rechazado"||atascado ? `<button class="btn amber xs" data-mi-an="${m.id}">${m.estado==="cargado"&&!m.notas?"✦ Analizar":"Reintentar"}</button>`
@@ -1597,6 +1716,9 @@ async function modalManualesIA(){
     }</tbody></table></div>
     <div class="explbox" style="margin-top:12px">🔒 A Gemini solo se envía el <b>manual del puesto</b> y los nombres del catálogo de políticas y competencias. <b>Nunca</b> se envían evaluaciones, puntajes ni datos personales. La clave de la IA está guardada como secreto en Supabase, no en esta página.</div>`, m=>{
     m.querySelector("#mi-subir").onclick=()=>subirManual(m);
+    m.querySelector("#mi-f").onchange=e=>{ const n=e.target.files.length; m.querySelector("#mi-p-w").style.display=n>1?"none":""; m.querySelector("#mi-subir").textContent=n>1?`Subir ${n} manuales`:"Subir"; };
+    if(m.querySelector("#mi-antodos")) m.querySelector("#mi-antodos").onclick=()=>analizarLote(l.filter(x=>x.estado==="cargado").map(x=>x.id).reverse());
+    if(m.querySelector("#mi-revtodos")) m.querySelector("#mi-revtodos").onclick=async()=>{ const p=await borradoresPendientes(); if(p.length) revisarBorrador(p[0]); };
     m.querySelectorAll("[data-mi-an]").forEach(b=>b.onclick=()=>analizarManual(Number(b.dataset.miAn), b));
     m.querySelectorAll("[data-mi-rev]").forEach(b=>b.onclick=()=>revisarBorrador(Number(b.dataset.miRev)));
     m.querySelectorAll("[data-mi-del]").forEach(b=>b.onclick=async()=>{ const man=l.find(x=>x.id===Number(b.dataset.miDel));
@@ -1626,33 +1748,84 @@ async function textoDocx(file){
   });
   return out.join("\n").replace(/\n{3,}/g,"\n\n").slice(0,300000);
 }
-async function subirManual(m){
-  const msg=m.querySelector("#mi-msg"), f=m.querySelector("#mi-f").files[0];
-  const err=(t)=>{ msg.className="msg error"; msg.textContent=t; };
-  if(!f) return err("Elige el archivo del manual (PDF o Word).");
+// Sube un archivo. Devuelve {ok, id} o {ok:false, motivo}
+async function subirUno(f, pid, version, preguntarDuplicado){
   const esPdf=/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name), esDocx=/\.docx$/i.test(f.name);
-  if(/\.doc$/i.test(f.name)) return err("Ese es un Word antiguo (.doc). Ábrelo en Word y usa Archivo → Guardar como → Documento de Word (.docx) o PDF.");
-  if(!esPdf&&!esDocx) return err("Solo se aceptan manuales en PDF o Word (.docx).");
-  if(f.size>MAX_MANUAL_MB*1024*1024) return err(`El archivo pesa ${(f.size/1048576).toFixed(1)} MB; el máximo es ${MAX_MANUAL_MB} MB.`);
-  msg.className="msg"; msg.textContent="Subiendo…";
+  if(/\.doc$/i.test(f.name)) return {ok:false,motivo:"Word antiguo (.doc): guárdalo como .docx o PDF"};
+  if(!esPdf&&!esDocx) return {ok:false,motivo:"solo PDF o Word .docx"};
+  if(f.size>MAX_MANUAL_MB*1024*1024) return {ok:false,motivo:`pesa ${(f.size/1048576).toFixed(1)} MB (máx. ${MAX_MANUAL_MB})`};
   const hash=await hashArchivo(f);
-  const { data:ig } = await sb.from("manuales_puesto").select("id,nombre_archivo,estado").eq("hash_archivo",hash);
-  if(ig&&ig.length){ msg.className="msg error"; msg.innerHTML=`Este mismo archivo ya fue subido como «${esc(ig[0].nombre_archivo)}». <a href="#" id="mi-igual">Subir de todas formas</a>`;
-    if(!await new Promise(r=>{ m.querySelector("#mi-igual").onclick=e=>{e.preventDefault();r(true);}; setTimeout(()=>r(false),20000); })) return; }
-  const limpio=f.name.normalize("NFD").replace(/[^\w.\-]/g,"_").slice(-80);
-  const ruta=`${new Date().getFullYear()}/${hash.slice(0,16)}_${limpio}`;
-  // Word: se extrae el texto aquí mismo (párrafos y tablas) para que la IA lo lea
-  let texto=null;
-  if(esDocx){ try{ texto=await textoDocx(f); }catch(e){ return err("No se pudo leer el Word: "+(e.message||e)+". Prueba guardándolo como PDF."); }
-    if(!texto||texto.length<200) return err("El Word casi no tiene texto (¿es una imagen escaneada?). Guárdalo como PDF y súbelo así."); }
+  const { data:ig } = await sb.from("manuales_puesto").select("id,nombre_archivo").eq("hash_archivo",hash);
+  if(ig&&ig.length&&!(preguntarDuplicado&&await preguntarDuplicado(ig[0]))) return {ok:false,motivo:`ya se subió antes como «${ig[0].nombre_archivo}»`,dup:true};
+  let texto=null;   // Word: se extrae el texto aquí mismo (párrafos y tablas) para que la IA lo lea
+  if(esDocx){ try{ texto=await textoDocx(f); }catch(e){ return {ok:false,motivo:"no se pudo leer el Word; guárdalo como PDF"}; }
+    if(!texto||texto.length<200) return {ok:false,motivo:"el Word casi no tiene texto (¿escaneado?); súbelo como PDF"}; }
   const mime=esDocx?"application/vnd.openxmlformats-officedocument.wordprocessingml.document":"application/pdf";
+  const ruta=`${new Date().getFullYear()}/${hash.slice(0,16)}_${f.name.normalize("NFD").replace(/[^\w.\-]/g,"_").slice(-80)}`;
   const up=await sb.storage.from("manuales").upload(ruta,f,{contentType:mime,upsert:true});
-  if(up.error) return err("No se pudo subir: "+up.error.message+" (¿ejecutaste el SQL v3.2 que crea el bucket «manuales»?)");
-  const pid=m.querySelector("#mi-p").value;
-  const { error } = await sb.from("manuales_puesto").insert({puesto_id:pid?Number(pid):null,nombre_archivo:f.name,version:m.querySelector("#mi-v").value.trim()||null,estado:"cargado",archivo_path:ruta,hash_archivo:hash,mime_type:mime,texto_extraido:texto,tamano_bytes:f.size,subido_por:PERFIL.id});
-  if(error) return err(error.message);
+  if(up.error) return {ok:false,motivo:"no se pudo subir: "+up.error.message};
+  const { data, error } = await sb.from("manuales_puesto").insert({puesto_id:pid||null,nombre_archivo:f.name,version:version||null,estado:"cargado",archivo_path:ruta,hash_archivo:hash,mime_type:mime,texto_extraido:texto,tamano_bytes:f.size,subido_por:PERFIL.id}).select("id").single();
+  if(error) return {ok:false,motivo:error.message};
+  return {ok:true,id:data.id};
+}
+async function subirManual(m){
+  const msg=m.querySelector("#mi-msg"), files=[...m.querySelector("#mi-f").files];
+  if(!files.length){ msg.className="msg error"; msg.textContent="Elige uno o varios manuales (PDF o Word)."; return; }
+  const auto=m.querySelector("#mi-auto").checked, version=m.querySelector("#mi-v").value.trim();
+  const pid=files.length===1&&m.querySelector("#mi-p").value?Number(m.querySelector("#mi-p").value):null;
+  m.querySelector("#mi-subir").disabled=true;
+  const fila=(f,t,c)=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid var(--line-2)"><span>${esc(f)}</span><span class="${c||"sub-t"}">${t}</span></div>`;
+  const estado=files.map(f=>[f.name,"en espera",""]);
+  const pintar=()=>{ msg.className="msg"; msg.innerHTML=`<div style="max-height:160px;overflow:auto;font-size:12.5px">${estado.map(e=>fila(...e)).join("")}</div>`; };
+  pintar(); const ids=[];
+  for(let k=0;k<files.length;k++){
+    estado[k]=[files[k].name,"subiendo…","sub-t"]; pintar();
+    const preg=files.length===1?(ig)=>new Promise(r=>{ msg.className="msg error"; msg.innerHTML=`Este mismo archivo ya fue subido como «${esc(ig.nombre_archivo)}». <a href="#" id="mi-igual">Subir de todas formas</a>`; m.querySelector("#mi-igual").onclick=e=>{e.preventDefault();r(true);}; setTimeout(()=>r(false),20000); }):null;
+    const r=await subirUno(files[k],pid,version,preg);
+    estado[k]=[files[k].name,r.ok?"✓ subido":(r.dup?"omitido: ":"✕ ")+r.motivo,r.ok?"":"err-t"]; if(r.ok) ids.push(r.id); pintar();
+  }
+  m.querySelector("#mi-subir").disabled=false;
+  if(!ids.length) return;   // nada nuevo: se queda el detalle a la vista
+  if(auto) return analizarLote(ids, files.map((f,k)=>[f.name,estado[k][1],estado[k][2]]).filter(e=>e[2]==="err-t"));
+  if(estado.some(e=>e[2]==="err-t")){ await new Promise(r=>setTimeout(r,2500)); }
   modalManualesIA();
 }
+// Analiza varios manuales uno tras otro (respeta los límites de Gemini) y muestra el avance
+async function analizarLote(ids, noSubidos){
+  const { data:mans } = await sb.from("manuales_puesto").select("id,nombre_archivo").in("id",ids);
+  const nombre=(id)=>(mans||[]).find(x=>x.id===id)?.nombre_archivo||("Manual "+id);
+  const est=Object.fromEntries(ids.map(id=>[id,["en espera","b-gris"]]));
+  let cancelado=false;
+  abrirModal(`<h3>✦ Analizando ${ids.length} manual${ids.length===1?"":"es"}</h3><div style="color:var(--muted);font-size:12.5px;margin-bottom:12px">Gemini los lee uno por uno (30–90 s cada uno). Puedes dejar esta ventana abierta; nada se aplica hasta que revises y apruebes.</div>
+    ${noSubidos&&noSubidos.length?`<div class="explbox" style="margin:0 0 12px">⚠ No se subieron ${noSubidos.length}: ${noSubidos.map(e=>`<b>${esc(e[0])}</b> (${esc(e[1].replace(/^✕ /,""))})`).join(" · ")}</div>`:""}
+    <div class="bar" style="height:6px;background:var(--line-2);border-radius:999px;overflow:hidden;margin-bottom:12px"><div id="al-bar" style="height:100%;width:0;background:var(--amber);transition:width .3s"></div></div>
+    <div class="tabla-wrap" style="max-height:50vh;overflow:auto"><table><tbody id="al-lista"></tbody></table></div>
+    <div id="al-fin" style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn ghost sm" id="al-parar">Detener después del actual</button></div>`, m=>{ m.querySelector("#al-parar").onclick=()=>{ cancelado=true; m.querySelector("#al-parar").textContent="Se detendrá al terminar el actual…"; m.querySelector("#al-parar").disabled=true; }; });
+  m_ancho(680);
+  const pintar=(hechos)=>{ const t=$("al-lista"); if(!t) return; t.innerHTML=ids.map(id=>`<tr><td><b>${esc(nombre(id))}</b></td><td class="r"><span class="badge ${est[id][1]}">${esc(est[id][0])}</span></td></tr>`).join(""); if($("al-bar")) $("al-bar").style.width=Math.round(hechos*100/ids.length)+"%"; };
+  let hechos=0, ok=0; pintar(0);
+  for(const id of ids){
+    if(cancelado){ est[id]=["no analizado","b-gris"]; continue; }
+    est[id]=["analizando…","b-blue"]; pintar(hechos);
+    let r=await sb.functions.invoke("analizar-manual",{ body:{ manual_id:id } }), t=r.error?await errorFuncion(r.error):"";
+    if(r.error&&/429|quota|RESOURCE_EXHAUSTED|límite/i.test(t)){ est[id]=["límite de Gemini: esperando 60 s…","b-wait"]; pintar(hechos); await new Promise(z=>setTimeout(z,60000));
+      r=await sb.functions.invoke("analizar-manual",{ body:{ manual_id:id } }); t=r.error?await errorFuncion(r.error):""; }
+    if(r.error){ est[id]=["✕ "+t.slice(0,90),"b-red"];
+      if(/GEMINI_API_KEY|Failed to send|not found|404/i.test(t)){ ids.filter(x=>est[x][0]==="en espera").forEach(x=>est[x]=["no analizado","b-gris"]); hechos=ids.length; pintar(hechos); break; } }
+    else { est[id]=["✓ borrador listo","b-ok"]; ok++; }
+    hechos++; pintar(hechos);
+  }
+  const fin=$("al-fin"); if(!fin) return;
+  fin.innerHTML=`<span class="sub-t" style="margin-right:auto;align-self:center">${ok} de ${ids.length} con borrador listo</span><button class="btn ghost sm" id="al-lista-b">Volver a la lista</button>${ok?`<button class="btn amber sm" id="al-rev">Revisar borradores (${ok})</button>`:""}`;
+  $("al-lista-b").onclick=()=>modalManualesIA();
+  if($("al-rev")) $("al-rev").onclick=async()=>{ const p=await borradoresPendientes(); if(p.length) revisarBorrador(p[0]); else modalManualesIA(); };
+}
+async function borradoresPendientes(){
+  const { data } = await sb.from("borradores_manual").select("id,estado").in("estado",["pendiente","en_revision"]).order("id",{ascending:true});
+  return (data||[]).map(x=>x.id);
+}
+// Después de revisar uno: pasa al siguiente borrador pendiente o vuelve a la lista
+async function siguienteBorrador(actual){ const p=(await borradoresPendientes()).filter(x=>x!==actual); if(p.length) revisarBorrador(p[0]); else modalManualesIA(); }
 
 async function analizarManual(id, boton){
   boton.disabled=true; boton.textContent="Gemini está leyendo…";
@@ -1671,6 +1844,7 @@ async function revisarBorrador(borId){
   const { data:man } = await sb.from("manuales_puesto").select("*").eq("id",b.manual_id).maybeSingle();
   const d=JSON.parse(JSON.stringify(b.datos||{})); d.funciones=d.funciones||[]; d.competencias=d.competencias||[];
   const soloVer=b.estado==="aplicado"||b.estado==="rechazado";
+  const cola=soloVer?[]:await borradoresPendientes(), pos=cola.indexOf(b.id);
   // puesto destino: el del manual, el sugerido por la función o el que coincide por nombre
   const coincide=D.puestos.find(p=>nrm(p.nombre)===nrm(d.puesto));
   const destino=d._destino!=null?d._destino:(man?.puesto_id||b.puesto_id||coincide?.id||"");
@@ -1688,8 +1862,9 @@ async function revisarBorrador(borId){
       <div class="fila"><div class="campo" style="flex:2"><label>Política</label>${D.v34?`<select class="inp br-po" ${dis}><option value="">— Sin política —</option>${c.politica?`<option value="nueva" ${pm==="nueva"?"selected":""}>➕ Crear: ${esc(c.politica)}</option>`:""}${D.politicas.filter(p=>p.estado!=="derogada").map(p=>`<option value="${p.id}" ${String(pm)===String(p.id)?"selected":""}>${esc((p.codigo?p.codigo+" · ":"")+p.nombre)}</option>`).join("")}</select>`:`<input class="inp br-pt" value="${esc(c.politica)}" ${dis}>`}</div></div>
       <div class="fila"><div class="campo" style="flex:2"><label>Indicador</label><input class="inp br-in" value="${esc(c.indicador)}" ${dis}></div><div class="campo"><label>Meta</label><input class="inp br-me" value="${esc(c.meta)}" ${dis}></div></div>
       <label style="display:flex;gap:8px;align-items:flex-start;margin:0;font-weight:500;font-size:13px"><input type="checkbox" class="br-cr" ${c.critico?"checked":""} ${dis} style="margin-top:3px"> <span><b>Competencia crítica</b>${c.justificacion?` <span class="sub-t">· IA: ${esc(c.justificacion)}</span>`:""}${c.fuente?` <span class="sub-t">· Fuente: ${esc(c.fuente)}</span>`:""}</span></label>
+      <div class="br-fw" data-sel="${esc((c.funciones_relacionadas||[]).join(","))}" style="margin-top:8px"></div>
     </div>`; };
-  abrirModal(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3>Borrador del manual · ${esc(man?.nombre_archivo||"")}</h3><div style="color:var(--muted);font-size:12.5px">Propuesta de ${esc(b.modelo_ia||"la IA")} · ${soloVer?(b.estado==="aplicado"?"ya aplicado a la estructura":"rechazado"):"revisa y corrige: nada se aplica hasta que apruebes"}</div></div><span class="badge ${b.estado==="aplicado"?"b-ok":b.estado==="rechazado"?"b-red":"b-wait"}">${esc(b.estado)}</span></div>
+  abrirModal(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3>Borrador del manual · ${esc(man?.nombre_archivo||"")}</h3><div style="color:var(--muted);font-size:12.5px">Propuesta de ${esc(b.modelo_ia||"la IA")} · ${soloVer?(b.estado==="aplicado"?"ya aplicado a la estructura":"rechazado"):"revisa y corrige: nada se aplica hasta que apruebes"}${cola.length>1&&pos>=0?` · <b>${pos+1} de ${cola.length}</b> por revisar`:""}</div></div><span class="badge ${b.estado==="aplicado"?"b-ok":b.estado==="rechazado"?"b-red":"b-wait"}">${esc(b.estado)}</span></div>
     ${d.observaciones?`<div class="explbox" style="margin-top:10px">⚠ <b>La IA advierte:</b> ${esc(d.observaciones)}</div>`:""}
     <div style="max-height:62vh;overflow:auto;padding-right:6px;margin-top:12px">
       <div class="lbl-campo">1 · Puesto</div>
@@ -1702,12 +1877,13 @@ async function revisarBorrador(borId){
       <div class="campo"><label for="br-mis">Misión del puesto</label><textarea class="inp" id="br-mis" rows="2" ${dis}>${esc(d.mision)}</textarea></div>
       <div class="lbl-campo" style="margin-top:8px">2 · Funciones (una por línea)</div>
       <textarea class="inp" id="br-fun" rows="5" ${dis}>${esc(d.funciones.join("\n"))}</textarea>
+      <div id="br-cob" style="font-size:12.5px;margin-top:6px"></div>
       <label style="display:flex;gap:8px;align-items:center;margin:6px 0 0;font-weight:500;font-size:13px" id="br-reemp-w"><input type="checkbox" id="br-reemp" ${d._reemplazar?"checked":""} ${dis}> Reemplazar las funciones actuales del puesto (si no, se agregan solo las nuevas)</label>
-      <div class="lbl-campo" style="margin-top:14px;display:flex;justify-content:space-between">3 · Competencias <span id="br-suma"></span></div>
+      <div class="lbl-campo" style="margin-top:14px;display:flex;justify-content:space-between">3 · Competencias <span style="display:flex;gap:6px;align-items:center">${soloVer?"":`<button class="btn ghost xs" id="br-sugpeso" title="Según cuántas funciones respalda cada competencia y si es crítica">Sugerir pesos</button>`}<span id="br-suma"></span></span></div>
       <div id="br-comps">${d.competencias.map(compHTML).join("")}</div>
     </div>
     <div class="msg" id="br-msg"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">${soloVer?`<button class="btn sm" data-cerrar>Cerrar</button>`:`<button class="btn danger sm" id="br-rech" style="margin-right:auto">Rechazar</button><button class="btn ghost sm" id="br-guardar">Guardar revisión</button><button class="btn amber sm" id="br-ok">Aprobar y aplicar</button>`}</div>`, m=>{
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">${soloVer?`<button class="btn sm" data-cerrar>Cerrar</button>`:`<button class="btn danger sm" id="br-rech">Rechazar</button>${cola.length>1?`<button class="btn ghost sm" id="br-saltar" style="margin-right:auto">Saltar →</button>`:`<span style="margin-right:auto"></span>`}<button class="btn ghost sm" id="br-guardar">Guardar revisión</button><button class="btn amber sm" id="br-ok">Aprobar y aplicar</button>`}</div>`, m=>{
     const q=s=>m.querySelector(s);
     const compsDestino=()=>{ const v=q("#br-dest").value; return v?D.competencias.filter(c=>c.puesto_id===Number(v)):[]; };
     const refrescar=()=>{
@@ -1721,7 +1897,24 @@ async function revisarBorrador(borId){
         const glob=!e&&D.competencias.find(c=>nrm(c.nombre||c.categoria)===n);
         el.querySelector(".br-dup").innerHTML=e?'<span class="badge b-blue">Ya existe en el puesto · se actualizará</span>':glob?`<span class="badge b-gris">Nombre usado en otro puesto</span>`:'<span class="badge b-ok">Nueva</span>'; });
       q("#br-suma").innerHTML=`<span class="badge ${Math.round(suma)===100?"b-ok":"b-red"}">Pesos: ${Math.round(suma)}%</span>`;
+      // cobertura: funciones respaldadas por al menos una competencia incluida
+      const nF=lineasFun().length, cub=new Set();
+      m.querySelectorAll(".br-c").forEach(el=>{ if(el.querySelector(".br-inc").checked) el.querySelectorAll(".br-fn:checked").forEach(i=>cub.add(Number(i.value))); });
+      const falta=[...Array(nF).keys()].map(k=>k+1).filter(k=>!cub.has(k));
+      q("#br-cob").innerHTML=nF?`<span class="badge ${falta.length?"b-wait":"b-ok"}">${nF-falta.length} de ${nF} funciones respaldadas por alguna competencia</span>${falta.length?` <span class="sub-t">· sin competencia: ${falta.join(", ")}</span>`:""}`:"";
     };
+    const lineasFun=()=>q("#br-fun").value.split("\n").map(x=>x.trim()).filter(Boolean);
+    const pintarChips=()=>{ const fs=lineasFun();
+      m.querySelectorAll(".br-fw").forEach(w=>{ const marcadas=w.querySelector(".br-fn")?new Set([...w.querySelectorAll(".br-fn:checked")].map(i=>Number(i.value))):new Set((w.dataset.sel||"").split(",").filter(Boolean).map(Number));
+        w.innerHTML=fs.length?`<div class="sub-t" style="margin-bottom:4px"><b>Respalda las funciones:</b></div><div style="display:flex;gap:5px;flex-wrap:wrap">${fs.map((f,k)=>`<label title="${esc(f)}" style="display:inline-flex;gap:4px;align-items:center;margin:0;padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;background:${marcadas.has(k+1)?"var(--amber-soft)":"#fff"}"><input type="checkbox" class="br-fn" value="${k+1}" ${marcadas.has(k+1)?"checked":""} ${dis} style="margin:0"> ${k+1}</label>`).join("")}</div>`:""; });
+      m.querySelectorAll(".br-fn").forEach(i=>i.addEventListener("change",()=>{ i.parentElement.style.background=i.checked?"var(--amber-soft)":"#fff"; }));
+    };
+    pintarChips();
+    q("#br-fun").addEventListener("input",pintarChips);
+    if(q("#br-sugpeso")) q("#br-sugpeso").onclick=()=>{ const els=[...m.querySelectorAll(".br-c")].filter(el=>el.querySelector(".br-inc").checked); if(!els.length) return;
+      const pts=els.map(el=>(1+el.querySelectorAll(".br-fn:checked").length)*(el.querySelector(".br-cr").checked?1.5:1)), tot=pts.reduce((a,b)=>a+b,0);
+      const ps=pts.map(p=>Math.round(p*100/tot)); ps[ps.indexOf(Math.max(...ps))]+=100-ps.reduce((a,b)=>a+b,0);
+      els.forEach((el,k)=>el.querySelector(".br-pe").value=ps[k]); refrescar(); };
     if(!soloVer){ m.addEventListener("input",refrescar); m.addEventListener("change",refrescar); }
     q("#br-dest").addEventListener("change",e=>{ const p=D.puestoPorId[Number(e.target.value)]; if(p){ q("#br-pn").value=p.nombre; if(!q("#br-dep").value) q("#br-dep").value=p.departamento||""; } });
     refrescar();
@@ -1731,14 +1924,16 @@ async function revisarBorrador(borId){
       nd.competencias=[...m.querySelectorAll(".br-c")].map(el=>{ const c=d.competencias[Number(el.dataset.i)]; const g=s=>el.querySelector(s);
         return {...c, _excluir:!g(".br-inc").checked, nombre:g(".br-n").value.trim(), definicion:g(".br-de").value.trim(), conductas:g(".br-co").value.split("\n").map(x=>x.trim()).filter(Boolean),
           _pol:g(".br-po")?g(".br-po").value:undefined, politica:g(".br-pt")?g(".br-pt").value.trim():c.politica, indicador:g(".br-in").value.trim(), meta:g(".br-me").value.trim(),
-          nivel_esperado:Math.min(5,Math.max(1,parseFloat(g(".br-ne").value)||3.5)), peso:parseFloat(g(".br-pe").value)||0, critico:g(".br-cr").checked }; });
+          nivel_esperado:Math.min(5,Math.max(1,parseFloat(g(".br-ne").value)||3.5)), peso:parseFloat(g(".br-pe").value)||0, critico:g(".br-cr").checked,
+          funciones_relacionadas:[...el.querySelectorAll(".br-fn:checked")].map(i=>Number(i.value)) }; });
       return nd; };
     const err=(t)=>{ q("#br-msg").className="msg error"; q("#br-msg").textContent=t; };
     q("#br-guardar").onclick=async()=>{ const { error } = await sb.from("borradores_manual").update({datos:leer(),estado:"en_revision",revisado_por:PERFIL.id,revisado_en:new Date().toISOString()}).eq("id",b.id);
       if(error) return err(error.message); await sb.from("manuales_puesto").update({estado:"en_revision"}).eq("id",b.manual_id); cerrarModal(); modalManualesIA(); };
+    if(q("#br-saltar")) q("#br-saltar").onclick=()=>{ const sig=cola[(pos+1)%cola.length]; if(sig&&sig!==b.id) revisarBorrador(sig); };
     q("#br-rech").onclick=async()=>{ const motivo=q("#br-msg"); motivo.className="msg"; motivo.innerHTML=`<input class="inp" id="br-mot" placeholder="Motivo del rechazo (opcional)"> <button class="btn danger xs" id="br-rok" style="margin-top:6px">Confirmar rechazo</button>`;
       q("#br-rok").onclick=async()=>{ await sb.from("borradores_manual").update({estado:"rechazado",comentario:q("#br-mot").value.trim()||null,revisado_por:PERFIL.id,revisado_en:new Date().toISOString()}).eq("id",b.id);
-        await sb.from("manuales_puesto").update({estado:"rechazado"}).eq("id",b.manual_id); cerrarModal(); modalManualesIA(); }; };
+        await sb.from("manuales_puesto").update({estado:"rechazado"}).eq("id",b.manual_id); siguienteBorrador(b.id); }; };
     q("#br-ok").onclick=async()=>{ const nd=leer(); const inc=nd.competencias.filter(c=>!c._excluir);
       if(!nd.puesto) return err("Falta el nombre del puesto.");
       if(!nd._destino&&D.puestos.some(p=>nrm(p.nombre)===nrm(nd.puesto))) return err("Ya existe un puesto con ese nombre: elige «Actualizar» para no duplicarlo.");
@@ -1748,7 +1943,8 @@ async function revisarBorrador(borId){
       const nombres=inc.map(c=>nrm(c.nombre)); if(new Set(nombres).size!==nombres.length) return err("Hay dos competencias con el mismo nombre en el borrador.");
       q("#br-ok").disabled=true; q("#br-ok").textContent="Aplicando…";
       try{ const res=await aplicarBorrador(b, nd); cerrarModal(); await cargarBase(); irA("puestos",{vista:"competencias",puesto:res.puestoId});
-        aviso(`✅ Manual aplicado a <b>${esc(nd.puesto)}</b>: ${res.fn} funciones, ${res.nuevas} competencias nuevas, ${res.act} actualizadas${res.pols?`, ${res.pols} políticas creadas (quedan como «sin aprobación registrada» en Políticas)`:""}.${res.fuera.length?`<br><br>⚠ El puesto tiene ${res.fuera.length} competencia(s) que el manual no menciona: <b>${res.fuera.map(esc).join(", ")}</b>. No se borraron; revisa si siguen aplicando y ajusta los pesos.`:""}`); }
+        const resto=(await borradoresPendientes()).filter(x=>x!==b.id);
+        abrirModal(`<p style="margin-bottom:16px">`+`✅ Manual aplicado a <b>${esc(nd.puesto)}</b>: ${res.fn} funciones, ${res.nuevas} competencias nuevas, ${res.act} actualizadas${res.enlaces?`, ${res.enlaces} vínculos competencia–función`:""}${res.pols?`, ${res.pols} políticas creadas (quedan como «sin aprobación registrada» en Políticas)`:""}.${res.fuera.length?`<br><br>⚠ El puesto tiene ${res.fuera.length} competencia(s) que el manual no menciona: <b>${res.fuera.map(esc).join(", ")}</b>. No se borraron; revisa si siguen aplicando y ajusta los pesos.`:""}`+`</p><div style="display:flex;gap:8px;justify-content:flex-end">${resto.length?`<button class="btn ghost sm" data-cerrar>Ver el puesto</button><button class="btn amber sm" id="br-sig">Siguiente borrador (${resto.length})</button>`:`<button class="btn sm" data-cerrar>Entendido</button>`}</div>`, mm=>{ if(mm.querySelector("#br-sig")) mm.querySelector("#br-sig").onclick=()=>revisarBorrador(resto[0]); }); }
       catch(e){ q("#br-ok").disabled=false; q("#br-ok").textContent="Aprobar y aplicar"; err("Se detuvo: "+(e.message||e)+". Revisa la estructura antes de reintentar."); }
     };
   });
@@ -1772,7 +1968,11 @@ async function aplicarBorrador(b, d){
   if(d._reemplazar&&actuales.length){ ok(await sb.from("funciones_puesto").delete().eq("puesto_id",puestoId)); actuales=[]; }
   const ya=new Set(actuales.map(f=>nrm(f.funcion))); let orden=Math.max(0,...actuales.map(f=>f.orden||0));
   const nuevasF=d.funciones.filter(f=>!ya.has(nrm(f))).map(f=>({puesto_id:puestoId,funcion:f,orden:++orden,origen:"ia_aprobada",manual_id:b.manual_id}));
-  if(nuevasF.length) ok(await sb.from("funciones_puesto").insert(nuevasF));
+  const insF=nuevasF.length?ok(await sb.from("funciones_puesto").insert(nuevasF).select("id,funcion")):[];
+  // número de función del borrador (1, 2, 3…) → id real, para enlazar competencias con funciones
+  const idPorTexto={}; actuales.forEach(f=>idPorTexto[nrm(f.funcion)]=f.id); (insF||[]).forEach(f=>idPorTexto[nrm(f.funcion)]=f.id);
+  const idFuncion=(n)=>idPorTexto[nrm(d.funciones[n-1]||"")];
+  let enlaces=0;
   // 3. Políticas nuevas (solo si el catálogo existe)
   let pols=0; const polCreada={};
   for(const c of inc){ if(!D.v34||c._pol!=="nueva"||!c.politica) continue; const k=nrm(c.politica);
@@ -1793,6 +1993,9 @@ async function aplicarBorrador(b, d){
     if(e){ ok(await sb.from("competencias").update(v).eq("id",e.id)); compId=e.id; act++; }
     else { compId=ok(await sb.from("competencias").insert({...v,nombre:c.nombre,puesto_id:puestoId,orden:++ordC,origen:"ia_aprobada",manual_id:b.manual_id}).select("id").single()).id; nuevas++; }
     // conductas adicionales (la primera ya es el texto de la competencia)
+    if(D.v35){ const fids=[...new Set((c.funciones_relacionadas||[]).map(idFuncion).filter(Boolean))];
+      ok(await sb.from("competencia_funcion").delete().eq("competencia_id",compId));
+      if(fids.length){ ok(await sb.from("competencia_funcion").insert(fids.map(fid=>({competencia_id:compId,funcion_id:fid,origen:"ia_aprobada"})))); enlaces+=fids.length; } }
     const extra=c.conductas.slice(1); if(extra.length){ const tiene=new Set(D.conductas.filter(k=>k.competencia_id===compId).map(k=>nrm(k.texto)));
       const filas=extra.filter(t=>!tiene.has(nrm(t))).map((t,i)=>({competencia_id:compId,texto:t,politica:polTxt,indicador:c.indicador||null,meta:c.meta||null,orden:i+2,origen:"ia_aprobada",sincronizada:false}));
       if(filas.length) ok(await sb.from("conductas_competencia").insert(filas)); }
@@ -1803,7 +2006,7 @@ async function aplicarBorrador(b, d){
   ok(await sb.from("manuales_puesto").update({estado:"aprobado",puesto_id:puestoId}).eq("id",b.manual_id));
   const tocadas=new Set(inc.map(c=>nrm(c.nombre)));
   const fuera=ex.filter(x=>!tocadas.has(nrm(x.nombre||x.categoria))&&!tocadas.has(nrm(x.categoria))).map(x=>x.categoria);
-  return {puestoId, fn:nuevasF.length, nuevas, act, pols, fuera};
+  return {puestoId, fn:nuevasF.length, nuevas, act, pols, fuera, enlaces};
 }
 
 // ==================== USUARIOS (con organigrama) ====================
@@ -2122,7 +2325,7 @@ function informeHTML(x, ex, modo){
     </div>
     <div class="row2">
       <div class="card"><h3>Comparativo por competencia</h3><div class="cap">Autoevaluación frente a la valoración del jefe directo</div>${radarSVG(x.filas.map(f=>f.c.categoria),x.filas.map(f=>f.j),x.filas.map(f=>f.a))}</div>
-      <div class="card"><div class="levelcard">${anilloSVG(x.prom180)}<div><div class="lbl" style="color:var(--muted);font-size:12.5px;font-weight:600">Nivel resultante</div><div style="font-size:25px;font-weight:800;letter-spacing:-.02em">${x.nivel.txt}</div><div style="color:var(--ink-2);font-size:13px;margin-top:2px">Resultado ${f2(x.prom180)} / 5${CFG.peso_jefe<1?` · ${Math.round(CFG.peso_jefe*100)}% jefe`:" · valoración del jefe"}</div></div></div>
+      <div class="card"><div class="levelcard">${anilloSVG(x.prom180)}<div><div class="lbl" style="color:var(--muted);font-size:12.5px;font-weight:600">Nivel resultante</div><div style="font-size:25px;font-weight:800;letter-spacing:-.02em">${x.nivel.txt}</div><div style="color:var(--ink-2);font-size:13px;margin-top:2px">Resultado ${f2(x.prom180)} / 5${CFG.peso_jefe<1?` · ${Math.round(CFG.peso_jefe*100)}% jefe`:" · valoración del jefe"}${x.ponderado?" · ponderado por pesos":""}</div></div></div>
         <div class="aviso" style="margin-top:16px"><b>Acción según el nivel:</b> ${niv>=0?ACCION_NIVEL[niv]:"—"}</div>
         <div style="margin-top:12px;font-size:12.5px;color:var(--ink-2);line-height:1.7">
           <div>Conocimiento de reglas: ${acP?`<span class="badge b-ok">Firmado ${fmtFecha(acP.creado_en)}</span>`:'<span class="badge b-wait">Pendiente</span>'}</div>
@@ -2133,9 +2336,9 @@ function informeHTML(x, ex, modo){
       </div>
     </div>
     <div class="card mt"><h3>Análisis de brechas</h3><div class="cap">Brecha de desempeño = nivel esperado − resultado (Armstrong): significativa desde ${CFG.brecha_significativa.toFixed(2)}, crítica desde ${CFG.brecha_critica.toFixed(2)}. Autoconciencia = autoevaluación − jefe; se marca desde ${CFG.umbral_brecha.toFixed(2)}.</div>
-      <div class="tabla-wrap"><table><thead><tr><th>Competencia</th><th class="c">Esperado</th><th class="c">Auto</th><th class="c">Jefe</th><th class="c">Resultado</th><th class="c">Brecha</th><th>Nivel de brecha</th><th class="c">Autoconciencia</th></tr></thead><tbody>${
-        x.filas.map(f=>`<tr class="${f.nb.i>=2?"bajo":""}"><td style="min-width:220px"><b>${esc(f.c.categoria)}</b>${f.c.critico?'<span class="tag-crit">CRÍTICA</span>':""}<div class="sub-t">${esc(f.c.texto)}</div>${f.c.indicador?`<div class="ficha"><b>Indicador:</b> ${esc(f.c.indicador)}${f.c.meta?` · <b>Meta:</b> ${esc(f.c.meta)}`:""}${f.evidencia?` · <b>Resultado real:</b> ${esc(f.evidencia)}`:""}</div>`:""}</td>
-          <td class="c num">${f.esperado.toFixed(1)}</td><td class="c num">${f.a??"—"}</td><td class="c num">${f.j??"—"}</td><td class="c num"><b>${f.r==null?"—":f.r}</b></td><td class="c num"><b>${f.bd==null?"—":(f.bd>0?"+":"")+f.bd.toFixed(2)}</b></td><td>${semHTML(f.bd)}</td>
+      <div class="tabla-wrap"><table><thead><tr><th>Competencia</th><th class="c">Esperado</th><th class="c">Auto</th><th class="c">Jefe</th><th class="c">Resultado</th>${x.ponderado?'<th class="c">Peso</th><th class="c">Aporte</th>':""}<th class="c">Brecha</th><th>Nivel de brecha</th><th class="c">Autoconciencia</th></tr></thead><tbody>${
+        x.filas.map(f=>`<tr class="${f.nb.i>=2?"bajo":""}"><td style="min-width:220px"><b>${esc(f.c.categoria)}</b>${f.c.critico?'<span class="tag-crit">CRÍTICA</span>':""}<div class="sub-t">${esc(f.c.texto)}</div>${f.c.indicador?`<div class="ficha"><b>Indicador:</b> ${esc(f.c.indicador)}${f.c.meta?` · <b>Meta:</b> ${esc(f.c.meta)}`:""}${f.evidencia?` · <b>Resultado real:</b> ${esc(f.evidencia)}`:""}${f.kpi?` → nota KPI <b>${f.kpi.nota}</b>${f.j!=null&&f.j!==f.kpi.nota?` <span class="badge b-wait" title="La nota del jefe se aparta de la del indicador">jefe ${f.j}</span>`:""}`:""}${f.justificacion?`<div><b>Justificación del jefe:</b> ${esc(f.justificacion)}</div>`:""}</div>`:""}</td>
+          <td class="c num">${f.esperado.toFixed(1)}</td><td class="c num">${f.a??"—"}</td><td class="c num">${f.j??"—"}</td><td class="c num"><b>${f.r==null?"—":f.r}</b></td>${x.ponderado?`<td class="c num">${f.pesoEf==null?"—":Math.round(f.pesoEf)+"%"}</td><td class="c num">${f.aporte==null?"—":f.aporte.toFixed(2)}</td>`:""}<td class="c num"><b>${f.bd==null?"—":(f.bd>0?"+":"")+f.bd.toFixed(2)}</b></td><td>${semHTML(f.bd)}</td>
           <td class="c num" style="${f.sigBA?(f.ba>0?"color:var(--warn);font-weight:700":"color:var(--blue);font-weight:700"):"color:var(--muted)"}">${f.ba==null?"—":signo(f.ba)}${f.sigBA?" *":""}</td></tr>`).join("")
       }</tbody></table></div></div>
     <div class="card mt"><h3>Brechas de autoconciencia — interpretación</h3><div class="cap">Dónde la percepción del colaborador difiere de la valoración del jefe directo</div><div style="font-size:13.5px;color:var(--ink-2);line-height:1.6">${interpretacion(x)}</div></div>
@@ -2419,7 +2622,7 @@ async function cargaMasivaResultados(pid){
       const filas=[]; evs.sort((a,b)=>String(perfil(a.evaluado_id)?.nombre).localeCompare(String(perfil(b.evaluado_id)?.nombre))||a.tipo.localeCompare(b.tipo)).forEach(e=>{ const p=perfil(e.evaluado_id)||{};
         compsDelPuesto(e.puesto_id).forEach(c=>{ const r=ya[e.id+"|"+c.id]; filas.push({"ID evaluación":e.id,"ID competencia":c.id,Cédula:p.cedula||"",Colaborador:p.nombre||"",Puesto:D.puestoPorId[e.puesto_id]?.nombre||"",
           Tipo:e.tipo==="autoevaluacion"?"Autoevaluación":"Valoración del jefe",Evaluador:e.tipo==="autoevaluacion"?"":perfil(e.evaluador_id)?.nombre||"",Competencia:c.categoria,Conducta:c.texto,Indicador:c.indicador||"",Meta:c.meta||"","Nivel esperado":esperadoDe(c),
-          "Puntaje (1-5)":r?.puntaje??"","Resultado real":r?.evidencia||""}); }); });
+          "Puntaje (1-5)":r?.puntaje??"","Resultado real":r?.evidencia||"",...(e.tipo!=="autoevaluacion"&&modoKPI()?{"Justificación (si el puntaje se aparta del KPI)":r?.justificacion||""}:{})}); }); });
       if(!filas.length){ m.querySelector("#cr-out").innerHTML=`<div class="aviso">No hay evaluaciones con ese filtro. Genera primero la campaña en Evaluaciones.</div>`; return; }
       exportarExcel("Plantilla_Resultados_"+soloAlnum(per.nombre||"campana"),[{nombre:"Resultados",filas}]);
     };
@@ -2428,16 +2631,23 @@ async function cargaMasivaResultados(pid){
       try{ filas=await leerExcelArchivo(e.target.files[0]); }catch(err){ out.innerHTML=`<div class="msg error">No pude leer el archivo: ${esc(err.message)}</div>`; return; }
       const evs=await cargarEvaluaciones(pid); const porId=Object.fromEntries(evs.map(x=>[x.id,x]));
       const ok=[], errores=[];
-      filas.forEach((r,i)=>{ const eid=parseInt(col(r,"id evaluacion")), cid=parseInt(col(r,"id competencia")), pt=col(r,"puntaje"), ev=col(r,"resultado real");
+      let calc=0, desv=0;
+      filas.forEach((r,i)=>{ const eid=parseInt(col(r,"id evaluacion")), cid=parseInt(col(r,"id competencia")), ev=col(r,"resultado real"), just=col(r,"justificacion"); let pt=col(r,"puntaje");
+        const e2=porId[eid], c2=e2&&compsDelPuesto(e2.puesto_id).find(c=>c.id===cid);
+        // Valoración del jefe: el resultado real del KPI se convierte en nota (vacío → se calcula; modo obligatorio → manda el KPI)
+        const k=e2&&c2&&e2.tipo!=="autoevaluacion"&&modoKPI()?notaKPI(c2.meta,ev):null;
+        if(k&&(pt===""||modoKPI()===2)){ if(pt==="") calc++; pt=String(k.nota); }
         if(pt==="") return;
-        const v=parseInt(pt); const e2=porId[eid];
+        const v=parseInt(pt);
         if(!e2){ errores.push(`Fila ${i+2}: la evaluación ${eid||"(vacía)"} no pertenece a esta campaña`); return; }
         if(!compsDelPuesto(e2.puesto_id).some(c=>c.id===cid)){ errores.push(`Fila ${i+2}: competencia no válida para el puesto`); return; }
         if(!(v>=1&&v<=5)||String(v)!==pt.replace(/\.0+$/,"")){ errores.push(`Fila ${i+2}: el puntaje "${pt}" debe ser un número entero de 1 a 5`); return; }
-        ok.push({evaluacion_id:eid,competencia_id:cid,puntaje:v,evidencia:ev||null}); });
+        const fila={evaluacion_id:eid,competencia_id:cid,puntaje:v,evidencia:ev||null};
+        if(D.v36&&k){ fila.resultado_kpi=k.real; fila.nota_kpi=k.nota; fila.justificacion=just||null; if(Math.abs(v-k.nota)>=CFG.kpi_desvio&&!just) desv++; }
+        ok.push(fila); });
       const porEval={}; ok.forEach(r=>(porEval[r.evaluacion_id]=porEval[r.evaluacion_id]||new Set()).add(r.competencia_id));
       const completas=Object.entries(porEval).filter(([eid,set])=>compsDelPuesto(porId[eid].puesto_id).every(c=>set.has(c.id))).map(([eid])=>Number(eid));
-      out.innerHTML=`<div class="aviso">${ok.length} puntajes válidos · ${Object.keys(porEval).length} evaluaciones · ${completas.length} quedarán completas${errores.length?`<div style="color:var(--red);font-size:12px;margin-top:6px;max-height:120px;overflow:auto">${errores.slice(0,100).map(esc).join("<br>")}</div>`:""}</div>
+      out.innerHTML=`<div class="aviso">${ok.length} puntajes válidos · ${Object.keys(porEval).length} evaluaciones · ${completas.length} quedarán completas${calc?` · ${calc} calculados desde el resultado del KPI`:""}${desv?`<div style="color:var(--warn);font-size:12px;margin-top:4px">⚠ ${desv} puntaje(s) se apartan de la nota del KPI sin justificación.</div>`:""}${errores.length?`<div style="color:var(--red);font-size:12px;margin-top:6px;max-height:120px;overflow:auto">${errores.slice(0,100).map(esc).join("<br>")}</div>`:""}</div>
         ${ok.length?`<button class="btn amber sm" id="cr-ok">Cargar ${ok.length} puntajes</button>`:""}<div class="msg" id="cr-msg"></div>`;
       if(!ok.length) return;
       m.querySelector("#cr-ok").onclick=async()=>{
@@ -2643,7 +2853,8 @@ function reglasDelJuego(e, evsPeriodo, continuar){
   abrirModal(`<h3>Reglas de la evaluación</h3><div style="color:var(--muted);font-size:12.5px;margin-bottom:12px">${esc(per.nombre)} · antes de evaluar, revisa ${soloAuto?"las competencias y políticas de tu puesto":"cómo se evalúa cada competencia"}.</div>
     <div style="max-height:52vh;overflow:auto;padding-right:4px">${puestos.map(pid=>{ const full=deJefe.has(pid);
       return `<div class="catchip" style="margin:6px 0 8px"><span class="d"></span>${esc(D.puestoPorId[pid]?.nombre)}${!soloAuto?(full?" · equipo que evalúas":" · tu autoevaluación"):""}</div>${compsDelPuesto(pid).map(c=>`<div style="padding:8px 0;border-bottom:1px solid var(--line-2)"><b>${esc(c.categoria)}</b><div style="font-size:13px">${esc(c.texto)}</div>${fichaUsuario(c,full)}</div>`).join("")}`; }).join("")}
-      <div class="explbox">Escala: 1 Deficiente · 2 Regular · 3 Bueno · 4 Muy bueno · 5 Excelente. ${soloAuto?"Califícate con honestidad, pensando en hechos concretos del periodo.":"Califica con base en hechos del periodo y en el indicador de cada competencia."}</div></div>
+      <div class="explbox">Escala: 1 Deficiente · 2 Regular · 3 Bueno · 4 Muy bueno · 5 Excelente. ${soloAuto?"Califícate con honestidad, pensando en hechos concretos del periodo.":"Califica con base en hechos del periodo y en el indicador de cada competencia."}</div>
+      ${!soloAuto&&modoKPI()?`<div class="explbox"><b>Cómo se convierte el resultado del indicador en nota</b>${modoKPI()===1?" (nota sugerida; si te apartas "+CFG.kpi_desvio+" punto o más, debes justificar)":" (la nota es la del indicador)"}<div style="margin-top:8px">${tablaConversionHTML(true)}</div></div>`:""}</div>
     <label style="display:flex;gap:8px;align-items:flex-start;margin-top:14px;font-weight:500;font-size:13px"><input type="checkbox" id="rg-ok" style="margin-top:3px"> ${soloAuto?"Declaro que conozco las competencias y políticas con las que se realiza esta evaluación.":"Declaro que conozco las políticas, indicadores y metas con los que se realiza esta evaluación."}</label>
     <div class="msg" id="rg-msg"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px"><button class="btn ghost sm" data-cerrar>Cancelar</button><button class="btn amber sm" id="rg-si">Firmar y continuar</button></div>`, m=>{
@@ -2674,7 +2885,9 @@ async function abrirFormulario(evalId){
   comps.forEach(c=>{ if(c.categoria!==cat){ cat=c.categoria; html+=`<div class="catchip"><span class="d"></span>${esc(cat)}</div>`; }
     html+=`<div class="q"><p>${esc(c.texto)}</p>${fichaUsuario(c,!esAuto)}
       <div class="scale ${solo?"solo":""}" data-comp="${c.id}">${NIV.map((t,i)=>`<div class="opt ${ya[c.id]?.puntaje===i+1?"sel":""}" data-v="${i+1}" role="button" tabindex="${solo?-1:0}"><div class="n">${i+1}</div><div class="t">${t}</div></div>`).join("")}</div>
-      ${!esAuto&&c.indicador?`<div class="evid"><label for="ev-${c.id}">Resultado real del indicador</label><input class="inp" id="ev-${c.id}" data-evid="${c.id}" value="${esc(ya[c.id]?.evidencia)}" placeholder="Ej. 97% · 2 errores en el mes" ${solo?"disabled":""}></div>`:""}</div>`; });
+      ${!esAuto&&c.indicador?`<div class="evid"><label for="ev-${c.id}">Resultado real del indicador${modoKPI()&&interpretarMeta(c.meta)?` <span class="sub-t" style="font-weight:500">· escribe el número (ej. 97% · 2)${modoKPI()===2?" — la nota sale del KPI":""}</span>`:""}</label><input class="inp" id="ev-${c.id}" data-evid="${c.id}" value="${esc(ya[c.id]?.evidencia)}" placeholder="Ej. 97% · 2 errores en el mes" ${solo?"disabled":""}>
+        <div class="sub-t" id="kn-${c.id}" style="margin-top:6px"></div>
+        <div id="kj-w-${c.id}" style="display:none;margin-top:8px"><label for="kj-${c.id}" style="color:var(--warn)">Justificación obligatoria: tu nota se aparta de la que da el indicador</label><textarea class="inp" id="kj-${c.id}" data-just="${c.id}" rows="2" placeholder="Explica con hechos por qué la nota es distinta" ${solo?"disabled":""}>${esc(ya[c.id]?.justificacion)}</textarea></div></div>`:""}</div>`; });
   $("contenido").innerHTML=`<div class="formwrap">
     <button class="btn ghost sm" id="fm-volver" style="margin-bottom:14px">← Volver</button>
     <div class="evhead"><img class="brandimg" alt="Etinar" src="${$("logo-app").src}" style="height:26px">
@@ -2692,15 +2905,36 @@ async function abrirFormulario(evalId){
   $("fm-volver").onclick=()=>irA("mis");
   const actualizar=()=>{ const t=document.querySelectorAll(".scale").length, r=document.querySelectorAll(".scale .opt.sel").length; $("fm-bar").style.width=(t?Math.round(r*100/t):0)+"%"; if($("fm-st")) $("fm-st").textContent=`${r} de ${t} respondidas`; };
   actualizar();
+  // Conversión del resultado del KPI a nota (según las reglas de Periodos)
+  const compPorId=Object.fromEntries(comps.map(c=>[c.id,c]));
+  const kpiDe=(cid)=>{ const i=document.querySelector(`[data-evid="${cid}"]`); return i&&modoKPI()?notaKPI(compPorId[cid]?.meta,i.value):null; };
+  const elegir=(cid,v)=>{ const s=document.querySelector(`.scale[data-comp="${cid}"]`); s.querySelectorAll(".opt").forEach(x=>x.classList.toggle("sel",Number(x.dataset.v)===v)); actualizar(); };
+  const revisarKPI=(cid,desdeInput)=>{ const k=kpiDe(cid), info=$("kn-"+cid), jw=$("kj-w-"+cid); if(!info) return;
+    const s=document.querySelector(`.scale[data-comp="${cid}"]`);
+    info.innerHTML=k?`📏 ${textoNotaKPI(k)}`:(modoKPI()&&interpretarMeta(compPorId[cid]?.meta)?`Meta: ${esc(interpretarMeta(compPorId[cid].meta).txt)}`:"");
+    if(k&&!solo&&(desdeInput||modoKPI()===2)) elegir(cid,k.nota);
+    if(modoKPI()===2&&interpretarMeta(compPorId[cid]?.meta)){ s.classList.toggle("solo",true); s.title="La nota sale del resultado del indicador"; }
+    const sel=Number(s.querySelector(".opt.sel")?.dataset.v||0);
+    jw.style.display=(k&&modoKPI()===1&&sel&&Math.abs(sel-k.nota)>=CFG.kpi_desvio)||(solo&&$("kj-"+cid).value)?"":"none"; };
+  comps.forEach(c=>revisarKPI(c.id,false));
   if(solo) return;
-  document.querySelectorAll(".scale").forEach(s=>s.querySelectorAll(".opt").forEach(o=>{ const sel=()=>{ s.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel")); o.classList.add("sel"); actualizar(); }; o.onclick=sel; o.onkeydown=ev2=>{ if(ev2.key==="Enter"||ev2.key===" "){ ev2.preventDefault(); sel(); } }; }));
+  document.querySelectorAll("[data-evid]").forEach(i=>i.addEventListener("input",()=>revisarKPI(Number(i.dataset.evid),true)));
+  document.querySelectorAll(".scale").forEach(s=>s.querySelectorAll(".opt").forEach(o=>{ const sel=()=>{ if(s.classList.contains("solo")) return; s.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel")); o.classList.add("sel"); actualizar(); revisarKPI(Number(s.dataset.comp),false); }; o.onclick=sel; o.onkeydown=ev2=>{ if(ev2.key==="Enter"||ev2.key===" "){ ev2.preventDefault(); sel(); } }; }));
   $("fm-ok").onclick=async()=>{
     const msg=$("fm-msg"); const filas=[]; let faltan=0;
     document.querySelectorAll(".scale").forEach(s=>{ const o=s.querySelector(".opt.sel"); if(!o){ faltan++; return; } const cid=Number(s.dataset.comp); const evd=document.querySelector(`[data-evid="${cid}"]`);
-      filas.push({evaluacion_id:Number(evalId),competencia_id:cid,puntaje:Number(o.dataset.v),evidencia:evd?evd.value.trim()||null:null}); });
+      const k=kpiDe(cid), jt=$("kj-"+cid), fila={evaluacion_id:Number(evalId),competencia_id:cid,puntaje:Number(o.dataset.v),evidencia:evd?evd.value.trim()||null:null};
+      if(D.v36&&!esAuto){ fila.resultado_kpi=k?k.real:null; fila.nota_kpi=k?k.nota:null; fila.justificacion=jt&&$("kj-w-"+cid).style.display!=="none"?jt.value.trim()||null:null; }
+      filas.push(fila); });
+    if(!esAuto&&modoKPI()){
+      const sinJ=comps.find(c=>{ const w=$("kj-w-"+c.id); return w&&w.style.display!=="none"&&!$("kj-"+c.id).value.trim(); });
+      if(sinJ){ msg.className="msg error"; msg.textContent=`Escribe la justificación en «${sinJ.categoria}»: tu nota se aparta de la que da el indicador.`; $("kj-"+sinJ.id).scrollIntoView({behavior:"smooth",block:"center"}); return; }
+      const sinReal=modoKPI()===2&&comps.find(c=>interpretarMeta(c.meta)&&c.indicador&&!kpiDe(c.id));
+      if(sinReal){ msg.className="msg error"; msg.textContent=`Escribe el resultado real del indicador en «${sinReal.categoria}».`; $("ev-"+sinReal.id).scrollIntoView({behavior:"smooth",block:"center"}); return; } }
     if(faltan){ msg.className="msg error"; msg.textContent=`Faltan ${faltan} competencia(s) por calificar.`; [...document.querySelectorAll(".scale")].find(x=>!x.querySelector(".sel"))?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
     $("fm-ok").disabled=true; $("fm-ok").textContent="Enviando...";
-    const e1=(await sb.from("respuestas").upsert(filas,{onConflict:"evaluacion_id,competencia_id"})).error;
+    let e1=(await sb.from("respuestas").upsert(filas,{onConflict:"evaluacion_id,competencia_id"})).error;
+    if(e1&&/nota_kpi|resultado_kpi|justificacion/i.test(e1.message)){ filas.forEach(f=>{ delete f.nota_kpi; delete f.resultado_kpi; delete f.justificacion; }); e1=(await sb.from("respuestas").upsert(filas,{onConflict:"evaluacion_id,competencia_id"})).error; }
     const e2=e1?null:(await sb.from("comentarios").upsert({evaluacion_id:Number(evalId),fortalezas:$("cm-f").value.trim(),areas_mejora:$("cm-a").value.trim(),aspectos_mejorar_evaluador:esAuto?null:($("cm-e").value.trim()||null)},{onConflict:"evaluacion_id"})).error;
     const e3=(e1||e2)?null:(await sb.from("evaluaciones").update({estado:"completada",completada_en:new Date().toISOString()}).eq("id",evalId)).error;
     const err=e1||e2||e3;
@@ -2798,16 +3032,17 @@ function exportarResultados(personas, periodoNombre){
       "Autoevaluación":x.promA==null?"":+x.promA.toFixed(2),"Valoración del jefe":x.promJ==null?"":+x.promJ.toFixed(2),"Resultado 180°":x.prom180==null?"":+x.prom180.toFixed(2),
       Nivel:x.nivel.txt,"Brechas significativas":x.nSig,"Brechas críticas":x.nCrit,"Brecha de autoconciencia":x.brechaAuto??"",Clasificación:x.clasif.txt,"Acción recomendada":x.clasif.accion});
     x.filas.forEach(f=>matriz.push({Colaborador:x.nombre,Cargo:x.puesto,Área:x.departamento,Competencia:f.c.categoria,Conducta:f.c.texto,"Competencia crítica":f.c.critico?"Sí":"No",
-      "Nivel esperado":f.esperado,"Evaluación jefe":f.j??"",Autoevaluación:f.a??"","Resultado 180°":f.r??"","Resultado real del indicador":f.evidencia||"",
+      "Nivel esperado":f.esperado,"Evaluación jefe":f.j??"",Autoevaluación:f.a??"","Resultado 180°":f.r??"","Peso en la nota (%)":x.ponderado&&f.pesoEf!=null?Math.round(f.pesoEf):"","Aporte a la nota":x.ponderado&&f.aporte!=null?+f.aporte.toFixed(2):"","Resultado real del indicador":f.evidencia||"","Nota según KPI":f.kpi?f.kpi.nota:"","Justificación del jefe":f.justificacion||"",
       Brecha:f.bd??"","Nivel de brecha":f.nb.txt,"Brecha autoconciencia":f.ba??"","Acción recomendada":f.nb.i>=3?"Plan de Desarrollo Individual":f.nb.i===2?"Acción de desarrollo / acompañamiento":f.nb.i===1?"Seguimiento normal":f.nb.i===0?"Mantener / potenciar":""}));
   });
   exportarExcel("Resultados_Etinar",[{nombre:"Resumen por persona",filas:resumen},{nombre:"Matriz de brechas",filas:matriz}]);
 }
 function exportarInformeWord(x, ex, per){
-  const filas=x.filas.map(f=>[f.c.categoria+(f.c.critico?" (crítica)":""),f.esperado.toFixed(1),f.a??"—",f.j??"—",f.r??"—",f.bd==null?"—":f.bd.toFixed(2),f.nb.txt,f.ba==null?"—":signo(f.ba)]);
+  const pd=x.ponderado;
+  const filas=x.filas.map(f=>[f.c.categoria+(f.c.critico?" (crítica)":""),f.esperado.toFixed(1),f.a??"—",f.j??"—",f.r??"—",...(pd?[f.pesoEf==null?"—":Math.round(f.pesoEf)+"%",f.aporte==null?"—":f.aporte.toFixed(2)]:[]),f.bd==null?"—":f.bd.toFixed(2),f.nb.txt,f.ba==null?"—":signo(f.ba)]);
   const cuerpo=`<p><b>Colaborador:</b> ${esc(x.nombre)} · <b>Cargo:</b> ${esc(x.puesto)} · <b>Área:</b> ${esc(x.departamento)}<br><b>Campaña:</b> ${esc(per.nombre||"")} · <b>Jefe directo:</b> ${esc(x.jefe?.nombre||"")}</p>
     <table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse;width:100%;font-size:10pt;background:#FBF4DC"><tr><td><b>Resultado 180°</b><br>${f2(x.prom180)}</td><td><b>Nivel</b><br>${x.nivel.txt}</td><td><b>Brecha de autoconciencia</b><br>${signo(x.brechaAuto)}</td><td><b>Clasificación</b><br>${esc(x.clasif.txt)}</td></tr></table>
-    <h3>Análisis de brechas</h3>${tablaWord(["Competencia","Esperado","Auto","Jefe","Resultado","Brecha","Nivel de brecha","Autoconciencia"],filas)}
+    <h3>Análisis de brechas</h3>${tablaWord(["Competencia","Esperado","Auto","Jefe","Resultado",...(pd?["Peso","Aporte"]:[]),"Brecha","Nivel de brecha","Autoconciencia"],filas)}${pd?`<p style="font-size:9pt;color:#555">Nota ponderada: cada competencia aporta según su peso en el puesto; las que no tienen peso cuentan con el peso promedio.</p>`:""}
     <p style="font-size:9pt;color:#555">Brecha de desempeño = nivel esperado − resultado. Significativa desde ${CFG.brecha_significativa.toFixed(2)}; crítica desde ${CFG.brecha_critica.toFixed(2)}.</p>
     <h3>Interpretación</h3>${interpretacion(x)}
     <h3>Clasificación del caso: ${esc(x.clasif.txt)}</h3><p>${esc(x.clasif.accion)}</p>
