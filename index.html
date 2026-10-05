@@ -542,6 +542,13 @@ const cliente={
   from:(t)=>new Q(t),
   storage:{ from:()=>({ upload:async(path)=>({data:{path},error:null}), remove:async()=>({data:null,error:null}), download:async()=>({data:null,error:{message:"demo"}}) }) },
   functions:{ invoke:async(nombre,{body})=>{ const m=yo(); if(!m||m.rol!=="admin") return {data:null,error:{message:"Solo Recursos Humanos puede analizar manuales"}};
+    if(nombre==="gestionar-usuarios"){ const clave=()=>"Et-demo"+Math.random().toString(36).slice(2,7);
+      if(body.accion==="restablecer"&&Array.isArray(body.perfil_ids)){ return {data:{ok:true,resultados:body.perfil_ids.map(id=>{ const p=DB.perfiles.find(x=>x.id===id); const c=clave(); p.debe_cambiar_clave=true; DB.accesos_temp=DB.accesos_temp.filter(x=>x.perfil_id!==id).concat([{perfil_id:id,usuario:p.usuario,clave:c}]); return {ok:true,perfil_id:id,usuario:p.usuario,clave:c}; })},error:null}; }
+      if(body.accion==="restablecer"){ const p=DB.perfiles.find(x=>x.id===body.perfil_id); const c=clave(); p.debe_cambiar_clave=true; DB.accesos_temp=DB.accesos_temp.filter(x=>x.perfil_id!==p.id).concat([{perfil_id:p.id,usuario:p.usuario,clave:c}]); return {data:{ok:true,usuario:p.usuario,clave:c},error:null}; }
+      const resultados=(body.usuarios||[]).map(u=>{ if(DB.perfiles.some(x=>x.usuario===u.usuario)) return {usuario:u.usuario,ok:false,error:"ese usuario ya existe"};
+        const pid=crypto.randomUUID?crypto.randomUUID():String(Math.random()); const c=clave(); const {email,...resto}=u;
+        DB.perfiles.push({id:pid,...resto,rol:u.rol==="evaluador"?"evaluador":"evaluado",debe_cambiar_clave:true,activo:true}); DB.accesos_temp.push({perfil_id:pid,usuario:u.usuario,clave:c}); return {usuario:u.usuario,ok:true,id:pid,clave:c}; });
+      return {data:{ok:true,resultados},error:null}; }
     const man=DB.manuales_puesto.find(x=>x.id===Number(body.manual_id)); if(!man) return {data:null,error:{message:"Manual no encontrado"}};
     man.estado="procesando"; await new Promise(r=>setTimeout(r,1800));
     const datos=propuestaDemo(man.nombre_archivo,man.puesto_id); const iguales=DB.puestos.filter(p=>p.nombre.toLowerCase()===datos.puesto.toLowerCase());
@@ -566,8 +573,7 @@ window.supabase={createClient:()=>cliente};
 const SUPABASE_URL = "https://hwscyzrytwdvqlombpph.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3c2N5enJ5dHdkdnFsb21icHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNjY4MTksImV4cCI6MjEwMDc0MjgxOX0.DK-K-HgqYPY8E8rpEE8OMBkknlZVmk-z85rZT4l2oe0";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-// cliente temporal (para crear usuarios sin cerrar la sesión del admin)
-const sbTmp = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ persistSession:false, autoRefreshToken:false }});
+// v3.10: las cuentas se crean en el servidor (Edge Function "gestionar-usuarios"); el registro público queda cerrado.
 const DOMINIO = "etinar.app";
 function usuarioAEmail(u){
   u=(u||"").trim().toLowerCase();
@@ -870,6 +876,8 @@ async function iniciarSesion(){
     await sb.auth.signOut(); $("btn-entrar").disabled=false; $("btn-entrar").textContent="Ingresar"; return;
   }
   PERFIL=perfilU;
+  if(PERFIL.activo===false){ $("msg-login").className="msg error"; $("msg-login").textContent="Tu usuario está inactivo. Contacta a RRHH.";
+    await sb.auth.signOut(); $("btn-entrar").disabled=false; $("btn-entrar").textContent="Ingresar"; mostrarLogin(); return; }
   // Primer ingreso: 1) nueva contraseña obligatoria  2) política de datos y privacidad
   if(PERFIL.rol!=="admin" && PERFIL.debe_cambiar_clave===true) return pasoClave();
   if(PERFIL.rol!=="admin" && ("acepto_privacidad_en" in PERFIL) && !PERFIL.acepto_privacidad_en) return pasoPrivacidad();
@@ -924,6 +932,8 @@ $("btn-clave").addEventListener("click", ()=>{
     m.querySelector("#nc-ok").onclick=async()=>{
       const a=m.querySelector("#nc1").value, b=m.querySelector("#nc2").value, msg=m.querySelector("#nc-msg");
       if(a.length<8){ msg.className="msg error"; msg.textContent="Mínimo 8 caracteres."; return; }
+      if(!/[a-zA-Z]/.test(a)||!/[0-9]/.test(a)){ msg.className="msg error"; msg.textContent="Usa letras y números."; return; }
+      if(PERFIL.cedula&&a.includes(PERFIL.cedula)){ msg.className="msg error"; msg.textContent="No uses tu número de cédula."; return; }
       if(a!==b){ msg.className="msg error"; msg.textContent="Las contraseñas no coinciden."; return; }
       const { error } = await sb.auth.updateUser({ password:a });
       if(error){ msg.className="msg error"; msg.textContent="Error: "+error.message; return; }
@@ -1008,7 +1018,8 @@ function pasoClave(){
     if(a!==b){ msg.className="msg error"; msg.textContent="Las contraseñas no coinciden."; return; }
     const { error } = await sb.auth.updateUser({ password:a });
     if(error){ msg.className="msg error"; msg.textContent="Error: "+error.message; return; }
-    await sb.rpc("marcar_clave_cambiada");
+    const { error:e2 } = await sb.rpc("marcar_clave_cambiada");
+    if(e2){ msg.className="msg error"; msg.textContent=e2.message||"No se pudo confirmar el cambio de contraseña."; return; }
     PERFIL.debe_cambiar_clave=false; iniciarSesion(); };
 }
 async function pasoPrivacidad(){
@@ -1911,38 +1922,90 @@ async function revisarBorrador(borId){
   const polSug=(t)=>{ const n=nrm(t); return n?D.politicas?.find(p=>nrm(p.nombre)===n):null; };
   const dis=soloVer?"disabled":"";
   const compHTML=(c,i)=>{ const pm=c._pol??(polSug(c.politica)?.id?String(polSug(c.politica).id):(c.politica?"nueva":""));
-    return `<div class="br-c" data-i="${i}" style="border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px">
-      <div style="display:flex;gap:10px;align-items:center;justify-content:space-between"><label style="display:flex;gap:8px;align-items:center;margin:0;font-weight:700"><input type="checkbox" class="br-inc" ${c._excluir?"":"checked"} ${dis}> Incluir</label><span class="br-dup"></span></div>
-      <div class="fila" style="margin-top:8px"><div class="campo" style="flex:2"><label>Competencia</label><input class="inp br-n" value="${esc(c.nombre)}" ${dis}></div>
-        <div class="campo" style="max-width:110px"><label>Nivel esperado</label><input class="inp br-ne" type="number" min="1" max="5" step="0.5" value="${esc(c.nivel_esperado)}" ${dis}></div>
-        <div class="campo" style="max-width:90px"><label>Peso %</label><input class="inp br-pe" type="number" min="0" max="100" value="${esc(c.peso)}" ${dis}></div></div>
-      <div class="campo"><label>Definición</label><input class="inp br-de" value="${esc(c.definicion)}" ${dis}></div>
-      <div class="campo"><label>Conductas observables (una por línea · la primera es la que se califica hoy)</label><textarea class="inp br-co" rows="2" ${dis}>${esc((c.conductas||[]).join("\n"))}</textarea></div>
-      <div class="fila"><div class="campo" style="flex:2"><label>Política</label>${D.v34?`<select class="inp br-po" ${dis}><option value="">— Sin política —</option>${c.politica?`<option value="nueva" ${pm==="nueva"?"selected":""}>➕ Crear: ${esc(c.politica)}</option>`:""}${D.politicas.filter(p=>p.estado!=="derogada").map(p=>`<option value="${p.id}" ${String(pm)===String(p.id)?"selected":""}>${esc((p.codigo?p.codigo+" · ":"")+p.nombre)}</option>`).join("")}</select>`:`<input class="inp br-pt" value="${esc(c.politica)}" ${dis}>`}</div></div>
-      <div class="fila"><div class="campo" style="flex:2"><label>Indicador</label><input class="inp br-in" value="${esc(c.indicador)}" ${dis}></div><div class="campo"><label>Meta</label><input class="inp br-me" value="${esc(c.meta)}" ${dis}></div></div>
-      <label style="display:flex;gap:8px;align-items:flex-start;margin:0;font-weight:500;font-size:13px"><input type="checkbox" class="br-cr" ${c.critico?"checked":""} ${dis} style="margin-top:3px"> <span><b>Competencia crítica</b>${c.justificacion?` <span class="sub-t">· IA: ${esc(c.justificacion)}</span>`:""}${c.fuente?` <span class="sub-t">· Fuente: ${esc(c.fuente)}</span>`:""}</span></label>
-      <div class="br-fw" data-sel="${esc((c.funciones_relacionadas||[]).join(","))}" style="margin-top:8px"></div>
+    const polSel=D.v34?`<select class="inp br-po" ${dis}><option value="">— Sin política (definir después) —</option>${c.politica?`<option value="nueva" ${pm==="nueva"?"selected":""}>➕ Crear: ${esc(c.politica)}</option>`:""}${D.politicas.filter(p=>p.estado!=="derogada").map(p=>`<option value="${p.id}" ${String(pm)===String(p.id)?"selected":""}>${esc((p.codigo?p.codigo+" · ":"")+p.nombre)}</option>`).join("")}</select>`:`<input class="inp br-pt" value="${esc(c.politica)}" ${dis}>`;
+    return `<div class="br-c rv-card" data-i="${i}">
+      <div class="rv-top">
+        <label class="rv-inc" title="Incluir esta competencia"><input type="checkbox" class="br-inc" ${c._excluir?"":"checked"} ${dis}></label>
+        <input class="rv-nombre br-n" value="${esc(c.nombre)}" ${dis} aria-label="Nombre de la competencia">
+        <span class="br-dup"></span>
+      </div>
+      <div class="rv-meta">
+        <label class="rv-mini">Nivel esperado<input class="inp br-ne" type="number" min="1" max="5" step="0.5" value="${esc(c.nivel_esperado)}" ${dis}></label>
+        <label class="rv-mini">Peso %<input class="inp br-pe" type="number" min="0" max="100" value="${esc(c.peso)}" ${dis}></label>
+        <label class="rv-crit"><input type="checkbox" class="br-cr" ${c.critico?"checked":""} ${dis}> <span>Crítica</span></label>
+        ${c.tipo?`<span class="badge b-gris">${esc(c.tipo)}</span>`:""}
+      </div>
+      <input class="inp rv-def br-de" value="${esc(c.definicion)}" placeholder="Qué significa esta competencia en este puesto" ${dis}>
+      <div class="rv-sec">👁 Qué observa el jefe <span class="sub-t">(una conducta por línea · hoy se califica la primera)</span></div>
+      <textarea class="inp br-co" rows="3" ${dis}>${esc((c.conductas||[]).join("\n"))}</textarea>
+      <div class="rv-mide">
+        <div class="rv-sec" style="margin-top:0">📏 Cómo se mide</div>
+        <div class="fila" style="margin-top:6px"><div class="campo" style="flex:2;margin:0"><label>Indicador <span class="sub-t">· fórmula · fuente · frecuencia</span></label><input class="inp br-in" value="${esc(c.indicador)}" ${dis}></div>
+          <div class="campo" style="margin:0"><label>Meta</label><input class="inp br-me" value="${esc(c.meta)}" ${dis}></div></div>
+        <div class="campo" style="margin:8px 0 0"><label>Política que fija el estándar</label>${polSel}</div>
+      </div>
+      <div class="br-fw" data-sel="${esc((c.funciones_relacionadas||[]).join(","))}" style="margin-top:10px"></div>
+      ${c.justificacion||c.fuente?`<details class="rv-why"><summary>¿Por qué la propuso la IA?</summary>${c.justificacion?`<div>${esc(c.justificacion)}</div>`:""}${c.fuente?`<div class="sub-t">Fuente en el manual: ${esc(c.fuente)}</div>`:""}</details>`:""}
     </div>`; };
-  abrirModal(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><h3>Borrador del manual · ${esc(man?.nombre_archivo||"")}</h3><div style="color:var(--muted);font-size:12.5px">Propuesta de ${esc(b.modelo_ia||"la IA")} · ${soloVer?(b.estado==="aplicado"?"ya aplicado a la estructura":"rechazado"):"revisa y corrige: nada se aplica hasta que apruebes"}${cola.length>1&&pos>=0?` · <b>${pos+1} de ${cola.length}</b> por revisar`:""}</div></div><span class="badge ${b.estado==="aplicado"?"b-ok":b.estado==="rechazado"?"b-red":"b-wait"}">${esc(b.estado)}</span></div>
-    ${d.observaciones?`<div class="explbox" style="margin-top:10px">⚠ <b>La IA advierte:</b> ${esc(d.observaciones)}</div>`:""}
-    <div style="max-height:62vh;overflow:auto;padding-right:6px;margin-top:12px">
-      <div class="lbl-campo">1 · Puesto</div>
+  abrirModal(`<style>
+    .rv-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .rv-resumen{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+    .rv-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:var(--line-2);font-size:12px;font-weight:600;color:var(--ink-2)}
+    .rv-chip.ok{background:#E8F5EC;color:#166534}.rv-chip.mal{background:#FDECEC;color:#B91C1C}
+    .rv-ia{margin-top:10px;background:var(--amber-soft);border:1px solid #F2E4B5;border-radius:12px;padding:8px 12px;font-size:12.5px;color:#6b5a1e}
+    .rv-ia summary{cursor:pointer;font-weight:700}
+    .rv-tabs{display:flex;gap:4px;margin-top:12px;border-bottom:1px solid var(--line)}
+    .rv-tab{border:0;background:none;padding:9px 14px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;font-family:inherit}
+    .rv-tab.on{color:var(--ink);border-bottom-color:var(--amber)}
+    .rv-tab .n{display:inline-block;min-width:20px;padding:1px 6px;margin-left:4px;border-radius:999px;background:var(--line-2);font-size:11px}
+    .rv-panel{display:none}.rv-panel.on{display:block}
+    .rv-card{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;background:#fff;transition:opacity .2s}
+    .rv-top{display:flex;gap:10px;align-items:center}
+    .rv-inc input{width:18px;height:18px;accent-color:var(--amber-d);cursor:pointer}
+    .rv-nombre{flex:1;border:0;border-bottom:1px dashed transparent;font-size:15.5px;font-weight:800;color:var(--ink);padding:4px 2px;background:transparent;font-family:inherit;min-width:0}
+    .rv-nombre:hover,.rv-nombre:focus{border-bottom-color:var(--amber);outline:none}
+    .rv-meta{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin:8px 0}
+    .rv-mini{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;color:var(--muted);margin:0}
+    .rv-mini .inp{width:92px;padding:7px 10px}
+    .rv-crit{display:inline-flex;align-items:center;gap:6px;margin:0 0 4px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;font-size:12.5px;cursor:pointer}
+    .rv-crit:has(input:checked){background:#FDECEC;border-color:#F5C2C2;color:#B91C1C}
+    .rv-def{font-size:13px;color:var(--ink-2)}
+    .rv-sec{font-size:12.5px;font-weight:700;color:var(--ink);margin:12px 0 6px}
+    .rv-mide{margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+    .rv-why{margin-top:8px;font-size:12.5px;color:var(--ink-2)}.rv-why summary{cursor:pointer;color:var(--muted);font-weight:600}
+    .rv-funlist{counter-reset:f;list-style:none;padding:0;margin:8px 0 0}
+    .rv-funlist li{counter-increment:f;display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line-2);font-size:13px}
+    .rv-funlist li::before{content:counter(f);min-width:22px;height:22px;border-radius:50%;background:var(--amber-soft);font-weight:800;font-size:11.5px;display:inline-flex;align-items:center;justify-content:center}
+    .rv-pie{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  </style>
+  <div class="rv-head"><div><h3 style="margin:0">${esc(d.puesto||"Borrador del manual")}</h3><div style="color:var(--muted);font-size:12.5px;margin-top:2px">${esc(man?.nombre_archivo||"")} · propuesta de ${esc(b.modelo_ia||"la IA")}${cola.length>1&&pos>=0?` · <b>${pos+1} de ${cola.length}</b> por revisar`:""}</div></div><span class="badge ${b.estado==="aplicado"?"b-ok":b.estado==="rechazado"?"b-red":"b-wait"}">${soloVer?esc(b.estado):"nada se aplica hasta que apruebes"}</span></div>
+    <div class="rv-resumen" id="rv-res"></div>
+    ${d.observaciones?`<details class="rv-ia"><summary>⚠ La IA dejó una observación (clic para leer)</summary><div style="margin-top:6px">${esc(d.observaciones)}</div></details>`:""}
+    <div class="rv-tabs" role="tablist"><button class="rv-tab" data-rv="1">1 · Puesto</button><button class="rv-tab" data-rv="2">2 · Funciones <span class="n" id="rv-nf"></span></button><button class="rv-tab on" data-rv="3">3 · Competencias <span class="n" id="rv-nc"></span></button></div>
+    <div style="max-height:56vh;overflow:auto;padding:12px 6px 0 0">
+      <div class="rv-panel" data-rvp="1">
       <div class="fila"><div class="campo" style="flex:2"><label for="br-dest">Aplicar a</label><select class="inp" id="br-dest" ${dis}><option value="">➕ Crear puesto nuevo</option>${D.puestos.slice().sort((a,c)=>a.nombre.localeCompare(c.nombre)).map(p=>`<option value="${p.id}" ${String(destino)===String(p.id)?"selected":""}>Actualizar: ${esc(p.nombre)}</option>`).join("")}</select></div>
         <div class="campo" style="flex:2"><label for="br-pn">Nombre del puesto</label><input class="inp" id="br-pn" value="${esc(d.puesto)}" ${dis}></div></div>
       <div id="br-pdup"></div>
       <div class="fila"><div class="campo"><label for="br-dep">Departamento</label><input class="inp" id="br-dep" value="${esc(d.departamento)}" list="br-deps" ${dis}><datalist id="br-deps">${departamentos().map(x=>`<option value="${esc(x)}">`).join("")}</datalist></div>
         <div class="campo"><label for="br-niv">Nivel</label><select class="inp" id="br-niv" ${dis}>${opciones(NIVELES_PUESTO,d.nivel,"—")}</select></div></div>
       <div class="campo"><label for="br-jefe">Reporta a ${d.reporta_a?`<span class="sub-t">(el manual dice: «${esc(d.reporta_a)}»)</span>`:""}</label><select class="inp" id="br-jefe" ${dis}>${opciones(D.puestos.map(p=>[p.id,p.nombre]),jefeSug,"— Nadie / definir después —")}</select></div>
-      <div class="campo"><label for="br-mis">Misión del puesto</label><textarea class="inp" id="br-mis" rows="2" ${dis}>${esc(d.mision)}</textarea></div>
-      <div class="lbl-campo" style="margin-top:8px">2 · Funciones (una por línea)</div>
-      <textarea class="inp" id="br-fun" rows="5" ${dis}>${esc(d.funciones.join("\n"))}</textarea>
-      <div id="br-cob" style="font-size:12.5px;margin-top:6px"></div>
-      <label style="display:flex;gap:8px;align-items:center;margin:6px 0 0;font-weight:500;font-size:13px" id="br-reemp-w"><input type="checkbox" id="br-reemp" ${d._reemplazar?"checked":""} ${dis}> Reemplazar las funciones actuales del puesto (si no, se agregan solo las nuevas)</label>
-      <div class="lbl-campo" style="margin-top:14px;display:flex;justify-content:space-between">3 · Competencias <span style="display:flex;gap:6px;align-items:center">${soloVer?"":`<button class="btn ghost xs" id="br-sugpeso" title="Según cuántas funciones respalda cada competencia y si es crítica">Sugerir pesos</button>`}<span id="br-suma"></span></span></div>
+      <div class="campo"><label for="br-mis">Misión del puesto</label><textarea class="inp" id="br-mis" rows="3" ${dis}>${esc(d.mision)}</textarea></div>
+      </div>
+      <div class="rv-panel" data-rvp="2">
+      <div class="sub-t" style="margin-bottom:6px">Una función por línea. El número de cada función es el que aparece en las competencias.</div>
+      <textarea class="inp" id="br-fun" rows="8" ${dis}>${esc(d.funciones.join("\n"))}</textarea>
+      <ol class="rv-funlist" id="rv-funlist"></ol>
+      <div id="br-cob" style="font-size:12.5px;margin-top:8px"></div>
+      <label style="display:flex;gap:8px;align-items:center;margin:8px 0 0;font-weight:500;font-size:13px" id="br-reemp-w"><input type="checkbox" id="br-reemp" ${d._reemplazar?"checked":""} ${dis}> Reemplazar las funciones actuales del puesto (si no, se agregan solo las nuevas)</label>
+      </div>
+      <div class="rv-panel on" data-rvp="3">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap"><span class="sub-t">Desmarca la casilla de una competencia para no incluirla.</span><span style="display:flex;gap:6px;align-items:center">${soloVer?"":`<button class="btn ghost xs" id="br-sugpeso" title="Según cuántas funciones respalda cada competencia y si es crítica">⚖ Sugerir pesos</button>`}<span id="br-suma"></span></span></div>
       <div id="br-comps">${d.competencias.map(compHTML).join("")}</div>
+      </div>
     </div>
     <div class="msg" id="br-msg"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">${soloVer?`<button class="btn sm" data-cerrar>Cerrar</button>`:`<button class="btn danger sm" id="br-rech">Rechazar</button>${cola.length>1?`<button class="btn ghost sm" id="br-saltar" style="margin-right:auto">Saltar →</button>`:`<span style="margin-right:auto"></span>`}<button class="btn ghost sm" id="br-guardar">Guardar revisión</button><button class="btn amber sm" id="br-ok">Aprobar y aplicar</button>`}</div>`, m=>{
+    <div class="rv-pie">${soloVer?`<button class="btn sm" data-cerrar>Cerrar</button>`:`<button class="btn danger sm" id="br-rech">Rechazar</button>${cola.length>1?`<button class="btn ghost sm" id="br-saltar" style="margin-right:auto">Saltar →</button>`:`<span style="margin-right:auto"></span>`}<button class="btn ghost sm" id="br-guardar">Guardar revisión</button><button class="btn amber sm" id="br-ok">Aprobar y aplicar</button>`}</div>`, m=>{
     const q=s=>m.querySelector(s);
     const compsDestino=()=>{ const v=q("#br-dest").value; return v?D.competencias.filter(c=>c.puesto_id===Number(v)):[]; };
     const refrescar=()=>{
@@ -1965,7 +2028,7 @@ async function revisarBorrador(borId){
     const lineasFun=()=>q("#br-fun").value.split("\n").map(x=>x.trim()).filter(Boolean);
     const pintarChips=()=>{ const fs=lineasFun();
       m.querySelectorAll(".br-fw").forEach(w=>{ const marcadas=w.querySelector(".br-fn")?new Set([...w.querySelectorAll(".br-fn:checked")].map(i=>Number(i.value))):new Set((w.dataset.sel||"").split(",").filter(Boolean).map(Number));
-        w.innerHTML=fs.length?`<div class="sub-t" style="margin-bottom:4px"><b>Respalda las funciones:</b></div><div style="display:flex;gap:5px;flex-wrap:wrap">${fs.map((f,k)=>`<label title="${esc(f)}" style="display:inline-flex;gap:4px;align-items:center;margin:0;padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;background:${marcadas.has(k+1)?"var(--amber-soft)":"#fff"}"><input type="checkbox" class="br-fn" value="${k+1}" ${marcadas.has(k+1)?"checked":""} ${dis} style="margin:0"> ${k+1}</label>`).join("")}</div>`:""; });
+        w.innerHTML=fs.length?`<div class="sub-t" style="margin-bottom:4px"><b>🎯 Funciones que respalda</b> (pasa el mouse sobre el número para ver la función)</div><div style="display:flex;gap:5px;flex-wrap:wrap">${fs.map((f,k)=>`<label title="${esc(f)}" style="display:inline-flex;gap:4px;align-items:center;margin:0;padding:3px 9px;border:1px solid var(--line);border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;background:${marcadas.has(k+1)?"var(--amber-soft)":"#fff"}"><input type="checkbox" class="br-fn" value="${k+1}" ${marcadas.has(k+1)?"checked":""} ${dis} style="margin:0"> ${k+1}</label>`).join("")}</div>`:""; });
       m.querySelectorAll(".br-fn").forEach(i=>i.addEventListener("change",()=>{ i.parentElement.style.background=i.checked?"var(--amber-soft)":"#fff"; }));
     };
     pintarChips();
@@ -1976,7 +2039,21 @@ async function revisarBorrador(borId){
       els.forEach((el,k)=>el.querySelector(".br-pe").value=ps[k]); refrescar(); };
     if(!soloVer){ m.addEventListener("input",refrescar); m.addEventListener("change",refrescar); }
     q("#br-dest").addEventListener("change",e=>{ const p=D.puestoPorId[Number(e.target.value)]; if(p){ q("#br-pn").value=p.nombre; if(!q("#br-dep").value) q("#br-dep").value=p.departamento||""; } });
-    refrescar();
+    // Pestañas y barra de resumen (v3.11)
+    m.querySelectorAll(".rv-tab").forEach(t=>t.onclick=()=>{ m.querySelectorAll(".rv-tab").forEach(x=>x.classList.toggle("on",x===t)); m.querySelectorAll(".rv-panel").forEach(p=>p.classList.toggle("on",p.dataset.rvp===t.dataset.rv)); });
+    const resumen=()=>{ const fs=lineasFun(), cards=[...m.querySelectorAll(".br-c")].filter(el=>el.querySelector(".br-inc").checked);
+      const suma=Math.round(cards.reduce((a,el)=>a+(parseFloat(el.querySelector(".br-pe").value)||0),0));
+      const cub=new Set(); cards.forEach(el=>el.querySelectorAll(".br-fn:checked").forEach(i=>cub.add(Number(i.value))));
+      const crit=cards.filter(el=>el.querySelector(".br-cr").checked).length, sinMeta=cards.filter(el=>!el.querySelector(".br-me").value.trim()||!el.querySelector(".br-in").value.trim()).length;
+      const sinPol=cards.filter(el=>{ const s=el.querySelector(".br-po"), t=el.querySelector(".br-pt"); return s?!s.value:!(t&&t.value.trim()); }).length;
+      const chip=(cls,txt)=>`<span class="rv-chip ${cls}">${txt}</span>`;
+      q("#rv-res").innerHTML=chip("",`${cards.length} competencias`)+chip(suma===100?"ok":"mal",`Pesos ${suma}%${suma===100?" ✓":""}`)+chip(fs.length&&cub.size>=fs.length?"ok":"mal",`${Math.min(cub.size,fs.length)}/${fs.length} funciones cubiertas`)+(crit?chip("",`${crit} crítica${crit>1?"s":""}`):"")+(sinMeta?chip("mal",`${sinMeta} sin indicador o meta`):"")+(sinPol?chip("",`${sinPol} sin política`):"");
+      q("#rv-nf").textContent=fs.length; q("#rv-nc").textContent=cards.length;
+      q("#rv-funlist").innerHTML=fs.map(f=>`<li>${esc(f)}</li>`).join("");
+      m.querySelectorAll(".br-fw").forEach(w=>{ let l=w.querySelector(".rv-fsel"); if(!l){ l=document.createElement("div"); l.className="rv-fsel sub-t"; l.style.marginTop="6px"; w.appendChild(l); }
+        const sel=[...w.querySelectorAll(".br-fn:checked")].map(i=>Number(i.value)); l.innerHTML=sel.map(n=>`<div>${n}. ${esc(fs[n-1]||"")}</div>`).join(""); }); };
+    m.addEventListener("input",()=>setTimeout(resumen)); m.addEventListener("change",()=>setTimeout(resumen));
+    refrescar(); resumen();
     if(soloVer) return;
     const leer=()=>{ const nd={...d, puesto:q("#br-pn").value.trim(), departamento:q("#br-dep").value.trim(), nivel:q("#br-niv").value, mision:q("#br-mis").value.trim(),
         funciones:q("#br-fun").value.split("\n").map(x=>x.trim()).filter(Boolean), _destino:q("#br-dest").value, _reporta_a_id:q("#br-jefe").value, _reemplazar:q("#br-reemp").checked };
@@ -2075,7 +2152,7 @@ const ROL_TXT={admin:"RRHH",evaluador:"Evaluador",evaluado:"Evaluado"};
 VISTAS.usuarios = async ()=>{
   const deps=departamentos();
   $("contenido").innerHTML=`<div>
-    ${encabezado("Usuarios","Personal registrado y organigrama (jefe directo)",`<button class="btn ghost sm" id="us-xls">Exportar Excel</button><button class="btn ghost sm" id="us-doc">Informe Word</button><button class="btn ghost sm" id="us-masivo">Carga masiva</button><button class="btn amber sm" id="us-nuevo">Nuevo usuario</button>`)}
+    ${encabezado("Usuarios","Personal registrado y organigrama (jefe directo)",`<button class="btn ghost sm" id="us-xls">Exportar Excel</button><button class="btn ghost sm" id="us-doc">Informe Word</button><button class="btn ghost sm" id="us-acc">Accesos pendientes</button><button class="btn ghost sm" id="us-masivo">Carga masiva</button><button class="btn amber sm" id="us-nuevo">Nuevo usuario</button>`)}
     <div class="side-layout">
       <aside class="card filtro"><h3>Filtrar</h3><div class="cap">Acota el listado. Los informes respetan los filtros.</div>
         <label for="fu-q">Buscar</label><input class="inp" id="fu-q" placeholder="Nombre, usuario o cédula">
@@ -2101,6 +2178,7 @@ VISTAS.usuarios = async ()=>{
   $("fu-limpiar").onclick=()=>{ ["fu-q","fu-dep","fu-rol","fu-jefe"].forEach(id=>$(id).value=""); pintar(); };
   $("us-nuevo").onclick=()=>editarUsuario(null);
   $("us-masivo").onclick=cargaMasiva;
+  $("us-acc").onclick=descargarAccesos;
   $("us-xls").onclick=()=>exportarExcel("Usuarios_Etinar",[{nombre:"Usuarios",filas:filtrados().map(u=>({Nombre:u.nombre,Usuario:u.usuario,Cédula:u.cedula||"",Departamento:u.departamento||"",Puesto:u.puesto||"","Jefe directo":perfil(u.jefe_id)?.nombre||"",Rol:ROL_TXT[u.rol],Correo:u.correo||""}))}]);
   $("us-doc").onclick=()=>{ const l=filtrados(); const filtros=[$("fu-dep").value&&"Departamento: "+$("fu-dep").value,$("fu-rol").value&&"Rol: "+ROL_TXT[$("fu-rol").value],$("fu-q").value&&"Búsqueda: "+$("fu-q").value].filter(Boolean);
     exportarWord("Informe_Usuarios_Etinar","Informe de Usuarios",`<p>Total: <b>${l.length}</b> usuario(s). ${filtros.length?"Filtros: "+esc(filtros.join(" · ")):"Listado completo."}</p>`+tablaWord(["Nombre","Usuario","Departamento","Puesto","Jefe directo","Rol"],l.map(u=>[u.nombre,u.usuario,u.departamento,u.puesto,perfil(u.jefe_id)?.nombre,ROL_TXT[u.rol]]))); };
@@ -2112,6 +2190,13 @@ VISTAS.usuarios = async ()=>{
 };
 let usuarioEditado=false;
 function sugiereUsuario(nombre){ const t=normTxt(nombre).split(/\s+/).map(soloAlnum).filter(Boolean); if(!t.length) return "usuario"; const ap=t.length>=4?t[2]:t.length>=2?t[1]:t[0]; return (t[0][0]||"")+ap; }
+// Llama a la Edge Function de usuarios. Devuelve {data} o {error:"texto"}
+async function fnUsuarios(body){
+  const { data, error } = await sb.functions.invoke("gestionar-usuarios",{ body });
+  if(!error) return { data };
+  const t=await errorFuncion(error);
+  return { error: /Failed to send|404|not found|NOT_FOUND/i.test(t) ? "Falta publicar la función «gestionar-usuarios» en Supabase (Edge Functions)." : t };
+}
 function genPassword(){ const c="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"; let s=""; const a=new Uint32Array(10); crypto.getRandomValues(a); a.forEach(x=>s+=c[x%c.length]); return "Et-"+s; }
 async function usuarioUnico(base){ let u=base||"usuario",i=1; const usados=new Set(D.perfiles.map(p=>p.usuario)); while(usados.has(u)){ i++; u=base+i; } return u; }
 function editarUsuario(u){
@@ -2128,7 +2213,7 @@ function editarUsuario(u){
       <span class="sub-t">Clave: ${u.debe_cambiar_clave===false?'<span class="badge b-ok">cambiada</span>':'<span class="badge b-wait">inicial</span>'} · Privacidad: ${u.acepto_privacidad_en?`<span class="badge b-ok">aceptada ${fmtFecha(u.acepto_privacidad_en)}</span>`:'<span class="badge b-wait">pendiente</span>'}</span>
       ${u.debe_cambiar_clave===false?`<button class="btn ghost xs" id="eu-forzar">Pedir nueva clave al ingresar</button>`:""}</div>`:""}
     <div class="msg" id="eu-msg"></div><div id="eu-cred"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px">${u?`<button class="btn danger sm" id="eu-del" style="margin-right:auto">Eliminar</button><button class="btn ghost sm" id="eu-acc">Ver acceso inicial</button>`:""}<button class="btn ghost sm" data-cerrar>Cerrar</button><button class="btn amber sm" id="eu-ok">Guardar</button></div>`, m=>{
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px">${u?`<button class="btn danger sm" id="eu-del" style="margin-right:auto">Eliminar</button><button class="btn ghost sm" id="eu-acc">Ver acceso inicial</button>${u.rol!=="admin"?`<button class="btn ghost sm" id="eu-reset">Restablecer contraseña</button>`:""}`:""}<button class="btn ghost sm" data-cerrar>Cerrar</button><button class="btn amber sm" id="eu-ok">Guardar</button></div>`, m=>{
     const q=(s)=>m.querySelector(s);
     q("#eu-p").onchange=e=>{ const p=D.puestos.find(x=>x.nombre===e.target.value); if(p&&p.departamento) q("#eu-d").value=p.departamento; };
     if(!u) q("#eu-n").oninput=()=>{ q("#eu-u").value=sugiereUsuario(q("#eu-n").value); };
@@ -2136,16 +2221,32 @@ function editarUsuario(u){
       const msg=q("#eu-msg"); const datos={ nombre:q("#eu-n").value.trim(), cedula:q("#eu-c").value.trim()||null, correo:q("#eu-m").value.trim()||null,
         puesto:q("#eu-p").value||null, departamento:q("#eu-d").value.trim()||null, jefe_id:q("#eu-j").value||null, rol:q("#eu-r").value };
       if(!datos.nombre){ msg.className="msg error"; msg.textContent="Escribe el nombre."; return; }
-      if(u){ datos.activo=q("#eu-act").checked; const { error } = await sb.from("perfiles").update(datos).eq("id",u.id);
+      if(u){ datos.activo=q("#eu-act").checked;
+        if(datos.jefe_id===u.id){ msg.className="msg error"; msg.textContent="Una persona no puede ser su propio jefe."; return; }
+        // ¿el nuevo jefe está debajo de esta persona? (crearía un círculo)
+        let x=datos.jefe_id?perfil(datos.jefe_id):null, n=0; while(x&&n<60){ if(x.id===u.id){ msg.className="msg error"; msg.textContent="Ese jefe depende (directa o indirectamente) de esta persona: se formaría un círculo."; return; } x=x.jefe_id?perfil(x.jefe_id):null; n++; }
+        const { error } = await sb.from("perfiles").update(datos).eq("id",u.id);
         if(error){ msg.className="msg error"; msg.textContent=error.message; return; }
-        cerrarModal(); await cargarBase(); irA("usuarios"); return; }
-      const usuario=await usuarioUnico(soloAlnum(q("#eu-u").value)||sugiereUsuario(datos.nombre)), clave=genPassword();
-      q("#eu-ok").disabled=true;
-      const { data, error } = await sbTmp.auth.signUp({ email:usuarioAEmail(usuario), password:clave });
-      if(error){ msg.className="msg error"; msg.textContent=/registered|exists|already/i.test(error.message)?"Ese usuario ya existe.":"Error: "+error.message; q("#eu-ok").disabled=false; return; }
-      const { error:e2 } = await sb.from("perfiles").insert({ id:data.user.id, usuario, ...datos, debe_cambiar_clave:true });
-      if(e2){ msg.className="msg error"; msg.textContent="Se creó el acceso pero falló el perfil: "+e2.message; return; }
-      await sb.from("accesos_temp").insert({ perfil_id:data.user.id, usuario, clave });
+        const avisos=[];
+        // Cambió de jefe con campaña abierta: su valoración pendiente pasa al nuevo jefe (si RRHH lo confirma)
+        if((datos.jefe_id||null)!==(u.jefe_id||null)&&u.jefe_id&&datos.jefe_id){
+          const abiertos=D.periodos.filter(p=>p.estado==="abierto").map(p=>p.id);
+          if(abiertos.length){ const { data:pe } = await sb.from("evaluaciones").select("id").eq("evaluado_id",u.id).eq("evaluador_id",u.jefe_id).eq("tipo","evaluador").eq("estado","pendiente").in("periodo_id",abiertos);
+            if(pe&&pe.length&&await confirmar(`${esc(u.nombre)} tiene <b>${pe.length}</b> valoración pendiente con su jefe anterior (<b>${esc(perfil(u.jefe_id)?.nombre)}</b>). ¿Pasarla al nuevo jefe (<b>${esc(perfil(datos.jefe_id)?.nombre)}</b>)?`,"Pasar al nuevo jefe")){
+              const { error:e3 } = await sb.from("evaluaciones").update({evaluador_id:datos.jefe_id}).in("id",pe.map(e=>e.id)); avisos.push(e3?"No se pudo mover la valoración: "+esc(e3.message):"✅ La valoración pendiente pasó al nuevo jefe."); } }
+        }
+        // Se inactivó a alguien que tiene equipo o valoraciones por llenar
+        if(u.activo!==false&&datos.activo===false){
+          const pend=await pendientesComoJefe(u.id), equipo=D.perfiles.filter(x=>x.jefe_id===u.id&&x.activo!==false);
+          if(pend.length||equipo.length) avisos.push(`⚠ ${esc(u.nombre)} quedó inactivo/a pero tiene <b>${equipo.length}</b> personas a cargo y <b>${pend.length}</b> valoraciones pendientes. Ve a <b>Evaluaciones → Reasignar evaluaciones de un jefe a otro</b> para pasarlas a su reemplazo.`);
+        }
+        cerrarModal(); await cargarBase(); irA("usuarios"); if(avisos.length) aviso(avisos.join("<br><br>")); return; }
+      const usuario=await usuarioUnico(soloAlnum(q("#eu-u").value)||sugiereUsuario(datos.nombre));
+      q("#eu-ok").disabled=true; msg.className="msg"; msg.textContent="Creando acceso…";
+      const r=await fnUsuarios({ accion:"crear", usuarios:[{ usuario, email:usuarioAEmail(usuario), ...datos }] });
+      const res=r.data?.resultados?.[0];
+      if(r.error||!res?.ok){ msg.className="msg error"; msg.textContent=r.error||("Error: "+(res?.error||"desconocido")); q("#eu-ok").disabled=false; return; }
+      const clave=res.clave; msg.textContent="";
       await cargarBase();
       q("#eu-cred").innerHTML=`<div class="aviso amber">✅ <b>Usuario creado.</b> Comparte estos datos en persona y pide que cambie la contraseña con el botón <b>Clave</b> al ingresar:<br><br>Usuario: <b>${esc(usuario)}</b><br>Contraseña inicial: <b>${esc(clave)}</b></div>`;
       q("#eu-ok").classList.add("oculto");
@@ -2157,10 +2258,35 @@ function editarUsuario(u){
         if(error){ aviso("No se pudo eliminar: "+esc(error.message)); return; }
         await cargarBase(); irA("usuarios"); };
       if(q("#eu-forzar")) q("#eu-forzar").onclick=async()=>{ await sb.from("perfiles").update({debe_cambiar_clave:true}).eq("id",u.id); await cargarBase(); cerrarModal(); aviso("En su próximo ingreso, la persona deberá crear una nueva contraseña."); };
+      if(q("#eu-reset")) q("#eu-reset").onclick=async()=>{
+        if(!await confirmar(`Se generará una <b>nueva contraseña temporal</b> para <b>${esc(u.nombre)}</b>. La actual dejará de funcionar y deberá crear la suya al ingresar.`,"Restablecer")) return;
+        const r=await fnUsuarios({ accion:"restablecer", perfil_id:u.id });
+        if(r.error){ aviso("No se pudo restablecer: "+esc(r.error)); return; }
+        await cargarBase();
+        aviso(`✅ Nueva contraseña temporal para <b>${esc(u.nombre)}</b>:<br><br>Usuario: <b>${esc(r.data.usuario)}</b><br>Contraseña: <b>${esc(r.data.clave)}</b><br><br><span class="sub-t">Entrégala en persona o por un canal privado. Al ingresar deberá crear la suya.</span>`); };
       q("#eu-acc").onclick=async()=>{ const { data } = await sb.from("accesos_temp").select("usuario,clave").eq("perfil_id",u.id).maybeSingle();
         q("#eu-cred").innerHTML=data?`<div class="aviso amber">Usuario: <b>${esc(data.usuario)}</b> · Contraseña inicial: <b>${esc(data.clave)}</b><br><span class="sub-t">Si la persona ya la cambió, esta clave ya no funciona.</span></div>`:`<div class="aviso">No hay acceso inicial guardado para esta persona.</div>`; };
     }
   });
+}
+// ---- Accesos pendientes: contraseñas temporales de quienes aún no ingresan (solo RRHH) ----
+async function descargarAccesos(){
+  const { data, error } = await sb.from("accesos_temp").select("perfil_id,usuario,clave");
+  if(error){ aviso("No se pudieron leer los accesos: "+esc(error.message)); return; }
+  const filas=(data||[]).map(a=>{ const p=perfil(a.perfil_id)||{}; const j=p.jefe_id?perfil(p.jefe_id):null;
+    return { Nombre:p.nombre||"", Usuario:a.usuario, "Contraseña temporal":a.clave, Departamento:p.departamento||"", Puesto:p.puesto||"", "Jefe directo":j?.nombre||"" }; })
+    .sort((a,b)=>String(a.Departamento).localeCompare(String(b.Departamento))||String(a.Nombre).localeCompare(String(b.Nombre)));
+  // Accesos antiguos cuya contraseña inicial es la cédula: se cambian por claves aleatorias antes de descargar
+  const conCedula=(data||[]).filter(a=>{ const p=perfil(a.perfil_id); return p&&p.rol!=="admin"&&p.cedula&&String(a.clave)===String(p.cedula); });
+  if(conCedula.length&&await confirmar(`<b>${conCedula.length}</b> personas que aún no ingresan tienen como contraseña su <b>cédula</b> (sistema anterior). Cualquiera que conozca su cédula podría entrar por ellas.<br><br>¿Generar ahora contraseñas aleatorias para todas?`,"Generar contraseñas seguras")){
+    abrirModal(`<h3>Generando contraseñas seguras…</h3><div class="msg" id="rc-msg">0 de ${conCedula.length}</div>`); let hechos=0; const fallas=[];
+    for(let i=0;i<conCedula.length;i+=25){ const r=await fnUsuarios({ accion:"restablecer", perfil_ids:conCedula.slice(i,i+25).map(a=>a.perfil_id) });
+      if(r.error){ fallas.push(r.error); break; } (r.data.resultados||[]).forEach(x=>x.ok?hechos++:fallas.push(x.error)); if($("rc-msg")) $("rc-msg").textContent=`${hechos} de ${conCedula.length}`; }
+    cerrarModal(); if(fallas.length){ aviso(`Se cambiaron ${hechos} contraseñas. Problemas: ${esc(fallas.slice(0,5).join(" · "))}`); return; }
+    return descargarAccesos(); }
+  if(!filas.length){ aviso("No hay accesos pendientes: todas las personas ya crearon su propia contraseña."); return; }
+  if(!await confirmar(`Se descargará un Excel con <b>${filas.length}</b> contraseñas temporales.<br><br>🔒 Es información confidencial: entrégala a cada persona de forma privada (sobre cerrado o mensaje directo), no la envíes en grupos y <b>borra el archivo</b> cuando termines. Cada contraseña deja de funcionar cuando la persona crea la suya.`,"Descargar")) return;
+  exportarExcel("Accesos_pendientes_CONFIDENCIAL",[{nombre:"Accesos",filas}]);
 }
 // ---- Carga masiva (Excel) con organigrama ----
 function mapFila(row){
@@ -2198,15 +2324,18 @@ function cargaMasiva(){
         <button class="btn amber sm" id="cm-ok" style="margin-top:12px">Procesar ${lista.length} filas</button><div class="msg" id="cm-msg"></div>`;
       m.querySelector("#cm-ok").onclick=async()=>{
         const b=m.querySelector("#cm-ok"), msg=m.querySelector("#cm-msg"); b.disabled=true; let ok=0,act=0; const errores=[];
-        for(let i=0;i<lista.length;i++){ const r=lista[i]; msg.className="msg"; msg.textContent=`Procesando ${i+1} de ${lista.length}...`;
+        const nuevos=[];
+        for(let i=0;i<lista.length;i++){ const r=lista[i]; msg.className="msg"; msg.textContent=`Revisando ${i+1} de ${lista.length}...`;
           if(r.cedula.length<6){ errores.push(`${r.nombre}: cédula inválida`); continue; }
           const datos={nombre:r.nombre,cedula:r.cedula,rol:r.rol,correo:r.correo,departamento:r.departamento,puesto:r.puesto};
           if(r.existe){ await sb.from("perfiles").update(datos).eq("id",r.existe.id); act++; continue; }
-          const { data, error } = await sbTmp.auth.signUp({ email:usuarioAEmail(r.usuario), password:r.cedula });
-          if(error){ errores.push(`${r.usuario}: ${error.message}`); if(/rate|too many/i.test(error.message)) await sleep(3000); continue; }
-          const { error:e2 } = await sb.from("perfiles").insert({ id:data.user.id, usuario:r.usuario, ...datos });
-          if(e2) errores.push(`${r.usuario}: ${e2.message}`); else { ok++; await sb.from("accesos_temp").insert({ perfil_id:data.user.id, usuario:r.usuario, clave:r.cedula }); }
-          await sleep(150);
+          nuevos.push({ usuario:r.usuario, email:usuarioAEmail(r.usuario), ...datos });
+        }
+        // Cuentas nuevas: se crean en el servidor de 25 en 25, con contraseña temporal aleatoria (no la cédula)
+        for(let i=0;i<nuevos.length;i+=25){ msg.className="msg"; msg.textContent=`Creando accesos ${Math.min(i+25,nuevos.length)} de ${nuevos.length}...`;
+          const r=await fnUsuarios({ accion:"crear", usuarios:nuevos.slice(i,i+25) });
+          if(r.error){ errores.push(r.error); if(/publicar/.test(r.error)) break; continue; }
+          (r.data.resultados||[]).forEach(x=>{ if(x.ok) ok++; else errores.push(`${x.usuario}: ${x.error}`); });
         }
         await cargarBase();
         // Enlazar organigrama
@@ -2214,7 +2343,7 @@ function cargaMasiva(){
         let enl=0; for(const r of lista){ if(!r.jefe) continue; const j=porCed2[normCedula(r.jefe)]||porUsu[soloAlnum(r.jefe)]; const yo=porCed2[r.cedula];
           if(j&&yo&&j.id!==yo.id){ await sb.from("perfiles").update({jefe_id:j.id}).eq("id",yo.id); enl++; } else errores.push(`${r.nombre}: no encontré al jefe "${r.jefe}"`); }
         await cargarBase();
-        msg.className="msg ok"; msg.innerHTML=`✅ Creados: <b>${ok}</b> · Actualizados: <b>${act}</b> · Jefes enlazados: <b>${enl}</b>. La contraseña inicial de los nuevos es su cédula.${errores.length?`<div style="max-height:120px;overflow:auto;color:var(--red);font-size:12px;margin-top:6px">${errores.slice(0,100).map(esc).join("<br>")}</div>`:""}`;
+        msg.className="msg ok"; msg.innerHTML=`✅ Creados: <b>${ok}</b> · Actualizados: <b>${act}</b> · Jefes enlazados: <b>${enl}</b>. Las contraseñas iniciales son <b>aleatorias</b>: descárgalas con <b>Usuarios → Accesos pendientes</b> y entrégalas de forma privada.${errores.length?`<div style="max-height:120px;overflow:auto;color:var(--red);font-size:12px;margin-top:6px">${errores.slice(0,100).map(esc).join("<br>")}</div>`:""}`;
       };
     };
   });
@@ -2223,19 +2352,61 @@ function cargaMasiva(){
 }
 
 // ==================== EVALUACIONES (asignación) ====================
+// Revisión del organigrama (v3.11): quién puede ser evaluado por su jefe y qué hay que corregir antes de la campaña
+function revisarOrganigrama(){
+  const activos=D.perfiles.filter(p=>p.rol!=="admin"&&p.activo!==false);
+  const r={ validos:[], sinJefe:[], propio:[], noExiste:[], jefeInactivo:[], jefeAdmin:[], ciclos:[] };
+  const enCiclo=new Set();
+  activos.forEach(p=>{ // sube por la cadena de jefes; si vuelve a la misma persona hay un círculo
+    let x=p, pasos=0; const vistos=new Set([p.id]);
+    while(x&&x.jefe_id&&pasos<60){ if(x.jefe_id===p.id&&pasos>0){ enCiclo.add(p.id); break; } if(vistos.has(x.jefe_id)) break; vistos.add(x.jefe_id); x=perfil(x.jefe_id); pasos++; }
+  });
+  activos.forEach(p=>{ const j=p.jefe_id?perfil(p.jefe_id):null;
+    if(!p.jefe_id) r.sinJefe.push({p});
+    else if(p.jefe_id===p.id) r.propio.push({p});
+    else if(!j) r.noExiste.push({p});
+    else if(j.activo===false) r.jefeInactivo.push({p,j});
+    else if(enCiclo.has(p.id)) r.ciclos.push({p,j});
+    else { if(j.rol==="admin") r.jefeAdmin.push({p,j}); r.validos.push(p); }
+  });
+  r.problemas=r.propio.length+r.noExiste.length+r.jefeInactivo.length+r.ciclos.length;
+  return r;
+}
+function organigramaHTML(org){
+  const lista=(arr,f)=>`<div class="sub-t" style="margin:6px 0 0 4px;line-height:1.8">${arr.slice(0,200).map(f).join(" · ")}${arr.length>200?" …":""}</div>`;
+  const fila=(n,txt,color,arr,f)=>n?`<details style="margin-top:8px"><summary style="cursor:pointer;font-size:13px"><b style="color:${color}">${n}</b> ${txt}</summary>${lista(arr,f)}</details>`:"";
+  const nom=x=>`<b>${esc(x.p.nombre)}</b>`, conJ=x=>`<b>${esc(x.p.nombre)}</b> → ${esc(x.j.nombre)}`;
+  return `<div class="card mt"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center"><div><h3>Revisión del organigrama</h3><div class="cap">Se revisa antes de generar la campaña. Las personas con problemas se omiten hasta que se corrijan en <b>Usuarios</b>.</div></div>
+    ${org.problemas?`<span class="badge b-red">${org.problemas} por corregir</span>`:'<span class="badge b-ok">Sin errores</span>'}</div>
+    ${fila(org.jefeInactivo.length,"con jefe <b>inactivo</b> (salió de la empresa): asigna su nuevo jefe o usa «Reasignar»","var(--red)",org.jefeInactivo,conJ)}
+    ${fila(org.ciclos.length,"en un <b>círculo</b> de jefes (A reporta a B y B reporta a A)","var(--red)",org.ciclos,conJ)}
+    ${fila(org.propio.length,"figuran como <b>su propio jefe</b>","var(--red)",org.propio,nom)}
+    ${fila(org.noExiste.length,"con un jefe que <b>ya no existe</b> en el sistema","var(--red)",org.noExiste,nom)}
+    ${fila(org.sinJefe.length,"sin jefe directo (no reciben valoración del jefe)","var(--warn)",org.sinJefe,nom)}
+    ${fila(org.jefeAdmin.length,"tienen como jefe a una cuenta de RRHH (administrador); revisa si es correcto","var(--warn)",org.jefeAdmin,conJ)}
+  </div>`;
+}
+// Evaluaciones pendientes de la campaña abierta que llena una persona (como jefe)
+async function pendientesComoJefe(uid){
+  const abiertos=D.periodos.filter(p=>p.estado==="abierto").map(p=>p.id); if(!abiertos.length) return [];
+  const { data } = await sb.from("evaluaciones").select("id,evaluado_id,periodo_id,estado,tipo").eq("evaluador_id",uid).eq("tipo","evaluador").eq("estado","pendiente").in("periodo_id",abiertos);
+  return data||[];
+}
+
 VISTAS.evaluaciones = async (pidArg)=>{
   const abiertos=D.periodos.filter(p=>p.estado==="abierto");
   const pid=pidArg||periodoDefecto();
   const evs=pid?await cargarEvaluaciones(pid):[];
-  const conJefe=D.perfiles.filter(p=>p.rol!=="admin"&&p.jefe_id&&p.activo!==false);
-  const sinJefe=D.perfiles.filter(p=>p.rol!=="admin"&&!p.jefe_id&&p.activo!==false);
+  const org=revisarOrganigrama();
+  const conJefe=org.validos;
+  const sinJefe=D.perfiles.filter(p=>p.rol!=="admin"&&p.activo!==false&&!org.validos.includes(p));
   const optPer=D.perfiles.filter(p=>p.rol!=="admin").map(p=>[p.id,p.nombre]);
   $("contenido").innerHTML=`<div>
     ${encabezado("Evaluaciones","Asignación de la campaña: quién evalúa a quién",selPeriodoHTML("ev-per",pid))}
     ${abiertos.length?"":`<div class="aviso amber">No hay campañas abiertas. Crea una en <b>Periodos</b> antes de asignar evaluaciones.</div>`}
     <div class="row2 eq">
       <div class="card"><h3>Generar campaña desde el organigrama</h3><div class="cap">Crea en un paso la valoración del jefe directo y la autoevaluación de cada colaborador activo. No duplica las que ya existen.</div>
-        <div class="grid3" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="kpi"><div class="lbl">Con jefe asignado</div><div class="val">${conJefe.length}</div></div><div class="kpi"><div class="lbl">Sin jefe (se omiten)</div><div class="val" style="color:${sinJefe.length?"var(--warn)":"inherit"}">${sinJefe.length}</div></div></div>
+        <div class="grid3" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="kpi"><div class="lbl">Con jefe asignado</div><div class="val">${conJefe.length}</div></div><div class="kpi"><div class="lbl">Sin jefe válido (se omiten)</div><div class="val" style="color:${sinJefe.length?"var(--warn)":"inherit"}">${sinJefe.length}</div></div></div>
         <div class="fila" style="margin-top:14px"><div class="campo"><label for="gc-per">Campaña</label><select class="inp" id="gc-per">${opciones(abiertos.map(p=>[p.id,p.nombre]),abiertos[0]?.id)}</select></div>
           <div class="campo"><label for="gc-dep">Departamento</label><select class="inp" id="gc-dep">${opciones(departamentos(),"","Todos")}</select></div></div>
         <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-weight:500"><input type="checkbox" id="gc-auto" checked> Incluir autoevaluación (180° completo)</label>
@@ -2250,6 +2421,13 @@ VISTAS.evaluaciones = async (pidArg)=>{
         <button class="btn" id="ai-ok" style="margin-top:12px" ${abiertos.length?"":"disabled"}>Asignar</button><div class="msg" id="ai-msg"></div>
       </div>
     </div>
+    ${organigramaHTML(org)}
+    <div class="card mt"><h3>Reasignar evaluaciones de un jefe a otro</h3><div class="cap">Cuando un jefe sale de la empresa, cambia de puesto o está ausente. Solo se mueven las valoraciones <b>pendientes</b>; las ya completadas quedan con quien las llenó.</div>
+      <div class="fila" style="margin-top:10px"><div class="campo"><label for="ra-per">Campaña</label><select class="inp" id="ra-per">${opciones(abiertos.map(p=>[p.id,p.nombre]),abiertos[0]?.id)}</select></div>
+        <div class="campo"><label for="ra-de">De (jefe actual)</label><select class="inp" id="ra-de">${opciones(D.perfiles.filter(p=>p.rol!=="admin"&&D.perfiles.some(x=>x.jefe_id===p.id)||p.activo===false).map(p=>[p.id,p.nombre+(p.activo===false?" (inactivo)":"")]),"","—")}</select></div>
+        <div class="campo"><label for="ra-a">A (nuevo jefe)</label><select class="inp" id="ra-a">${opciones(D.perfiles.filter(p=>p.rol!=="admin"&&p.activo!==false).map(p=>[p.id,p.nombre+(p.puesto?" · "+p.puesto:"")]),"","—")}</select></div></div>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-weight:500"><input type="checkbox" id="ra-org" checked> Cambiar también el jefe directo en el organigrama (su equipo pasa al nuevo jefe)</label>
+      <button class="btn" id="ra-ok" style="margin-top:10px" ${abiertos.length?"":"disabled"}>Reasignar</button><div class="msg" id="ra-msg"></div></div>
     <div class="card mt"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-end"><div><h3>Evaluaciones de la campaña</h3><div class="cap" id="ev-cuenta"></div></div>
       <div class="fila" style="min-width:min(100%,520px)"><div class="campo"><select class="inp" id="ev-est">${opciones([["pendiente","Pendientes"],["completada","Completadas"]],"","Todos los estados")}</select></div><div class="campo"><input class="inp" id="ev-q" placeholder="Buscar persona"></div></div></div>
       <div class="tabla-wrap"><table><thead><tr><th>Evaluado</th><th>Llenada por</th><th>Puesto</th><th>Tipo</th><th>Estado</th><th></th></tr></thead><tbody id="ev-tb"></tbody></table></div></div>
@@ -2280,6 +2458,23 @@ VISTAS.evaluaciones = async (pidArg)=>{
     $("gc-ok").disabled=true; msg.className="msg"; msg.textContent="Creando...";
     for(let i=0;i<filas.length;i+=500){ const { error } = await sb.from("evaluaciones").insert(filas.slice(i,i+500)); if(error){ msg.className="msg error"; msg.textContent="Error: "+error.message; $("gc-ok").disabled=false; return; } }
     irA("evaluaciones",p);
+  };
+  $("ra-ok").onclick=async()=>{
+    const p=Number($("ra-per").value), de=$("ra-de").value, a=$("ra-a").value, cambiarOrg=$("ra-org").checked, msg=$("ra-msg");
+    if(!p||!de||!a){ msg.className="msg error"; msg.textContent="Elige la campaña, el jefe actual y el nuevo jefe."; return; }
+    if(de===a){ msg.className="msg error"; msg.textContent="El jefe actual y el nuevo son la misma persona."; return; }
+    const { data:pend, error:e0 } = await sb.from("evaluaciones").select("id,evaluado_id").eq("periodo_id",p).eq("evaluador_id",de).eq("tipo","evaluador").eq("estado","pendiente");
+    if(e0){ msg.className="msg error"; msg.textContent=e0.message; return; }
+    const mover=(pend||[]).filter(e=>e.evaluado_id!==a), propia=(pend||[]).filter(e=>e.evaluado_id===a);
+    const equipo=D.perfiles.filter(x=>x.jefe_id===de&&x.id!==a);
+    const A=perfil(a), DE=perfil(de);
+    if(!mover.length&&!(cambiarOrg&&equipo.length)){ msg.className="msg"; msg.textContent="No hay nada que mover en esa campaña."; return; }
+    if(!await confirmar(`Pasar de <b>${esc(DE?.nombre)}</b> a <b>${esc(A?.nombre)}</b>:<br>· <b>${mover.length}</b> valoraciones pendientes${cambiarOrg?`<br>· <b>${equipo.length}</b> personas cambian de jefe directo en el organigrama`:""}${propia.length?`<br><span style="color:var(--warn)">· La valoración de ${esc(A?.nombre)} no se mueve (no puede evaluarse a sí mismo/a): asígnale otro evaluador.</span>`:""}`,"Reasignar")) return;
+    $("ra-ok").disabled=true; msg.className="msg"; msg.textContent="Reasignando…";
+    for(let i=0;i<mover.length;i+=200){ const { error } = await sb.from("evaluaciones").update({evaluador_id:a}).in("id",mover.slice(i,i+200).map(e=>e.id)); if(error){ msg.className="msg error"; msg.textContent="Error: "+error.message; $("ra-ok").disabled=false; return; } }
+    if(cambiarOrg&&equipo.length){ for(let i=0;i<equipo.length;i+=200){ const { error } = await sb.from("perfiles").update({jefe_id:a}).in("id",equipo.slice(i,i+200).map(x=>x.id)); if(error){ msg.className="msg error"; msg.textContent="Error en el organigrama: "+error.message; return; } } }
+    await cargarBase(); irA("evaluaciones",p);
+    aviso(`✅ Se reasignaron <b>${mover.length}</b> valoraciones${cambiarOrg?` y <b>${equipo.length}</b> personas pasaron al equipo de ${esc(A?.nombre)}`:""}.`);
   };
   $("ai-ok").onclick=async()=>{
     const msg=$("ai-msg"), tipo=$("ai-tipo").value, evdo=$("ai-evdo").value, evdr=tipo==="autoevaluacion"?evdo:$("ai-evdr").value, pue=$("ai-pue").value, p=$("ai-per").value;
