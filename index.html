@@ -1721,8 +1721,11 @@ async function modalManualesIA(){
           : (m.estado==="aprobado"&&b) ? `<button class="btn ghost xs" data-mi-rev="${b.id}">Ver</button>` : "";
         return `<tr><td style="min-width:160px"><b>${esc(m.nombre_archivo)}</b>${m.version?`<div class="sub-t">v${esc(m.version)}</div>`:""}${m.notas?`<div class="sub-t" style="color:var(--red)">${esc(m.notas)}</div>`:""}</td><td>${esc(D.puestoPorId[m.puesto_id]?.nombre)||'<span class="sub-t">por detectar</span>'}</td><td><span class="badge ${est[1]}">${est[0]}</span>${b?.modelo_ia?`<div class="sub-t">${esc(b.modelo_ia)}</div>`:""}</td><td class="num sub-t">${fmtFecha(m.fecha_carga||m.creado_en)}</td><td class="r" style="white-space:nowrap">${acc} ${m.estado!=="procesando"?`<button class="btn ghost xs" data-mi-del="${m.id}" title="Eliminar manual">✕</button>`:""}</td></tr>`; }).join("")||`<tr><td colspan="5" class="vacio">Aún no hay manuales. Sube el primero arriba.</td></tr>`
     }</tbody></table></div>
-    <div class="explbox" style="margin-top:12px">🔒 A la IA solo se envía el <b>manual del puesto</b> y los nombres del catálogo de políticas y competencias. <b>Nunca</b> se envían evaluaciones, puntajes ni datos personales. La clave de la IA está guardada como secreto en Supabase, no en esta página.</div>`, m=>{
+    <div class="explbox" style="margin-top:12px">🔒 A la IA solo se envía el <b>manual del puesto</b> y los nombres del catálogo de políticas y competencias. <b>Nunca</b> se envían evaluaciones, puntajes ni datos personales. La clave de la IA está guardada como secreto en Supabase, no en esta página.</div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap"><button class="btn ghost sm" id="mi-ctx">🏢 Contexto de la empresa para la IA</button><span class="sub-t" id="mi-ctx-e"></span></div>`, m=>{
     m.querySelector("#mi-subir").onclick=()=>subirManual(m);
+    m.querySelector("#mi-ctx").onclick=()=>modalContextoEmpresa();
+    sb.from("configuracion").select("valor").eq("clave","contexto_empresa").maybeSingle().then(({data})=>{ const e=m.querySelector("#mi-ctx-e"); if(e) e.innerHTML=(data?.valor||"").trim()?'<span class="badge b-ok">configurado</span>':'<span class="badge b-wait">sin configurar: la IA no conoce la empresa</span>'; });
     // Zona para arrastrar o elegir archivos: se acumulan en una lista que se puede revisar antes de subir
     m._files=[]; const drop=m.querySelector("#mi-drop"), inp=m.querySelector("#mi-f");
     const tam=(b)=>b>1048576?(b/1048576).toFixed(1)+" MB":Math.max(1,Math.round(b/1024))+" KB";
@@ -1862,6 +1865,35 @@ async function analizarManual(id, boton){
     const ayuda=/API_KEY|clave de IA/.test(t)?"<br><br>Falta guardar al menos una clave de IA (GEMINI_API_KEY u OPENROUTER_API_KEY, ambas gratuitas) como secreto en Supabase (Edge Functions → Secrets).":/Failed to send|404|not found/i.test(t)?"<br><br>¿Ya publicaste la función <b>analizar-manual</b> en Supabase?":"";
     aviso("No se pudo analizar el manual: "+esc(t)+ayuda); return; }
   revisarBorrador(data.borrador_id);
+}
+
+// ---------- Contexto de la empresa (v3.9): se agrega a las instrucciones de la IA en cada análisis ----------
+const CONTEXTO_GUIA=`1. Quiénes somos: actividad principal, sector, años en el mercado, ciudades/plantas/sucursales y número de colaboradores por área.
+2. Productos o servicios y clientes principales.
+3. Estrategia: objetivos del año y prioridades (crecimiento, costos, calidad, seguridad, servicio…).
+4. Normativa que nos rige: Código del Trabajo, IESS, SRI, Reglamento de Seguridad y Salud, normas ISO u otras certificaciones, regulaciones del sector.
+5. Riesgos críticos del negocio (seguridad industrial, financieros, legales, de continuidad).
+6. Valores corporativos (se evalúan aparte; la IA NO los repetirá como competencias del puesto).
+7. Niveles jerárquicos y cómo se nombran los cargos (ej. Gerente, Jefe, Coordinador, Supervisor, Asistente, Operador).
+8. Sistemas y herramientas que se usan (ERP, nómina, CRM, Excel…), para que los indicadores citen fuentes reales.
+9. Términos internos o siglas propias de la empresa.`;
+async function modalContextoEmpresa(){
+  const { data } = await sb.from("configuracion").select("valor").eq("clave","contexto_empresa").maybeSingle();
+  const actual=(data?.valor||"").trim(), MAX=6000;
+  abrirModal(`<h3>🏢 Contexto de la empresa para la IA</h3>
+    <div style="color:var(--muted);font-size:12.5px;margin-bottom:10px">La IA lo lee antes de cada manual para ajustar las competencias, los indicadores y las fuentes a la realidad de la empresa. No incluyas datos personales (nombres, cédulas, sueldos).</div>
+    <details style="margin-bottom:10px"><summary style="cursor:pointer;font-weight:600;font-size:13px">Qué conviene escribir (guía)</summary><div class="sub-t" style="white-space:pre-line;line-height:1.6;margin-top:6px">${esc(CONTEXTO_GUIA)}</div></details>
+    <textarea class="inp" id="cx-t" rows="14" maxlength="${MAX}" style="font-size:13px" placeholder="Escribe o pega aquí el contexto. Puedes usar la guía de arriba como esquema.">${esc(actual)}</textarea>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap"><span class="sub-t" id="cx-n" style="margin-right:auto"></span><button class="btn ghost sm" id="cx-v">Volver</button><button class="btn ghost sm" id="cx-g0">Usar la guía como plantilla</button><button class="btn amber sm" id="cx-g">Guardar</button></div>
+    <div class="msg" id="cx-msg"></div>
+    <div class="explbox" style="margin-top:10px">Los manuales ya analizados no cambian. Para aplicar el contexto a uno anterior, rechaza su borrador, pulsa «Reintentar» y revisa el nuevo.</div>`, m=>{
+    const t=m.querySelector("#cx-t"), n=m.querySelector("#cx-n"); const cuenta=()=>n.textContent=t.value.length+" / "+MAX+" caracteres"; cuenta(); t.oninput=cuenta;
+    m.querySelector("#cx-v").onclick=()=>modalManualesIA();
+    m.querySelector("#cx-g0").onclick=()=>{ if(!t.value.trim()){ t.value=CONTEXTO_GUIA.replace(/:.*$/gm,":\n"); cuenta(); } t.focus(); };
+    m.querySelector("#cx-g").onclick=async()=>{ const msg=m.querySelector("#cx-msg"); const { error } = await sb.from("configuracion").upsert({clave:"contexto_empresa",valor:t.value.trim()},{onConflict:"clave"});
+      if(error){ msg.className="msg error"; msg.textContent=error.message; return; } msg.className="msg ok"; msg.textContent="✅ Guardado. Se usará en los próximos análisis."; };
+  });
+  m_ancho(720);
 }
 
 // ---------- Revisión del borrador ----------
