@@ -476,7 +476,7 @@ function propuestaDemoBase(nombreArchivo, puestoId){
       {nombre:"Gestión documental",definicion:"Mantiene los expedientes completos.",conductas:["Archiva la documentación del personal en el expediente digital dentro de 5 días."],politica:"",indicador:"Expedientes completos",meta:"≥95%",nivel_esperado:3.5,peso:20,critico:false,fuente:"Sección 4.5"}],
     observaciones:"El manual no indica la política de gestión documental; se dejó vacía."};
   const base=nombreArchivo.replace(/\.(pdf|docx)$/i,"").replace(/^manual[_\s-]*(de[_\s-]*funciones[_\s-]*)?/i,"").replace(/[_-]+/g," ").replace(/\bv?\d+$/,"").trim();
-  if(base&&!/compras/i.test(base)){ const d=propuestaDemoBase("Manual_Analista_de_Compras.pdf",null); d.puesto=base.charAt(0).toUpperCase()+base.slice(1); d.departamento="Operaciones"; d.reporta_a="Jefe de Obra"; d.observaciones="(Demostración) Propuesta de ejemplo: en la plataforma real Gemini lee el contenido del manual."; return d; }
+  if(base&&!/compras/i.test(base)){ const d=propuestaDemoBase("Manual_Analista_de_Compras.pdf",null); d.puesto=base.charAt(0).toUpperCase()+base.slice(1); d.departamento="Operaciones"; d.reporta_a="Jefe de Obra"; d.observaciones="(Demostración) Propuesta de ejemplo: en la plataforma real la IA lee el contenido del manual."; return d; }
   return {puesto:"Analista de Compras",departamento:"Administrativo Financiero",reporta_a:"Gerente General",nivel:"Operativo",mision:"Asegurar el abastecimiento oportuno de materiales para las obras al mejor costo y calidad.",
     funciones:["Cotizar con al menos tres proveedores calificados.","Emitir órdenes de compra aprobadas en el sistema.","Dar seguimiento a las entregas hasta su recepción en obra.","Evaluar trimestralmente a los proveedores."],
     competencias:[{nombre:"Abastecimiento oportuno",definicion:"Garantiza que los materiales lleguen a tiempo a obra.",conductas:["Coloca las órdenes de compra dentro de las 48 horas de recibida la requisición.","Da seguimiento a cada entrega hasta su recepción."],politica:"Compras con requisición aprobada y entrega en plazo",indicador:"Órdenes entregadas en la fecha comprometida",meta:"≥95%",nivel_esperado:4,peso:35,critico:true,justificacion:"Retrasos detienen la obra (sección 5.2).",fuente:"Sección 5.2"},
@@ -1671,8 +1671,8 @@ function documentoSocializacion(){
   exportarWord("Socializacion_Politicas_Etinar","Políticas de la Evaluación de Desempeño 180°",cuerpo);
 }
 
-// ==================== MANUALES CON IA (Gemini) · exclusivo de RRHH ====================
-// Flujo: Manual (PDF o Word .docx) → Gemini propone → BORRADOR → RRHH revisa y corrige → Aprobar y aplicar.
+// ==================== MANUALES CON IA (Gemini y OpenRouter gratis; Claude u OpenAI opcionales, con respaldo) · exclusivo de RRHH ====================
+// Flujo: Manual (PDF o Word .docx) → la IA propone → BORRADOR → RRHH revisa y corrige → Aprobar y aplicar.
 // La IA nunca escribe en la estructura definitiva: solo la Edge Function crea borradores, y
 // los cambios reales se hacen aquí, con la sesión de RRHH, cuando aprueba.
 const EST_MAN={cargado:["Cargado","b-gris"],procesando:["Analizando…","b-blue"],borrador:["Borrador listo","b-wait"],en_revision:["En revisión","b-wait"],aprobado:["Aplicado","b-ok"],rechazado:["Rechazado","b-red"],archivado:["Archivado","b-gris"]};
@@ -1721,7 +1721,7 @@ async function modalManualesIA(){
           : (m.estado==="aprobado"&&b) ? `<button class="btn ghost xs" data-mi-rev="${b.id}">Ver</button>` : "";
         return `<tr><td style="min-width:160px"><b>${esc(m.nombre_archivo)}</b>${m.version?`<div class="sub-t">v${esc(m.version)}</div>`:""}${m.notas?`<div class="sub-t" style="color:var(--red)">${esc(m.notas)}</div>`:""}</td><td>${esc(D.puestoPorId[m.puesto_id]?.nombre)||'<span class="sub-t">por detectar</span>'}</td><td><span class="badge ${est[1]}">${est[0]}</span>${b?.modelo_ia?`<div class="sub-t">${esc(b.modelo_ia)}</div>`:""}</td><td class="num sub-t">${fmtFecha(m.fecha_carga||m.creado_en)}</td><td class="r" style="white-space:nowrap">${acc} ${m.estado!=="procesando"?`<button class="btn ghost xs" data-mi-del="${m.id}" title="Eliminar manual">✕</button>`:""}</td></tr>`; }).join("")||`<tr><td colspan="5" class="vacio">Aún no hay manuales. Sube el primero arriba.</td></tr>`
     }</tbody></table></div>
-    <div class="explbox" style="margin-top:12px">🔒 A Gemini solo se envía el <b>manual del puesto</b> y los nombres del catálogo de políticas y competencias. <b>Nunca</b> se envían evaluaciones, puntajes ni datos personales. La clave de la IA está guardada como secreto en Supabase, no en esta página.</div>`, m=>{
+    <div class="explbox" style="margin-top:12px">🔒 A la IA solo se envía el <b>manual del puesto</b> y los nombres del catálogo de políticas y competencias. <b>Nunca</b> se envían evaluaciones, puntajes ni datos personales. La clave de la IA está guardada como secreto en Supabase, no en esta página.</div>`, m=>{
     m.querySelector("#mi-subir").onclick=()=>subirManual(m);
     // Zona para arrastrar o elegir archivos: se acumulan en una lista que se puede revisar antes de subir
     m._files=[]; const drop=m.querySelector("#mi-drop"), inp=m.querySelector("#mi-f");
@@ -1817,28 +1817,28 @@ async function subirManual(m){
   if(estado.some(e=>e[2]==="err-t")){ await new Promise(r=>setTimeout(r,2500)); }
   modalManualesIA();
 }
-// Analiza varios manuales uno tras otro (respeta los límites de Gemini) y muestra el avance
+// Analiza varios manuales uno tras otro (respeta los límites de la IA) y muestra el avance
 async function analizarLote(ids, noSubidos){
   const { data:mans } = await sb.from("manuales_puesto").select("id,nombre_archivo").in("id",ids);
   const nombre=(id)=>(mans||[]).find(x=>x.id===id)?.nombre_archivo||("Manual "+id);
   const est=Object.fromEntries(ids.map(id=>[id,["en espera","b-gris"]]));
   let cancelado=false;
-  abrirModal(`<h3>✦ Analizando ${ids.length} manual${ids.length===1?"":"es"}</h3><div style="color:var(--muted);font-size:12.5px;margin-bottom:12px">Gemini los lee uno por uno (30–90 s cada uno). Puedes dejar esta ventana abierta; nada se aplica hasta que revises y apruebes.</div>
+  abrirModal(`<h3>✦ Analizando ${ids.length} manual${ids.length===1?"":"es"}</h3><div style="color:var(--muted);font-size:12.5px;margin-bottom:12px">La IA los lee uno por uno (30–120 s cada uno); si un proveedor está saturado, pasa solo al de respaldo. Puedes dejar esta ventana abierta; nada se aplica hasta que revises y apruebes.</div>
     ${noSubidos&&noSubidos.length?`<div class="explbox" style="margin:0 0 12px">⚠ No se subieron ${noSubidos.length}: ${noSubidos.map(e=>`<b>${esc(e[0])}</b> (${esc(e[1].replace(/^✕ /,""))})`).join(" · ")}</div>`:""}
     <div class="bar" style="height:6px;background:var(--line-2);border-radius:999px;overflow:hidden;margin-bottom:12px"><div id="al-bar" style="height:100%;width:0;background:var(--amber);transition:width .3s"></div></div>
     <div class="tabla-wrap" style="max-height:50vh;overflow:auto"><table><tbody id="al-lista"></tbody></table></div>
     <div id="al-fin" style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn ghost sm" id="al-parar">Detener después del actual</button></div>`, m=>{ m.querySelector("#al-parar").onclick=()=>{ cancelado=true; m.querySelector("#al-parar").textContent="Se detendrá al terminar el actual…"; m.querySelector("#al-parar").disabled=true; }; });
   m_ancho(680);
-  const pintar=(hechos)=>{ const t=$("al-lista"); if(!t) return; t.innerHTML=ids.map(id=>`<tr><td><b>${esc(nombre(id))}</b></td><td class="r"><span class="badge ${est[id][1]}">${esc(est[id][0])}</span></td></tr>`).join(""); if($("al-bar")) $("al-bar").style.width=Math.round(hechos*100/ids.length)+"%"; };
+  const pintar=(hechos)=>{ const t=$("al-lista"); if(!t) return; t.innerHTML=ids.map(id=>{ const e=est[id], err=e[1]==="b-red"; return `<tr><td style="min-width:200px;width:40%;word-break:break-word"><b>${esc(nombre(id))}</b></td><td class="r" style="white-space:normal">${err?`<div style="color:var(--red);font-size:12px;line-height:1.35;text-align:left">${esc(e[0])}</div>`:`<span class="badge ${e[1]}">${esc(e[0])}</span>`}</td></tr>`; }).join(""); if($("al-bar")) $("al-bar").style.width=Math.round(hechos*100/ids.length)+"%"; };
   let hechos=0, ok=0; pintar(0);
   for(const id of ids){
     if(cancelado){ est[id]=["no analizado","b-gris"]; continue; }
     est[id]=["analizando…","b-blue"]; pintar(hechos);
     let r=await sb.functions.invoke("analizar-manual",{ body:{ manual_id:id } }), t=r.error?await errorFuncion(r.error):"";
-    if(r.error&&/429|quota|RESOURCE_EXHAUSTED|límite/i.test(t)){ est[id]=["límite de Gemini: esperando 60 s…","b-wait"]; pintar(hechos); await new Promise(z=>setTimeout(z,60000));
+    if(r.error&&/429|quota|RESOURCE_EXHAUSTED|límite|saturad|tiempo/i.test(t)&&!/saldo|clave/i.test(t)){ est[id]=["IA ocupada: reintento en 60 s…","b-wait"]; pintar(hechos); await new Promise(z=>setTimeout(z,60000));
       r=await sb.functions.invoke("analizar-manual",{ body:{ manual_id:id } }); t=r.error?await errorFuncion(r.error):""; }
-    if(r.error){ est[id]=["✕ "+t.slice(0,90),"b-red"];
-      if(/GEMINI_API_KEY|Failed to send|not found|404/i.test(t)){ ids.filter(x=>est[x][0]==="en espera").forEach(x=>est[x]=["no analizado","b-gris"]); hechos=ids.length; pintar(hechos); break; } }
+    if(r.error){ est[id]=["✕ "+t,"b-red"];
+      if(/API_KEY|clave de IA|Failed to send|not found|404/i.test(t)){ ids.filter(x=>est[x][0]==="en espera").forEach(x=>est[x]=["no analizado","b-gris"]); hechos=ids.length; pintar(hechos); break; } }
     else { est[id]=["✓ borrador listo","b-ok"]; ok++; }
     hechos++; pintar(hechos);
   }
@@ -1855,11 +1855,11 @@ async function borradoresPendientes(){
 async function siguienteBorrador(actual){ const p=(await borradoresPendientes()).filter(x=>x!==actual); if(p.length) revisarBorrador(p[0]); else modalManualesIA(); }
 
 async function analizarManual(id, boton){
-  boton.disabled=true; boton.textContent="Gemini está leyendo…";
-  const fila=boton.closest("tr"); if(fila) fila.querySelector(".badge").outerHTML='<span class="badge b-blue">Analizando… (30–90 s)</span>';
+  boton.disabled=true; boton.textContent="La IA está leyendo…";
+  const fila=boton.closest("tr"); if(fila) fila.querySelector(".badge").outerHTML='<span class="badge b-blue">Analizando… (30–120 s)</span>';
   const { data, error } = await sb.functions.invoke("analizar-manual",{ body:{ manual_id:id } });
   if(error){ const t=await errorFuncion(error);
-    const ayuda=/GEMINI_API_KEY/.test(t)?"<br><br>Falta guardar la clave de Gemini como secreto en Supabase (Edge Functions → Secrets).":/Failed to send|404|not found/i.test(t)?"<br><br>¿Ya publicaste la función <b>analizar-manual</b> en Supabase?":"";
+    const ayuda=/API_KEY|clave de IA/.test(t)?"<br><br>Falta guardar al menos una clave de IA (GEMINI_API_KEY u OPENROUTER_API_KEY, ambas gratuitas) como secreto en Supabase (Edge Functions → Secrets).":/Failed to send|404|not found/i.test(t)?"<br><br>¿Ya publicaste la función <b>analizar-manual</b> en Supabase?":"";
     aviso("No se pudo analizar el manual: "+esc(t)+ayuda); return; }
   revisarBorrador(data.borrador_id);
 }
