@@ -2014,12 +2014,12 @@ async function subirManual(m){
   modalManualesIA();
 }
 // Analiza varios manuales uno tras otro (respeta los límites de la IA) y muestra el avance
-async function analizarLote(ids, noSubidos){
+async function analizarLote(ids, noSubidos, opts={}){
   const { data:mans } = await sb.from("manuales_puesto").select("id,nombre_archivo").in("id",ids);
   const nombre=(id)=>(mans||[]).find(x=>x.id===id)?.nombre_archivo||("Manual "+id);
   const est=Object.fromEntries(ids.map(id=>[id,["en espera","b-gris"]]));
   let cancelado=false;
-  abrirModal(`<h3>✦ Analizando ${ids.length} manual${ids.length===1?"":"es"}</h3><div style="color:var(--muted);font-size:12.5px;margin-bottom:12px">La IA los lee uno por uno (30–120 s cada uno); si un proveedor está saturado, pasa solo al de respaldo. Puedes dejar esta ventana abierta; nada se aplica hasta que revises y apruebes.</div>
+  abrirModal(`<h3>✦ ${opts.rehacer?"Rehaciendo":"Analizando"} ${ids.length} manual${ids.length===1?"":"es"}${opts.rehacer?" con el contexto nuevo":""}</h3>${opts.rehacer?`<div class="explbox" style="margin:0 0 10px">Se reutiliza la lectura de cada manual y la IA vuelve a diseñar las competencias con el contexto de la empresa. Si alguno falla, se conserva su borrador anterior.</div>`:""}<div style="color:var(--muted);font-size:12.5px;margin-bottom:12px">La IA los lee uno por uno (30–120 s cada uno); si un proveedor está saturado, pasa solo al de respaldo. Puedes dejar esta ventana abierta; nada se aplica hasta que revises y apruebes.</div>
     ${noSubidos&&noSubidos.length?`<div class="explbox" style="margin:0 0 12px">⚠ No se subieron ${noSubidos.length}: ${noSubidos.map(e=>`<b>${esc(e[0])}</b> (${esc(e[1].replace(/^✕ /,""))})`).join(" · ")}</div>`:""}
     <div class="bar" style="height:6px;background:var(--line-2);border-radius:999px;overflow:hidden;margin-bottom:12px"><div id="al-bar" style="height:100%;width:0;background:var(--amber);transition:width .3s"></div></div>
     <div class="tabla-wrap" style="max-height:50vh;overflow:auto"><table><tbody id="al-lista"></tbody></table></div>
@@ -2031,9 +2031,9 @@ async function analizarLote(ids, noSubidos){
     if(cancelado){ est[id]=["no analizado","b-gris"]; continue; }
     est[id]=["analizando…","b-blue"]; pintar(hechos);
     const avance=(txt)=>{ est[id]=[txt,"b-blue"]; pintar(hechos); };
-    let r=await procesarManual(id, avance), t=r.error||"";
+    let r=await procesarManual(id, avance, opts), t=r.error||"";
     if(r.error&&/429|quota|RESOURCE_EXHAUSTED|límite|saturad|tiempo/i.test(t)&&!/saldo|clave/i.test(t)){ est[id]=["IA ocupada: reintento en 60 s…","b-wait"]; pintar(hechos); await new Promise(z=>setTimeout(z,60000));
-      r=await procesarManual(id, avance); t=r.error||""; }
+      r=await procesarManual(id, avance, opts); t=r.error||""; }
     if(r.error){ est[id]=["✕ "+t,"b-red"];
       if(/API_KEY|clave de IA|Failed to send|not found|404|publicar/i.test(t)){ ids.filter(x=>est[x][0]==="en espera").forEach(x=>est[x]=["no analizado","b-gris"]); hechos=ids.length; pintar(hechos); break; } }
     else { est[id]=[r.data.calificacion!=null?`✓ borrador listo · revisión ${Number(r.data.calificacion).toFixed(1)}/5`:r.data.sinRevision?"✓ borrador listo (sin revisión cruzada)":"✓ borrador listo","b-ok"]; ok++; }
@@ -2081,15 +2081,44 @@ async function modalContextoEmpresa(){
     <textarea class="inp" id="cx-t" rows="14" maxlength="${MAX}" style="font-size:13px" placeholder="Escribe o pega aquí el contexto. Puedes usar la guía de arriba como esquema.">${esc(actual)}</textarea>
     <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap"><span class="sub-t" id="cx-n" style="margin-right:auto"></span><button class="btn ghost sm" id="cx-v">Volver</button><button class="btn ghost sm" id="cx-g0">Usar la guía como plantilla</button><button class="btn amber sm" id="cx-g">Guardar</button></div>
     <div class="msg" id="cx-msg"></div>
-    <div class="explbox" style="margin-top:10px">Los manuales ya analizados no cambian. Para aplicar el contexto a uno anterior, rechaza su borrador, pulsa «Reintentar» y revisa el nuevo.</div>`, m=>{
+    <div id="cx-rh"></div>`, m=>{
     const t=m.querySelector("#cx-t"), n=m.querySelector("#cx-n"); const cuenta=()=>n.textContent=t.value.length+" / "+MAX+" caracteres"; cuenta(); t.oninput=cuenta;
     m.querySelector("#cx-v").onclick=()=>modalManualesIA();
     m.querySelector("#cx-g0").onclick=()=>{ if(!t.value.trim()){ t.value=CONTEXTO_GUIA.replace(/:.*$/gm,":\n"); cuenta(); } t.focus(); };
     m.querySelector("#cx-g").onclick=async()=>{ const msg=m.querySelector("#cx-msg"); const { error } = await sb.from("configuracion").upsert({clave:"contexto_empresa",valor:t.value.trim()},{onConflict:"clave"});
-      if(error){ msg.className="msg error"; msg.textContent=error.message; return; } msg.className="msg ok"; msg.textContent="✅ Guardado. Se usará en los próximos análisis."; };
+      if(error){ msg.className="msg error"; msg.textContent=error.message; return; } msg.className="msg ok"; msg.textContent="✅ Guardado. Se usará en los próximos análisis.";
+      ofrecerRehacer(m.querySelector("#cx-rh")); };
+    ofrecerRehacer(m.querySelector("#cx-rh"), true);
   });
   m_ancho(720);
 }
+
+// Rehacer borradores por revisar con el contexto actual: todos o solo el más reciente
+async function ofrecerRehacer(caja, inicial=false){
+  if(!caja) return;
+  const [{ data:mans }, { data:bors }] = await Promise.all([
+    sb.from("manuales_puesto").select("id,nombre_archivo,estado").in("estado",["borrador","en_revision"]),
+    sb.from("borradores_manual").select("id,manual_id,estado").in("estado",["pendiente","en_revision"]).order("id",{ascending:false}) ]);
+  const l=(mans||[]).map(mn=>({ ...mn, bor:(bors||[]).find(b=>b.manual_id===mn.id) })).filter(x=>x.bor).sort((a,b)=>b.bor.id-a.bor.id);
+  if(!l.length){ caja.innerHTML=`<div class="explbox" style="margin-top:10px">El contexto se aplica a los manuales que se analicen desde ahora. No tienes borradores por revisar.</div>`; return; }
+  const sinTocar=l.filter(x=>x.estado==="borrador"), editados=l.filter(x=>x.estado==="en_revision");
+  caja.innerHTML=`<div class="card" style="margin-top:12px;padding:14px;box-shadow:none;border:1px solid var(--amber)">
+    <b style="font-size:13.5px">${inicial?"¿Aplicar el contexto a los borradores que ya tienes?":"¿Rehacer los borradores con este contexto?"}</b>
+    <div class="sub-t" style="margin:4px 0 10px">Tienes <b>${l.length}</b> borrador${l.length===1?"":"es"} por revisar. La IA reutiliza la lectura de cada manual y vuelve a diseñar las competencias (2 a 3 min c/u). Los puestos ya aplicados no cambian.</div>
+    ${editados.length?`<label style="display:flex;gap:8px;align-items:center;font-weight:500;font-size:13px;margin:0 0 10px"><input type="checkbox" id="rh-ed"> Incluir también ${editados.length} que ya corregí a mano <span class="sub-t">(se perderán esas correcciones)</span></label>`:""}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <button class="btn ghost sm" id="rh-no">No, solo para los nuevos</button>
+      <button class="btn ghost sm" id="rh-uno" title="${esc(l[0].nombre_archivo)}">Solo el más reciente</button>
+      <button class="btn amber sm" id="rh-todos">Rehacer todos (<span id="rh-n">${sinTocar.length}</span>)</button></div>
+    <div class="sub-t" style="margin-top:6px">Más reciente: ${esc(l[0].nombre_archivo)}</div></div>`;
+  const ed=caja.querySelector("#rh-ed"), elegidos=()=>(ed&&ed.checked?l:sinTocar).map(x=>x.id).reverse();
+  if(ed) ed.onchange=()=>{ caja.querySelector("#rh-n").textContent=elegidos().length; };
+  caja.querySelector("#rh-no").onclick=()=>{ caja.innerHTML=`<div class="explbox" style="margin-top:10px">Listo: el contexto se usará en los manuales que se analicen desde ahora.</div>`; };
+  caja.querySelector("#rh-uno").onclick=()=>{ if(l[0].estado==="en_revision"&&!confirmarSuave(caja,"Ese borrador ya tiene correcciones tuyas y se perderán.")) return; analizarLote([l[0].id], null, { rehacer:true }); };
+  caja.querySelector("#rh-todos").onclick=()=>{ const ids=elegidos(); if(!ids.length){ caja.querySelector("#rh-n").textContent="0 · marca la casilla"; return; } analizarLote(ids, null, { rehacer:true }); };
+}
+// Confirmación en dos clics (sin ventanas del navegador)
+function confirmarSuave(caja, texto){ if(caja._ok) return true; caja._ok=true; const d=document.createElement("div"); d.className="msg error"; d.textContent=texto+" Vuelve a pulsar para confirmar."; caja.appendChild(d); return false; }
 
 // ==================== METODOLOGÍA v3.14 · análisis riguroso, indicadores, reglamentos, validación ====================
 // --- IA: análisis del manual en 3 pasos (lectura → diseño → revisión cruzada con otra empresa de IA) ---
@@ -2098,13 +2127,15 @@ async function invocarIA(body){
   if(error) return { error: await errorFuncion(error) };
   return { data };
 }
-async function procesarManual(id, avance=()=>{}){
+async function procesarManual(id, avance=()=>{}, opts={}){
   await asegurarTexto(id);
-  let borId=null;
+  let borId=null, previo=null;
   // Si la lectura (paso 1) ya se hizo y falló el diseño, se continúa desde el paso 2
   const { data:prev } = await sb.from("borradores_manual").select("id,datos,estado").eq("manual_id",id).order("id",{ascending:false}).limit(1);
   const p0=(prev||[])[0];
   if(p0&&["pendiente","en_revision"].includes(p0.estado)&&p0.datos&&p0.datos._proceso&&p0.datos._proceso.extraer&&!(p0.datos.competencias||[]).length) borId=p0.id;
+  // Rehacer con el contexto nuevo: se reutiliza la lectura del manual (paso 1) y se rehacen diseño y revisión
+  if(opts.rehacer&&!borId&&p0&&["pendiente","en_revision"].includes(p0.estado)&&(p0.datos?.funciones||[]).length){ borId=p0.id; previo=p0; }
   if(!borId){
     avance("1/3 · leyendo el manual…");
     const r1=await invocarIA({ paso:"extraer", manual_id:id });
@@ -2114,7 +2145,11 @@ async function procesarManual(id, avance=()=>{}){
   }
   avance("2/3 · diseñando competencias…");
   const r2=await invocarIA({ paso:"disenar", borrador_id:borId });
-  if(r2.error) return { error:r2.error, borId };
+  if(r2.error){
+    // si falla al rehacer, el borrador anterior sigue intacto: el manual vuelve a "por revisar"
+    if(previo) await sb.from("manuales_puesto").update({ estado:previo.estado==="en_revision"?"en_revision":"borrador", notas:"No se pudo rehacer con el contexto nuevo ("+String(r2.error).slice(0,140)+"). Se conserva el borrador anterior." }).eq("id",id);
+    return { error:r2.error, borId: previo?null:borId };
+  }
   if(!(CFG.ia_revision>=1)) return { data:{ borrador_id:borId } };
   avance("3/3 · revisión cruzada…");
   const r3=await invocarIA({ paso:"revisar", borrador_id:borId, evitar:r2.data.proveedor||"" });
@@ -2233,15 +2268,24 @@ async function modalReglamentosIA(){
     <div class="card" style="padding:14px;margin:0"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input type="file" id="rg-f" multiple accept="application/pdf,.pdf,.docx" style="font-size:13px;flex:1;min-width:200px"><button class="btn amber sm" id="rg-subir">Subir y analizar</button></div><div class="msg" id="rg-msg"></div></div>
     <div class="tabla-wrap" style="margin-top:12px;max-height:340px;overflow:auto"><table><thead><tr><th>Documento</th><th>Estado</th><th></th></tr></thead><tbody>${
       l.map(d=>{ const e=EST_DOC[d.estado]||[d.estado,"b-gris"]; const n=(d.datos?.politicas||[]).length;
-        const acc=d.estado==="borrador"?`<button class="btn amber xs" data-rg-rev="${d.id}">Revisar (${n})</button>`:d.estado==="aplicado"?`<button class="btn ghost xs" data-rg-rev="${d.id}">Ver</button>`:d.estado==="procesando"?"":`<button class="btn amber xs" data-rg-an="${d.id}">${d.notas?"Reintentar":"✦ Analizar"}</button>`;
+        const acc=d.estado==="borrador"?`<button class="btn amber xs" data-rg-rev="${d.id}">Revisar (${n})</button>`:d.estado==="aplicado"?`<button class="btn ghost xs" data-rg-rev="${d.id}">Ver</button>`:d.estado==="procesando"?"":`<button class="btn amber xs" data-rg-an="${d.id}">${d.datos?._avance&&d.datos._avance.hechas<d.datos._avance.partes?`Continuar (${d.datos._avance.hechas}/${d.datos._avance.partes})`:d.notas?"Reintentar":"✦ Analizar"}</button>`;
         return `<tr><td style="min-width:200px;word-break:break-word"><b>${esc(d.nombre_archivo)}</b>${d.notas?`<div class="sub-t" style="color:var(--red)">${esc(d.notas)}</div>`:""}</td><td><span class="badge ${e[1]}">${e[0]}</span>${d.modelo_ia?`<div class="sub-t">${esc(provDe(d.modelo_ia))}</div>`:""}</td><td class="r" style="white-space:nowrap">${acc}</td></tr>`; }).join("")
       ||`<tr><td colspan="3" class="vacio">Aún no hay documentos. Empieza por el Reglamento Interno de Trabajo.</td></tr>`
     }</tbody></table></div>
     <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn ghost sm" data-cerrar>Cerrar</button></div>`, m=>{
     const msg=m.querySelector("#rg-msg");
-    const analizar=async(id)=>{ msg.className="msg"; msg.textContent="La IA está leyendo el documento (30–120 s)…";
-      const r=await invocarIA({ paso:"politicas", documento_id:id });
-      if(r.error){ msg.className="msg error"; msg.textContent="No se pudo analizar: "+r.error; return false; } return true; };
+    // Documentos largos se analizan por partes (~7 mil tokens c/u) para que quepan en las IA gratuitas; si se corta, retoma donde quedó
+    const analizar=async(id)=>{
+      const doc=l.find(x=>x.id===id), av=doc?.datos?._avance;
+      let parte=(doc&&doc.estado==="cargado"&&av&&av.hechas<av.partes)?av.hechas:0, partes=av?.partes||1, total=0;
+      do {
+        msg.className="msg"; msg.textContent=partes>1?`La IA está leyendo la parte ${parte+1} de ${partes} (30–120 s c/u)…`:"La IA está leyendo el documento (30–120 s)…";
+        let r=await invocarIA({ paso:"politicas", documento_id:id, parte });
+        if(r.error&&/límite|saturad|tiempo|cuota/i.test(r.error)&&!/saldo|clave inválida/i.test(r.error)){ msg.textContent=`IA ocupada en la parte ${parte+1}: reintento en 60 s…`; await sleep(60000); r=await invocarIA({ paso:"politicas", documento_id:id, parte }); }
+        if(r.error){ msg.className="msg error"; msg.textContent=(partes>1?`Se detuvo en la parte ${parte+1} de ${partes}. Lo ya leído quedó guardado; pulsa «Continuar» más tarde. `:"No se pudo analizar: ")+r.error; return false; }
+        partes=r.data.partes||1; total=r.data.total||0; parte=(r.data.parte??parte)+1;
+      } while(parte<partes);
+      msg.className="msg ok"; msg.textContent=`✓ ${total} políticas propuestas`; return true; };
     m.querySelector("#rg-subir").onclick=async()=>{ const fs=[...m.querySelector("#rg-f").files]; if(!fs.length){ msg.className="msg error"; msg.textContent="Elige uno o más archivos (PDF o Word .docx)."; return; }
       m.querySelector("#rg-subir").disabled=true; const ids=[];
       for(const f of fs){ msg.className="msg"; msg.textContent=`Subiendo ${f.name}…`; const r=await subirReglamento(f); if(r.ok) ids.push(r.id); else { msg.className="msg error"; msg.textContent=`${f.name}: ${r.motivo}`; await sleep(1500); } }
