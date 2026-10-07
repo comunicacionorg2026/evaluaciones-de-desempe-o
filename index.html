@@ -194,6 +194,11 @@ tr.bajo td{background:#FFF8F6}
 .q{background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:18px 20px;margin-bottom:12px}
 .q p{font-size:15px;font-weight:700;margin-bottom:6px}
 .scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:12px}
+.cond{padding:12px 0 4px;border-top:1px dashed var(--line);margin-top:10px}
+.cond-t{font-size:13.5px;line-height:1.45;display:flex;gap:8px;align-items:flex-start}
+.cond-n{flex:0 0 22px;height:22px;border-radius:50%;background:var(--amber-soft);font-weight:800;font-size:11.5px;display:inline-flex;align-items:center;justify-content:center}
+.scale.mini{margin-top:8px;gap:6px}.scale.mini .opt{padding-top:7px;padding-bottom:7px}
+.cond-prom{margin-top:12px;padding:9px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font-size:13px}
 .opt{border:1.5px solid var(--line);border-radius:12px;padding:11px 4px;text-align:center;transition:.2s var(--ease);background:#FCFCFB;cursor:pointer;user-select:none}
 .opt:hover{border-color:var(--amber)}
 .opt .n{font-size:17px;font-weight:800}
@@ -250,12 +255,81 @@ tr.bajo td{background:#FFF8F6}
 .es-demo .sidebar{padding-bottom:42px}
 .err-t{color:var(--red)}
 
+
+/* ---- Acceso v3.12: foto + panel ---- */
+#vista-login.lg{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(380px,.85fr);padding:0;background:#FBFBFA;align-items:stretch;justify-content:stretch}
+.lg-foto{position:relative;overflow:hidden;min-height:100vh;background:linear-gradient(135deg,#17140F 0%,#221D15 55%,#2C2616 100%)}
+.lg-foto .bp{position:absolute;inset:0;width:100%;height:100%}
+#lg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:lgzoom 24s ease-out both}
+@keyframes lgzoom{from{transform:scale(1.08)}to{transform:scale(1)}}
+.lg-velo{position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,20,15,.15) 0%,rgba(23,20,15,.25) 45%,rgba(23,20,15,.88) 100%)}
+.lg-texto{position:absolute;left:56px;right:56px;bottom:56px;color:#fff}
+.lg-kicker{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:14px}
+.lg-texto h1{font-size:clamp(26px,3.2vw,42px);line-height:1.12;margin:0 0 12px;font-weight:800;letter-spacing:-.02em}
+.lg-texto p{max-width:520px;font-size:15px;line-height:1.55;color:rgba(255,255,255,.82);margin:0}
+.lg-panel{display:flex;align-items:center;justify-content:center;padding:32px 24px;background:#FBFBFA}
+.lg-card{width:100%;max-width:400px}
+.lg-card .brandimg{height:42px;margin:0 0 26px;display:block}
+.lg-card h2{font-size:24px;margin:18px 0 4px;text-align:left}
+.lg-card .sub{text-align:left;margin-bottom:18px}
+.lg-tabs{display:flex;background:var(--line-2);border-radius:12px;padding:4px;gap:4px}
+.lg-tab{flex:1;border:0;background:none;padding:9px 10px;border-radius:9px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit}
+.lg-tab.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.lg-pass{position:relative}.lg-pass .inp{padding-right:44px}
+.lg-ojo{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;font-size:16px;cursor:pointer;opacity:.55;padding:6px}
+.lg-codigo{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:18px;letter-spacing:.18em;text-transform:uppercase;text-align:center}
+.lg-ayuda{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.5;text-align:left}
+#vista-login .demo-box{margin-top:18px}
+@media (max-width:860px){
+  #vista-login.lg{grid-template-columns:1fr}
+  .lg-foto{min-height:240px;height:34vh}
+  .lg-texto{left:22px;right:22px;bottom:20px}.lg-texto p{display:none}
+  .lg-texto h1{font-size:24px}
+  .lg-panel{padding:24px 18px 40px;align-items:flex-start}
+}
+/* ---- Revisión de borradores (v3.11+) ---- */
+    .rv-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .rv-resumen{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+    .rv-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:var(--line-2);font-size:12px;font-weight:600;color:var(--ink-2)}
+    .rv-chip.ok{background:#E8F5EC;color:#166534}.rv-chip.mal{background:#FDECEC;color:#B91C1C}
+    .rv-ia{margin-top:10px;background:var(--amber-soft);border:1px solid #F2E4B5;border-radius:12px;padding:8px 12px;font-size:12.5px;color:#6b5a1e}
+    .rv-ia summary{cursor:pointer;font-weight:700}
+    .rv-tabs{display:flex;gap:4px;margin-top:12px;border-bottom:1px solid var(--line)}
+    .rv-tab{border:0;background:none;padding:9px 14px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;font-family:inherit}
+    .rv-tab.on{color:var(--ink);border-bottom-color:var(--amber)}
+    .rv-tab .n{display:inline-block;min-width:20px;padding:1px 6px;margin-left:4px;border-radius:999px;background:var(--line-2);font-size:11px}
+    .rv-panel{display:none}.rv-panel.on{display:block}
+    .rv-card{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;background:#fff;transition:opacity .2s}
+    .rv-top{display:flex;gap:10px;align-items:center}
+    .rv-inc input{width:18px;height:18px;accent-color:var(--amber-d);cursor:pointer}
+    .rv-nombre{flex:1;border:0;border-bottom:1px dashed transparent;font-size:15.5px;font-weight:800;color:var(--ink);padding:4px 2px;background:transparent;font-family:inherit;min-width:0}
+    .rv-nombre:hover,.rv-nombre:focus{border-bottom-color:var(--amber);outline:none}
+    .rv-meta{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin:8px 0}
+    .rv-mini{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;color:var(--muted);margin:0}
+    .rv-mini .inp{width:92px;padding:7px 10px}
+    .rv-crit{display:inline-flex;align-items:center;gap:6px;margin:0 0 4px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;font-size:12.5px;cursor:pointer}
+    .rv-crit:has(input:checked){background:#FDECEC;border-color:#F5C2C2;color:#B91C1C}
+    .rv-def{font-size:13px;color:var(--ink-2)}
+    .rv-sec{font-size:12.5px;font-weight:700;color:var(--ink);margin:12px 0 6px}
+    .rv-mide{margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+    .rv-why{margin-top:8px;font-size:12.5px;color:var(--ink-2)}.rv-why summary{cursor:pointer;color:var(--muted);font-weight:600}
+    .rv-funlist{counter-reset:f;list-style:none;padding:0;margin:8px 0 0}
+    .rv-funlist li{counter-increment:f;display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line-2);font-size:13px}
+    .rv-funlist li::before{content:counter(f);min-width:22px;height:22px;border-radius:50%;background:var(--amber-soft);font-weight:800;font-size:11.5px;display:inline-flex;align-items:center;justify-content:center}
+    .rv-pie{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  
+.rv-audit{margin-top:10px;border:1px dashed var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px;background:#fff}
+.rv-audit-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-weight:700}
+.rv-sug{display:flex;gap:8px;align-items:flex-start;margin-top:6px}.rv-sug span{flex:1}
+.rv-proc{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:11.5px;color:var(--muted)}
+.rv-info{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.6;margin-top:8px}
 </style>
 </head>
 <body>
 <!-- ==================== ACCESO ==================== -->
-<section id="vista-login">
-  <svg class="bp" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true">
+<section id="vista-login" class="lg">
+  <div class="lg-foto">
+    <svg class="bp" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true">
     <g stroke="#EEBC1F" stroke-opacity="0.10" stroke-width="1"><path d="M0 620 H1440 M0 700 H1440 M0 780 H1440"/><path d="M120 900 V300 M300 900 V420 M1120 900 V360 M1330 900 V500"/></g>
     <g stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="1.4">
       <rect x="180" y="470" width="150" height="290"/>
@@ -268,19 +342,37 @@ tr.bajo td{background:#FFF8F6}
     <g stroke="#EEBC1F" stroke-opacity="0.22" stroke-width="1.6"><path d="M760 760 V300 M735 760 H785"/><path d="M760 320 H980 M760 300 L980 320 M760 340 L960 320"/><path d="M700 320 H760 M700 320 L760 300"/><path d="M960 320 V360"/><rect x="748" y="300" width="24" height="24"/></g>
     <g fill="#FFFFFF" fill-opacity="0.05"><rect x="180" y="470" width="150" height="290"/><rect x="1000" y="400" width="190" height="360"/></g>
   </svg>
-  <div class="vignette"></div>
-  <div class="glass anim">
-    <img class="brandimg" alt="Etinar" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAe8AAABaCAYAAACR+d6/AAAZtElEQVR42u2debRkVXXGf7eqemJs7EYcEFpAAk6JwSjBeQAEIWZFRdTQ0DQNjUgWKyokqMFoNC4wS5KlCIIN2CKKMwoqiELAQFAhjIaAIIOKQDPTDa/rVeWPffaqQ/Xrd/et6U77W+uuB/2q6t0659zz7b3P3t9OHvrJkjWNRnezTgfHyJF05s6h+dT6zm1bPXjXS5IDmO5CkkDXx8bhcDgcg6IFzEuSZG6S+GCMGp0u3WYjSSCZO4aPb4TL4Rjpsg3XxvaLUX9m0dEEsuyO0+RrnLeGeG87b28njHeZ0Y0uxrkWWnTpdrvQdV9wLBPZ7ZKMaQLLvCE6yolhNvdxPQfjxnSN5qgIxNeu2DMTO1mdPmLPzUpz5LcYOsDLgH3CQvC4iWMUG2cCXAP8KFpnik2AI4F5GQ3MJnAp8PMZPrMMWA5sk2H8vgvcnON3PRJ4RkaCSIAngc8BT+XkcXeB5wIHl9C4exJ4HHgMWAM8ANwffk7NsA5a4ft2hiFyJ+/ykvergE/6cDhGjLP7yFs31k2Bzwz4mWuAFwP3lZDAjwd2yPD6e3Ig72b4W7sBpwzxObcAF4TPm6QH3AgkuEOF9rQnAoH/FrgJ+BXwC+DXfWPbYsCjFifv8mJdWARtn0fHCKDr6LFZPMs1wJZki/ZMA4uA04H9w98oE3k/CGwX7rmR8j2bOXmuOj+Hh/tYn3FP0Lk/HPhBjvOzPtxLWaOJSbgawdjdFFgCvD6ao/8Ffgp8B7gsIvImGY9ofNMvtwfe8nl0jBCtFIJq0Qv5JRk+sw3sh4R0vzDIRpUjmpHB0UjZuLMmt42KMKaBxcA7wz00Mt6HJontBTwfuCOnCEkywPoqKrp9l66PXcN1FHADsAo4E3gkIn/TuHu2ssPhmAQBTiNh913Cf/veM7qxBTgQWBgMpazEpwbAPGCpc8PIDJFGZPw16Z1zt8PPlwCfBa4DVka/N2Xc+wQ5HI5JbGQgSW9nRx6qJ1oODzWEVvSNdVYoFywF5obP9fkZD6G3oshGG9geiUhdAuwUxr5lnTCHw+EYt4fYBl4BnEDvjNgxvNf9GuClWby2jXBBB0ka26vv8x3jgRK5kvgbgavC+KfmMvlZaX0wsvpCt54zeSR5j3uRPFwNn38Y+DFSPlam8++iPtcrw3+nncunQasLVpBv4lrZ9rSk7+cgJN4IhL0Iyfh/G3DhbM+Hk7eTjsPHfdJj0QDOQrQK1lFeAZe8vbZpYFvgr8L4Desp6/v3Jt/EtbI+W92IaAdRwFQvvAl8A/hL4PqNzYGTd32wFrjbiWSojaIDPBvYgvSMWP39g0i9ZyMHgmohAiObUpwMXiWdnZBknRX0MtId2caxAxyE5BKMomQ0CZ8zL3zuxwtO3o8Dv8vp2VLMDeO/BTC/bw46AxhV+nxsAnwVeDki9LKBgevkXX3o2eJVwJ6UU+WqCFCCWQ28h/SkEv396YjQx6QJSjeM1cC7MCbBTPDe2sBhSGjwO3j4fJDnei5waLTpj8ooAElc+zRSe13UPe1i4B05r51WIO2FiELcixEBrdchNd5K4lmiBPp8vAg4NhhRG3xHJ+/6IJbj8xDlYBvGIHKGOu7TORhNnQITohqRpwFXAn90wzKT8dMJxvhO2M+6LSSic7Bj+PwLC2xYdaP1kte6mQrXo8BdYS2fHjznvYD3A2/qMzqyzPEHgC+G5+Np3rdnm9cLet6Y+JX5yip8kfe4Nyj2ebuGOrcOm13X96PMxHVkRuKyrmE1UleUwNAvyp7WX9O9FtG5fzNSg39vRiNIj+m2CBGqDcLv/rDU74H3a7irbONedA9S1dfeh0v9WglYcwb2xHamquR+GZKDYZkXkMS1JRRbVKco+4JGudr0auRV7e7rwO7AFRkJXA3cg4A59NXeO3k7HI68CTxWX2v7vpS6oYOcdWcVUzkKuJynZ0VvzOubRs5yD3KuGNio0KOyFnBn8MIvyEDgSt47A3/eH53yCXE4HOOCJZyrxLMAV1+zjJVmIltJVcn9GqS71fnGsdXPPRhXXBsWbXpNa94R5qJpfD70NXv2PS9O3g6HY6xeoiV0H6uvfQxXX5ttnLpIXfe22MPZCdKrO0HEVx6OPmu2udPEtTc7XwwNXdNPIpn8T0UeusW43aP/9T4ZDodjHFiLtD60dknSUOLxwKsjb8WxoRe20mgUqeDHvcA3w1zcFwhcCSXt/dpq1CtURkPgLSQCsope/oKFvHeh79zbydvhcIwD84BjkNIZ6yYVq69t1rd5udctZPpSRMsc7IlqX0b6tM8J47na6LyVKXGtTAZYApyCLcKk6//ZiOAS7nk7HI5xk81aJEQ4Ff4tzXtTfecdgZPx8PlMm/gKozGkczAFnBH+vx3m4DJs0qeeuDYe8iZ43zeRHpnS2u75wLPiOfCJcDgc48JWwG3AcdgzbFWJbjnwN3j4XDfwNqLidaDR69a+3j8Gbo3Gv4Wct57XRyazGVTw9FahjuEN2y7wK+Mc6O+f6Z63w+GYBNYHAjkZOWdtYS+R6QCnBm9j2G5ZVdjsAd4JLMaW+a3j9fmNEMFXsbUQ1bnYiV7imtfijwZ3GF+nEauFkTHn5O1wOMYGFbBoICpR92GTQI3V187A1deUrA83vl6NnZuBS+iFv+PfXQ/8ou93s31erLjmyWujwaMZX7/APW+HwzFJtBBt5sPIln3eBt5KvdXX1DPeHekwZfGWdXxPZ+ZjB933v9Ln2aXdw1uA7fHEtVHPrRXznbwdDsckocT7faTe2NphzdXXeuR6RB8xz/baFlLLfU7kuc9E7t8Cngivn43APXFtPNgi4+s7Tt4Oh2PS0MzxDwE3BsJII6JYfe3L4T11Ul9T0twGSd6z6JgrUZ+H9JGfSYxFvfc/ABeRLpcac8VSevXGjuGwdcbXP+bk7XA48vAeoacwNYXt/FTD538BnEC9ysf0e74X2BxbopqS9akGw0Brvi0GkZanvYBe4pqX8Q33LCzpM1LTDKc/xO938nY4HJP0vlvAtcA/YC8fUwL/MPVSX9PxWm50tnQsLw9jPFs9+HQggYuA32PT2lbSKUOr0KJCoylzkKOgNPLWZM31wO1O3g6HIy/o+fdngR9hKx+Lezafhaivdal2+FyNkzcAL8ReLpfQKw9rpJBCCznz/nb4t47hnrrAPnji2jDkTYhgLDGsYzWSfgPcFc+TD7zD4Zg0VCJyOfAAtgx09SJVfc2SdV12dBEdcwux6njchSQGWkrAlBi+0mcwpHmN84G/NUYDHBuuYxDJWV3TScq8doGf0YvE+MA7HI7cyLuBhGsPx1b7reRSB/U13dS3B/bFlqim43cmsI70rmFExPELpO7bakSBtAqdg7cKHdRwXWrkYI04fa3P4HLydjgcuUC9iO8gyVXW8jEl+tOQZg1VVF/T73NI8HLTCFLJfR3SrcriqccGUQc41/g+Hf8XAG8yeuwOgVZY7A/8GenHDnEv9ivoy2Fw8nY4HHkSeBP4e+DX2MrHVH1tMSJCUjX1NQ1NzwvkbdmndZP/PhI2tySf9XvsX0c0z5sZ3qOtQj15zWaQaYORk7DlbOhr/iXy2HHyrieSCl2O8kM3/XVIGLFNtvKxKqqvabh7X+xtOPX3pwzwbGjk4g6k25jlrFzv8S3AdnjimoW41Wv+PLAz6REjjUz9DIlObVA54ANer41SxRi6Fbgc1fG+W8AvgePJVj6m6mu7Uh31NfVqVxrXuRLntUiJGGQXUNFz1dUZowML8MS1tHHSaFIbOBE4lPRcDZ33tWEdzGiQeXeY+mAu8AzsyUFF3+AecRKvHIGfBOyFiICkibHE6mtnA3vQCzOWdV3os7kr8MbISLHg1PBea+5A//h3kc5va4BFpId148S1kwb4m1Ul6/hqh2tr4N+Bd9OXMb4R4tbXHAn838YMWifv6kMf/j2Qvr5lDjnrhnIvsBsSbi3zZu3ozaue6S0DrkPaH6aFFmP1tY8BHxmQvIpG3suj75G20TeRcrvzBvS64895GDk3P8RAMnqvOwdD46IMUZNRe7bNnPe1brSG471oYYhMHAdsi00dsI1k8X+KniRw2z3veqMVPO8qoI2fe1cNWqd8D9KE4xvYQuFKGMcjoi9X5EAioyKiaUQG9b193m1axOKcQLyjMFxWB/JuGOesgSSu/TiHMZuKvNui7LHPAV6G5APsDzw3mqu0ULkqr30OUROcdT6dvOvn4ZT9/hNEKtBRPSgZfRPp432YwfuMw5RnISU4ZYzIaBThr4FnGb00fc9pEZkOYzwlyLn5rUgpmCXyoYprzwPuZjLHcnpPrwzrJI+jQF1fDWBT4JmBqLfl6X23NSehmTL2yscnBk891QB18q4Xkop8B/e6q03gTeAY4LXYMnMbgcR2RM4Wl1O+8Llu4EdkHKdLkDK7YQlM5VLXI2VjHzGMu57rauLav06ISPX5X0JP971oa1iPIixhcpUIfj+Sja6lfl2LBeNwOBxFia6AaG4v5enVEWmOSBvJ5n075VJf0816N3qJd9Z7t+iYZzUgzsXevS0WlJm04lqXXtg872s6Itwmvfa1GNbt7YjgzecjIu9aB97hcDiK5Lm0gP8G/gn7GbZ6fadSTvW1w7HVWWt+wK3IWXMyoiiDjtfNwFXGe4kT194wYV7RhLUiXE16JXfWsX4CkbPdHamxzxQtcvJ2OBxFJvBPAZdi6z4Wq6+dQTnU15QgFwHvjDxxi4d8BpK0NcoIg47X6r5IiOV+DscrP6xrOwF+ikSK7kcU9dqDTJSj+ihSiGkUl6P661WTqA5BsqktSWiaxLUvcBTFV19T4n0XsBXplRQaln0MKSWKyXMU0M/6bvgbLeOYqyrc83DFNeuc7480hdkDkaZNsoybD3B9UKQQ06DXnPBzMZ60VgdoGPdORAa1QTb1tZMovvqaEt2K6Dm1eG3fRvQOsuiYW8e8CfwRKb3rYuu3ropr1jI3349lbF8O/Cfw8WguTZEUzzavhweTIO0Xf0j5RU2S4IV5uVg9oOHzc5EeyAdjKx+D4quv6Wb9aqTEzbJxxzrm437OvoyE8i2Gcpy49m9MJjrWpRhqkXEFTJLxfWqgfhQRuzkUUVVLPf928q6H99IEbkDqZqtonDiqT+AN4OhAdDtSHfW1Lr3yMEuziiZwJXB1hkjEIHtGFylDuxsJhVvK9TrAnyCJaxczfrGchOJVFExH42E1evRI81Vhbg9BlO5cpMUB9ELOVdA271I+BS3HcPPdQM5glyJCIl3S9beVwI9HsrIvpzjqa0q8zwHeRrbysNPC+8dpjMwBnkQ6Wv0dtsx9fc0KRC51nOshQRK9bsgxopIgiWZbIPrl2/TNobXcTo80pxEVzPMRXfNTZ1uvTt712gDbFSFvRz297xbwX8A/h8sSPlcP6ExEtnItxQif63N4EKLQlfZdNIL2WyQTvINkmo8LU5GhcJSRhPQ1+yJKY/eMab/RsbgUOKAg63NzYHsk0rM/Io+6IFpniXH8NOrxhWA8nYU3JnE4HBUh8E8AeyIh9DTvRj1cVV87lPzD55rgNSfcDwavVkngMiQ0PZfJafzfjk0uVevNN0EU1z49ZmdBI4l5R1M6SFToxnCdGcbrg0j5HNg1BxoRgZ8SIhi/n8ngdPJ2OBxlQdy5aSnwP8Bm2MPny4ALgG/lvOGrQbEnIm5i1TEnkOLBORhNFgMjfs0hSK/16Qmsh4T8o4matKZn2LciuQzfQxL/FmUkcJWdPQA4OVrDGwy0w+FwlAHas/oORAvamrRVRPW1lQO8J48ErSx/sz9xLa97zsuwVKnURoisXIj0p19DtuMafe1+0brHydvhcJQZej68Gvgq5VJfi8P4e1MOFbhBDCyQxLW6VoN0kHLWOUiE6ECylbZprsZuiHiPRhicvB0OR6mh3s37kCQuy9lqrL72fvJRX9M9dxlybj3JRh6T9tTfiiSu1VlxTQn8J0gS2gbh7xTPeyHwwpn42snb4XCUEXrO/Qi9M+DUNor0zrpPDJviJNXXNFFtk+ieq7gHx4lrrrjWM14+HtZr0xiR0GjSi6JxdfJ2OByV2BRbiLzkJ7GFz/vV17R14yS8X92096uBRxonrlnmpcrQkPd9wNewdWuLsfNsA+xwOBxlJfAmcAKiTmUhCg1dvhypF7eKaYxiEwdJVOtm/I5Fuqzk3QF2AV4fjXudkQDnDMC9zws/u07eDoejKlCltQ5SPvY42bqP/SPwmvDf4yQXFeB4CfDajGTWLNiV1VjxVqG9I51fAn/AlqOh0aBFM5G313k7HI4qbIwt4DZEynMV2dTXzkIagzzB+NTXdCM+LDIcLPtvF+nu9ST5KsPp356PqIdZFcO6SOLac4HfUV+FR60qWAdcE8bEOpdbOHk7HI6qQsnwTKQE613Y1NfawA6MV31NE7i2BN5t9Lr1PPxqJDu+SLgSeCXpXdD6E9dOpN7yzPrdbzCStxpIm85E3h42dzgcVfLAG0hTh7uMRKFkvQx4B+MpH1OCezvSwMJaHpYAp4fvMY/8w+Xzwr2swp7gpxyjhpE3FILfZHz9fKTcLCZ0J2+Hw1Ep8k6AhwIZq2xmmocTq689h9Fnget9HWF8vXYYewCRctUmJHknqk2Fe/l2GONmhrGtm+LaxuYV5MybDAbQgoi83fN2OByVhJaP/RRpjJFFfW0Ro1df00S1V4QrLdRMdL/nAQ+H71CEhC81KtYA3+271zTjBeqtuBbjESN56+/nhcvJ2+FwVJ7Am8BHkTPjLOVj+9BTXxtl7fcRfURmIfwz+jy2ImFVBg6JE9fqrrg2SORhLhI6d/J2OByVhpaPtZHysbVGElT1tZMQVasuw4V4VYzjmch5t2Xj1vPwK4FrsTdemaRhlCB91a/HXvKkynKuuCa9v7MYZfMi8vYzb4fDUWlo+dgtwDHYWoDqxjgfKR/TbPRhPax3I+U+Wbz5LxZ4j9bIwFkZogmuuPZ0db8sr58TDB/3vB0ORy2gmeOnI4lf1vD5NKK+dgLw6JBeahM567Xst+rp/5FsZ8p5GEYAX0dq47Mkrrni2gzJZylrAnrlYu55OxyO2njgDeTM2SoSop7lRwKJD7JXKqG9HgnBW/qHK1GfG4yGoiSqzTSmTeD3wAXYtbpdcS07dJw2d8/b4XDUjbwTJEP6ULKVjzWAzYb8+yv7iMvi9X8pw3vyRBLdqzVxDXqKa3VPXMtC3lu65+1wOOoGLR+7CPgM9jPX7hAe4hSwHT0lLWt52OXAjRRfiUzv92fArdgT17xVqKyNrOS90D1vh8NRVwJvAscj2tLW9qGDlot1kUz3BWRTVCtyotpMnvR6YHWGSEGdE9eUiNcN8N5FTt71RlLhy+GwbJzrgYOQRh8w+rPXOKN4mXGfjc+Qz+/zbIsMJetzgKfIlri2K/VNXHu8b61YsNjJ2zcwPe+r2uVwWLzvFnAz8AFs5WODeKMJ0kxkB2znujEJPkFxE9U2ZnTcDlySwfuuq+KaftdHBuDfrZ286+11N8LD1qjg5d63wwItHzsF+B6jD92qMbkyI+G3kY5oVgIs0r6iiWtJhu8LsB+SuLa+Zmvw4eg7WzuLbd3/em8JWn3og7J78DiqRnJagnMwcNWYvClHNdfMCqS15TbYSrkseBx4FtKEw5qo1kASv35N+VpmTofv+UPgHkT+NG0s48S19yCKdnXyvB8O3vdio3EE8Hz61PacvOuDTZDOPlXFZj7Fjgzk3QTuB5YjtcqjKltah5x1N7G3F+1PVCsTeXfDd1yH1Kd/yGgI6e+XAScHT7Qu0bNHkY5xi8P4JSlrowvsHAj89vBvHQ+b1wd63l21qx1+urftyOoxtoALA3loX+9BoRvwtkhCHNgT1e4mm9hJEY0hgLPpZfWnIU5cewO9Y72q78EqAHRt39jNtq6mEVW2A4k63jl51wf6cFT18jNvxyAE3gSOA65juPNvbSt6ACIBaiVvkFKrddiytYtK3g3gJuAKsiuurTB4oFXahwEu7vv/2aDr4mhgKx1vJ2+Hw1FXaHLZFFKT/VT074Nib7Ilbk2RrcFHUaFc8qUM74kV1xbS6/5WZegcXxrm3mKwqSrgNkiipZO3w+GoPbT72PXAsQyX8JjFc9S/cQl2hbKiRzFA6tTvz0BKbaQm/kB69c9VX28JcAcS7bEabbouDwQ+AbSdvB0OR92hiWX/gZw9T0r5KwFOoxrnvZq49gjwjT5Ct3jsy5CQcB2gEYcfRGNnfd800jDnS55tXm4Lrs1wSTZVGYcGkzsrnDaOezuDVV2W+9XPsZ5Pdku2jhLgsOARLULCmo0xrtk7gB9lILoyEDhIvfrKaI+yrNE/RRLX1gJzDa/vlnjM9Bn7FvDR8F2y7ONTwKFO3uXFgmDp+hwK5k7o72xpHHf9fd4lbFnvd/NZvMRFGf92mdamZn7fGwj8fMYv27kaOWcfNtO9KNByu18BNwRCzoJjkZJW67paWHKH4ybgamCPQT7EN/7yWm0/Bz5MfbI003DLmD3dTuRVXG0Yd/39lTl54Pr3ViHiNdb7vabv/epNPQF8EJiX4R5+VzIPXMnn+0gC23aRR56GeeG96wMRJ4bvvapCXnf/WjoaeA3ZxG/WRY4JhrV6S07P1ihxDLAnA4gEJQ9dvOSxRpPNOh0co1/BnQVzk8a6qc5tWz145y7JAUx3IUlci9vhKDIsxOtw5Ar3vMuLBl6n3+81TWLDbWaMdHRy9gxGeb+tgs7JODzHrONW5DVb1f2pzOfeQ4+Tk3d5kTcp1NlIqOv9tn2eHb4/FWOc/h+QfbEZJmQJuAAAAABJRU5ErkJggg==">
-    <h2>Evaluación de Desempeño 180°</h2>
-    <div class="sub">Ingresa con tu usuario y contraseña</div>
-    <form id="form-login">
-      <div class="campo"><label for="in-usuario">Usuario</label><input class="inp" type="text" id="in-usuario" autocomplete="username" required></div>
-      <div class="campo"><label for="in-clave">Contraseña</label><input class="inp" type="password" id="in-clave" autocomplete="current-password" required></div>
-      <button type="submit" class="btn amber full" id="btn-entrar">Ingresar</button>
-      <div class="msg" id="msg-login"></div>
-      <div style="text-align:center"><a href="#" class="link" id="link-olvido">¿Olvidaste tu contraseña?</a></div>
-    </form>
-    <div id="demo-box" class="demo-box oculto">
+    <img id="lg-img" src="portada.jpg" alt="" onerror="this.remove()">
+    <div class="lg-velo"></div>
+    <div class="lg-texto">
+      <div class="lg-kicker">Etinar · Talento Humano</div>
+      <h1>Crecemos cuando sabemos<br>dónde estamos.</h1>
+      <p>Evaluación de desempeño 180°: tu jefe y tú miran juntos lo que haces bien y lo que puedes mejorar.</p>
+    </div>
+  </div>
+  <div class="lg-panel">
+    <div class="lg-card anim">
+      <img class="brandimg" alt="Etinar" src="data:image/png;base64,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">
+      <div class="lg-tabs" role="tablist"><button type="button" class="lg-tab on" data-lg="entrar">Ingresar</button><button type="button" class="lg-tab" data-lg="activar">Es mi primera vez</button></div>
+      <form id="form-login" data-lgp="entrar">
+        <h2>Bienvenido/a</h2>
+        <div class="sub">Ingresa con tu usuario, correo o cédula.</div>
+        <div class="campo"><label for="in-usuario">Usuario, correo o cédula</label><input class="inp" type="text" id="in-usuario" autocomplete="username" autocapitalize="none" required></div>
+        <div class="campo"><label for="in-clave">Contraseña</label><div class="lg-pass"><input class="inp" type="password" id="in-clave" autocomplete="current-password" required><button type="button" class="lg-ojo" data-ojo="in-clave" aria-label="Mostrar contraseña">👁</button></div></div>
+        <button type="submit" class="btn amber full" id="btn-entrar">Ingresar</button>
+        <div class="msg" id="msg-login"></div>
+        <div style="text-align:center;margin-top:10px"><a href="#" class="link" id="link-olvido">¿Olvidaste tu contraseña?</a></div>
+      </form>
+      <form id="form-activar" data-lgp="activar" class="oculto">
+        <h2>Activa tu cuenta</h2>
+        <div class="sub">Solo la primera vez. Usa el <b>código de activación</b> que te entregó Talento Humano; luego crearás tu propia contraseña.</div>
+        <div class="campo"><label for="ac-usuario">Usuario, correo o cédula</label><input class="inp" type="text" id="ac-usuario" autocomplete="username" autocapitalize="none" required></div>
+        <div class="campo"><label for="ac-codigo">Código de activación</label><input class="inp lg-codigo" type="text" id="ac-codigo" placeholder="ABCD-2345" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required></div>
+        <button type="submit" class="btn amber full" id="btn-activar">Continuar</button>
+        <div class="msg" id="msg-activar"></div>
+        <div class="lg-ayuda">¿No tienes código o se perdió? Pídelo a Talento Humano. Por seguridad, la cuenta no se activa solo con el correo: cualquiera que conozca tu correo podría tomarla.</div>
+      </form>
+      <div id="demo-box" class="demo-box oculto">
       <div style="font-size:12px;font-weight:700">MODO DEMOSTRACIÓN · datos ficticios</div>
       <div style="font-size:12px;color:var(--muted);margin:3px 0 10px">Entra con un clic. Contraseña de todos: <b>demo2026</b></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -288,6 +380,7 @@ tr.bajo td{background:#FFF8F6}
         <button type="button" class="btn ghost xs" data-demo="jefe">Jefe (evaluador)</button>
         <button type="button" class="btn ghost xs" data-demo="colaborador">Colaborador</button>
       </div>
+    </div>
     </div>
   </div>
 </section>
@@ -346,7 +439,7 @@ const cl=(v)=>Math.max(1,Math.min(5,Math.round(v)));
 function realDemo(meta,v){ const t=(meta||"").toLowerCase(); const n=parseFloat((t.match(/\d+(\.\d+)?/)||[])[0]);
   if(/^(0|cero|sin)/.test(t.trim())){ const k=[3,2,1,1,0][v-1]; return k+(k===1?" caso":" casos"); }
   if(isNaN(n)) return null; const f=[0.62,0.78,0.9,0.97,1][v-1]; const r=Math.round(n*f*10)/10; return /%/.test(t)?r+"%":String(r); }
-const DB={competencia_funcion:[],funciones_puesto:[],conductas_competencia:[],manuales_puesto:[],borradores_manual:[],perfiles:[],puestos:[],competencias:[],periodos:[],evaluaciones:[],respuestas:[],comentarios:[],planes:[],acuses:[],acciones:[],configuracion:[],accesos_temp:[],bitacora:[]};
+const DB={indicadores:[],documentos_politica:[],competencia_funcion:[],funciones_puesto:[],conductas_competencia:[],manuales_puesto:[],borradores_manual:[],perfiles:[],puestos:[],competencias:[],periodos:[],evaluaciones:[],respuestas:[],comentarios:[],planes:[],acuses:[],acciones:[],configuracion:[],accesos_temp:[],bitacora:[]};
 let nid=1; const id=()=>nid++;
 // ---- Estructura ----
 const PUESTOS=[
@@ -549,8 +642,27 @@ const cliente={
         const pid=crypto.randomUUID?crypto.randomUUID():String(Math.random()); const c=clave(); const {email,...resto}=u;
         DB.perfiles.push({id:pid,...resto,rol:u.rol==="evaluador"?"evaluador":"evaluado",debe_cambiar_clave:true,activo:true}); DB.accesos_temp.push({perfil_id:pid,usuario:u.usuario,clave:c}); return {usuario:u.usuario,ok:true,id:pid,clave:c}; });
       return {data:{ok:true,resultados},error:null}; }
+    const espera=(ms)=>new Promise(r=>setTimeout(r,ms));
+    // Demo v3.14: análisis en 3 pasos y reglamentos → políticas (simulados)
+    if(body.paso==="disenar"||body.paso==="revisar"){ const b=DB.borradores_manual.find(x=>x.id===Number(body.borrador_id)); if(!b) return {data:null,error:{message:"Borrador no encontrado"}};
+      const man=DB.manuales_puesto.find(x=>x.id===b.manual_id); await espera(700);
+      if(body.paso==="disenar"){ const full=propuestaDemo(man.nombre_archivo,man.puesto_id); b.datos={...b.datos,competencias:full.competencias,_proceso:{...(b.datos._proceso||{}),disenar:{modelo:"mistral:mistral-medium-latest (simulado)"}}}; delete b.datos._revision; b.modelo_ia="mistral:mistral-medium-latest (simulado)"; man.estado="borrador"; return {data:{ok:true,paso:"disenar",borrador_id:b.id,proveedor:"mistral"},error:null}; }
+      const cs=b.datos.competencias||[]; const notas=cs.map((c,i)=>i===1?{indice:i+1,especifica:4,observable:3,medible:3,trazable:4,problemas:"La conducta no fija un estándar verificable y la meta no dice en cuánto tiempo.",nombre_sugerido:"",conducta_sugerida:(c.conductas?.[0]||"")+" dentro de las 48 horas, con registro firmado.",indicador_sugerido:"",meta_sugerida:"≥95% en 48 h"}:{indice:i+1,especifica:5,observable:4,medible:4,trazable:5,problemas:"",nombre_sugerido:"",conducta_sugerida:"",indicador_sugerido:"",meta_sugerida:""});
+      notas.forEach(r=>r.promedio=Math.round((r.especifica+r.observable+r.medible+r.trazable)/4*10)/10);
+      b.datos={...b.datos,_revision:{calificacion_global:4.1,resumen:"Ficha sólida y específica del puesto. Conviene precisar el estándar de una conducta y el plazo de su meta.",competencias:notas,funciones_sin_cubrir:[],competencias_faltantes:[],modelo:"github:openai/gpt-4.1 (simulado)",mismo_proveedor:false}};
+      return {data:{ok:true,paso:"revisar",borrador_id:b.id,calificacion:4.1},error:null}; }
+    if(body.paso==="politicas"){ const doc=(DB.documentos_politica||[]).find(x=>x.id===Number(body.documento_id)); if(!doc) return {data:null,error:{message:"Documento no encontrado"}}; await espera(900);
+      doc.datos={documento:"Reglamento Interno de Trabajo (demostración)",observaciones:"Algunas metas se propusieron porque el reglamento no fija cifras.",politicas:[
+        {nombre:"Uso obligatorio de equipo de protección personal",descripcion:"Todo el personal en obra usa el EPP asignado.",estandar:"100% del personal en obra con EPP completo durante la jornada.",alcance:"Seguridad y Salud",articulo:"Art. 45",indicador_sugerido:"Cumplimiento de EPP = inspecciones sin novedad / inspecciones realizadas × 100 · Fuente: registro de inspección SSO · Frecuencia: Semanal",meta_sugerida:"100%",critica:true,existente:false},
+        {nombre:"Registro diario de asistencia",descripcion:"Marcación de ingreso y salida.",estandar:"Marcación de ingreso y salida todos los días laborables.",alcance:"Toda la empresa",articulo:"Art. 18",indicador_sugerido:"Marcaciones completas = días con 2 marcaciones / días laborables × 100 · Fuente: reloj biométrico · Frecuencia: Mensual",meta_sugerida:"≥98%",critica:false,existente:false},
+        {nombre:"Reporte de incidentes en 24 horas",descripcion:"Todo incidente o casi accidente se reporta.",estandar:"Reporte escrito al supervisor y a SSO dentro de las 24 horas.",alcance:"Toda la empresa",articulo:"Art. 52",indicador_sugerido:"Incidentes reportados a tiempo = reportes en 24 h / incidentes ocurridos × 100 · Fuente: bitácora SSO · Frecuencia: Mensual",meta_sugerida:"100%",critica:true,existente:false}]};
+      doc.estado="borrador"; doc.modelo_ia="gemini:gemini-3.8-flash (simulado)"; return {data:{ok:true,paso:"politicas",total:3},error:null}; }
     const man=DB.manuales_puesto.find(x=>x.id===Number(body.manual_id)); if(!man) return {data:null,error:{message:"Manual no encontrado"}};
     man.estado="procesando"; await new Promise(r=>setTimeout(r,1800));
+    if(body.paso==="extraer"){ const full=propuestaDemo(man.nombre_archivo,man.puesto_id); const iguales=DB.puestos.filter(p=>p.nombre.toLowerCase()===full.puesto.toLowerCase());
+      const datos={...full,competencias:[],fuentes_funciones:full.funciones.map((_,i)=>"Sección 4."+(i+1)),requisitos:"Tercer nivel en área afín · 2 años de experiencia",riesgos:["Manejo de compras y proveedores"],competencias_manual:[],_proceso:{extraer:{modelo:"gemini:gemini-3.8-flash (simulado)"}}};
+      const b={id:id(),manual_id:man.id,puesto_id:man.puesto_id||iguales[0]?.id||null,estado:"pendiente",datos,duplicados:iguales.map(p=>({tipo:"puesto",id:p.id,nombre:p.nombre})),modelo_ia:"gemini:gemini-3.8-flash (simulado)",creado_en:new Date().toISOString()};
+      DB.borradores_manual.push(b); return {data:{ok:true,paso:"extraer",borrador_id:b.id},error:null}; }
     const datos=propuestaDemo(man.nombre_archivo,man.puesto_id); const iguales=DB.puestos.filter(p=>p.nombre.toLowerCase()===datos.puesto.toLowerCase());
     const b={id:id(),manual_id:man.id,puesto_id:man.puesto_id||iguales[0]?.id||null,estado:"pendiente",datos,duplicados:iguales.map(p=>({tipo:"puesto",id:p.id,nombre:p.nombre})),modelo_ia:"gemini-3.8-flash (simulado)",creado_en:new Date().toISOString()};
     DB.borradores_manual.push(b); man.estado="borrador"; man.notas=null; return {data:{ok:true,borrador_id:b.id},error:null}; } },
@@ -572,7 +684,9 @@ window.supabase={createClient:()=>cliente};
 // ==================== Configuración ====================
 const SUPABASE_URL = "https://hwscyzrytwdvqlombpph.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3c2N5enJ5dHdkdnFsb21icHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNjY4MTksImV4cCI6MjEwMDc0MjgxOX0.DK-K-HgqYPY8E8rpEE8OMBkknlZVmk-z85rZT4l2oe0";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// v3.12: la sesión vive solo en esta pestaña (sessionStorage). Al cerrar el navegador o abrir el enlace de nuevo
+// se pide la contraseña: importante en computadoras compartidas de obra u oficina.
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth:{ storage: window.sessionStorage, persistSession:true, autoRefreshToken:true, detectSessionInUrl:true } });
 // v3.10: las cuentas se crean en el servidor (Edge Function "gestionar-usuarios"); el registro público queda cerrado.
 const DOMINIO = "etinar.app";
 function usuarioAEmail(u){
@@ -638,10 +752,11 @@ function confirmar(texto, etiqueta="Confirmar", peligro=false){
 function aviso(texto){ abrirModal(`<p style="margin-bottom:16px">${texto}</p><div style="text-align:right"><button class="btn sm" data-cerrar>Entendido</button></div>`); }
 
 // ==================== Parámetros de la metodología ====================
-const CFG={ umbral_brecha:0.5, brecha_significativa:0.5, brecha_critica:1.0, peso_jefe:1.0, umbral_colectivo:5, usar_pesos:0, kpi_modo:1, kpi_t5:100, kpi_t4:95, kpi_t3:85, kpi_t2:70, kpi_desvio:1 };
+const CFG={ curva_ref:1, curva_p0:10, curva_p1:20, curva_p2:40, curva_p3:20, curva_p4:10, curva_alerta_rev:10, curva_alerta_cal:20, curva_min_n:15, ia_revision:1, umbral_brecha:0.5, brecha_significativa:0.5, brecha_critica:1.0, peso_jefe:1.0, umbral_colectivo:5, usar_pesos:0, kpi_modo:1, kpi_t5:100, kpi_t4:95, kpi_t3:85, kpi_t2:70, kpi_desvio:1 };
+const CFG_TXT={};   // textos de configuración (consecuencias por nivel, escalera…)
 async function cargarConfig(){
   const { data } = await sb.from("configuracion").select("clave,valor");
-  (data||[]).forEach(r=>{ const v=parseFloat(r.valor); if(r.clave in CFG && !isNaN(v)) CFG[r.clave]=v; });
+  (data||[]).forEach(r=>{ CFG_TXT[r.clave]=r.valor; const v=parseFloat(r.valor); if(r.clave in CFG && !isNaN(v)) CFG[r.clave]=v; });
 }
 
 // ==================== Escala y niveles ====================
@@ -696,6 +811,13 @@ async function cargarBase(){
   try{ D.politicas=await traerTodo(()=>sb.from("politicas").select("*")); D.v34=true; }
   catch(e){ D.politicas=[]; D.v34=false; }
   D.politicaPorId=Object.fromEntries(D.politicas.map(p=>[p.id,p]));
+  // Modelo v3.10: calificación por conducta (detalle en respuestas.conductas)
+  try{ const { error } = await sb.from("respuestas").select("conductas").limit(1); D.v310=!error; }catch(e){ D.v310=false; }
+  // Modelo v3.9: justificación de competencias y Plan de Carrera
+  try{ const { error } = await sb.from("competencias").select("justificacion").limit(1); D.v39=!error; }catch(e){ D.v39=false; }
+  // Modelo v3.8: biblioteca de indicadores, reglamentos y validación con jefes
+  try{ D.indicadores=await traerTodo(()=>sb.from("indicadores").select("*")); D.v38=true; }
+  catch(e){ D.indicadores=[]; D.v38=false; }
   // Modelo v3.6: nota del KPI y justificación en cada respuesta
   try{ const { error } = await sb.from("respuestas").select("nota_kpi").limit(1); D.v36=!error; }catch(e){ D.v36=false; }
   // Modelo v3.5: qué funciones del puesto respalda cada competencia
@@ -840,11 +962,12 @@ function tablaConversionHTML(compacta){
 // ==================== Sesión y navegación ====================
 let PERFIL=null;
 // Menú lateral de RRHH: las entradas que empiezan con "#" son títulos de grupo
-const TABS_ADMIN=[["tablero","Tablero"],["#","Organización"],["puestos","Estructura"],["politicas","Políticas"],["usuarios","Usuarios"],["#","Campañas"],["periodos","Periodos"],["evaluaciones","Evaluaciones"],["#","Resultados"],["resultados","Resultados"],["planes","Planes"],["analitica","Analítica"]];
+const TABS_ADMIN=[["tablero","Tablero"],["#","Organización"],["puestos","Estructura"],["politicas","Políticas"],["indicadores","Indicadores"],["usuarios","Usuarios"],["#","Campañas"],["periodos","Periodos"],["evaluaciones","Evaluaciones"],["#","Resultados"],["resultados","Resultados"],["planes","Planes"],["analitica","Analítica"]];
 const ICONOS={
   tablero:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
   puestos:'<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/>',
   politicas:'<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  indicadores:'<path d="M4 18a8 8 0 1116 0"/><path d="M12 18l4.5-6"/><circle cx="12" cy="18" r="1.3"/><path d="M6.5 13.5l1 .6M12 10V9M17.5 13.5l-1 .6"/>',
   usuarios:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 010 7M18.5 14.8c1.6.8 2.6 2.6 3 5.2"/>',
   periodos:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   evaluaciones:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
@@ -862,8 +985,36 @@ $("form-login").addEventListener("submit", async (e)=>{
   const btn=$("btn-entrar"), msg=$("msg-login");
   msg.className="msg"; msg.textContent="";
   btn.disabled=true; btn.textContent="Ingresando...";
-  const { error } = await sb.auth.signInWithPassword({ email:usuarioAEmail($("in-usuario").value), password:$("in-clave").value });
-  if(error){ msg.className="msg error"; msg.textContent="Usuario o contraseña incorrectos."; btn.disabled=false; btn.textContent="Ingresar"; return; }
+  const email=await emailDeAcceso($("in-usuario").value);
+  const { error } = await sb.auth.signInWithPassword({ email, password:$("in-clave").value });
+  if(error){ msg.className="msg error"; msg.textContent=/rate|too many/i.test(error.message)?"Demasiados intentos. Espera unos minutos.":"Usuario o contraseña incorrectos. Si es tu primera vez, usa «Es mi primera vez»."; btn.disabled=false; btn.textContent="Ingresar"; return; }
+  await iniciarSesion();
+});
+// Acepta usuario, correo o cédula: el servidor devuelve el correo interno de acceso (si no, se usa la regla anterior)
+async function emailDeAcceso(ident){
+  const v=(ident||"").trim();
+  try{ const { data, error } = await sb.rpc("email_de_acceso",{ ident:v }); if(!error&&typeof data==="string"&&data) return data; }catch(e){}
+  return usuarioAEmail(v);
+}
+// Pestañas Ingresar / Es mi primera vez, y mostrar u ocultar la contraseña
+document.querySelectorAll(".lg-tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".lg-tab").forEach(x=>x.classList.toggle("on",x===t));
+  document.querySelectorAll("[data-lgp]").forEach(f=>f.classList.toggle("oculto",f.dataset.lgp!==t.dataset.lg));
+  const u=$("in-usuario").value||$("ac-usuario").value; $("in-usuario").value=u; $("ac-usuario").value=u;
+  (t.dataset.lg==="activar"?$("ac-usuario"):$("in-usuario")).focus();
+}));
+document.querySelectorAll("[data-ojo]").forEach(b=>b.addEventListener("click",()=>{ const i=$(b.dataset.ojo); i.type=i.type==="password"?"text":"password"; }));
+// Código de activación: mayúsculas y guion automático (ABCD-2345)
+const normCodigo=(v)=>{ const raw=(v||"").trim(); if(/^et-/i.test(raw)) return raw; const c=raw.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8); return c.length>4?c.slice(0,4)+"-"+c.slice(4):c; };
+$("ac-codigo").addEventListener("input",e=>{ const v=e.target.value; if(!/^et-/i.test(v)) e.target.value=normCodigo(v); });
+$("form-activar").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const btn=$("btn-activar"), msg=$("msg-activar"); msg.className="msg"; msg.textContent="";
+  btn.disabled=true; btn.textContent="Verificando...";
+  const email=await emailDeAcceso($("ac-usuario").value);
+  const { error } = await sb.auth.signInWithPassword({ email, password:normCodigo($("ac-codigo").value) });
+  btn.disabled=false; btn.textContent="Continuar";
+  if(error){ msg.className="msg error"; msg.textContent=/rate|too many/i.test(error.message)?"Demasiados intentos. Espera unos minutos.":"Los datos no coinciden. Revisa el código (8 caracteres) o, si ya activaste tu cuenta, usa «Ingresar» con tu contraseña."; return; }
   await iniciarSesion();
 });
 
@@ -916,7 +1067,7 @@ function mostrarLogin(){
   $("vista-app").classList.add("oculto"); $("vista-recovery").classList.add("oculto"); $("vista-primer").classList.add("oculto");
   $("vista-login").classList.remove("oculto");
   $("btn-entrar").disabled=false; $("btn-entrar").textContent="Ingresar";
-  $("form-login").reset(); PERFIL=null;
+  $("form-login").reset(); if($("form-activar")) $("form-activar").reset(); PERFIL=null;
 }
 // Menú lateral en celular: se abre con ☰ y se cierra al elegir una sección o tocar fuera
 $("sb-abrir").addEventListener("click",()=>document.body.classList.add("sb-abierto"));
@@ -947,8 +1098,11 @@ $("link-olvido").addEventListener("click", async (e)=>{
   e.preventDefault();
   const msg=$("msg-login"); msg.className="msg";
   const u=$("in-usuario").value.trim();
-  if(!u){ msg.className="msg error"; msg.textContent="Escribe primero tu usuario o correo en el campo Usuario."; return; }
-  const { error } = await sb.auth.resetPasswordForEmail(usuarioAEmail(u), { redirectTo: window.location.href.split('#')[0] });
+  if(!u){ msg.className="msg error"; msg.textContent="Escribe primero tu usuario, correo o cédula."; return; }
+  const email=await emailDeAcceso(u);
+  // Las cuentas con correo interno (@${DOMINIO}) no reciben correos: RRHH les entrega un código nuevo
+  if(email.endsWith("@"+DOMINIO)){ msg.className="msg"; msg.innerHTML="Pide a <b>Talento Humano</b> un código nuevo. Con él entras en «Es mi primera vez» y creas tu nueva contraseña."; return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href.split('#')[0] });
   if(error){ msg.className="msg error"; msg.textContent="No se pudo enviar: "+error.message; }
   else { msg.className="msg ok"; msg.textContent="Te enviamos un enlace a tu correo para restablecer la contraseña. Revisa también spam."; }
 });
@@ -1184,6 +1338,7 @@ VISTAS.periodos = async ()=>{
         <div class="explbox">Brecha de desempeño = <b>nivel esperado − resultado</b>. Sin brecha (≤ 0) · Leve · <b>Significativa</b> → acción de desarrollo · <b>Crítica</b> → PDI. Una brecha crítica en una competencia marcada como crítica activa un PDI prioritario sin importar el promedio.</div>
       </div>
     </div>
+    ${configCurvaHTML()}
     <div class="card mt"><h3>Campañas</h3><div class="cap">Avance de cada campaña</div>
       ${D.periodos.length?`<div class="tabla-wrap"><table><thead><tr><th>Campaña</th><th>Inicio</th><th>Fecha límite</th><th>Estado</th><th>Avance</th><th></th></tr></thead><tbody>${
       D.periodos.map(p=>{ const mis=evs.filter(e=>e.periodo_id===p.id), t=mis.length, c=mis.filter(e=>e.estado==="completada").length, pc=t?Math.round(c*100/t):0;
@@ -1218,6 +1373,7 @@ VISTAS.periodos = async ()=>{
     if(error){ m.className="msg error"; m.textContent="Error: "+error.message; return; }
     await cargarConfig(); m.className="msg ok"; m.textContent="✅ Reglas guardadas."; if($("cf-ktabla")) $("cf-ktabla").innerHTML=tablaConversionHTML(false);
   };
+  configCurvaEventos();
 };
 
 
@@ -1316,7 +1472,7 @@ VISTAS.puestos = async (arg)=>{
   const lista=D.puestos.filter(coincide).sort((a,b)=>String(a.departamento).localeCompare(String(b.departamento))||NIVELES_PUESTO.indexOf(a.nivel)-NIVELES_PUESTO.indexOf(b.nivel)||String(a.nombre).localeCompare(String(b.nombre)));
   const pctComp=D.competencias.length?Math.round((D.competencias.length-faltan.length)*100/D.competencias.length):0;
   $("contenido").innerHTML=`<div>
-    ${encabezado("Estructura organizacional",`${D.puestos.length} puestos · ${departamentos().length} departamentos · ${D.competencias.length} competencias`,`<button class="btn ghost sm" id="es-xls">Exportar Excel</button><button class="btn ghost sm" id="es-imp">Importar organigrama</button><button class="btn ghost sm" id="es-impc">Importar competencias</button>${PERFIL&&PERFIL.rol==="admin"?`<button class="btn ghost sm" id="es-ia">✦ Manuales con IA</button>`:""}<button class="btn amber sm" id="es-nuevo">Nuevo puesto</button>`)}
+    ${encabezado("Estructura organizacional",`${D.puestos.length} puestos · ${departamentos().length} departamentos · ${D.competencias.length} competencias`,`<button class="btn ghost sm" id="es-xls">Exportar Excel</button><button class="btn ghost sm" id="es-imp">Importar organigrama</button><button class="btn ghost sm" id="es-impc">Importar competencias</button><button class="btn ghost sm" id="es-val">Validación con jefes</button>${PERFIL&&PERFIL.rol==="admin"?`<button class="btn ghost sm" id="es-ia">✦ Manuales con IA</button>`:""}<button class="btn amber sm" id="es-nuevo">Nuevo puesto</button>`)}
     <div class="grid4">
       <div class="card kpi"><div class="lbl">Puestos en el organigrama</div><div class="val">${D.puestos.filter(p=>p.reporta_a||p.nivel==="Alta dirección").length}/${D.puestos.length}</div><div class="delta">con jefe inmediato definido</div></div>
       <div class="card kpi"><div class="lbl">Competencias completas</div><div class="val">${pctComp}%</div><div class="bar"><div style="width:${pctComp}%"></div></div></div>
@@ -1339,6 +1495,7 @@ VISTAS.puestos = async (arg)=>{
   document.querySelectorAll("[data-vista]").forEach(b=>b.onclick=()=>re({vista:b.dataset.vista}));
   document.querySelectorAll("[data-val]").forEach(b=>b.onclick=()=>validarCritica(D.competencias.find(c=>c.id===Number(b.dataset.val)),()=>re()));
   $("es-nuevo").onclick=()=>editarPuesto(null);
+  if($("es-val")) $("es-val").onclick=modalValidacionJefes;
   $("es-imp").onclick=importarOrganigrama;
   $("es-impc").onclick=importarCompetenciasExcel;
   if($("es-ia")) $("es-ia").onclick=modalManualesIA;
@@ -1574,7 +1731,7 @@ VISTAS.politicas = async (arg)=>{
     .sort((a,b)=>String(a.codigo||"").localeCompare(String(b.codigo||""))||String(a.nombre).localeCompare(String(b.nombre)));
   const pctSoc=soc.tot?Math.round(soc.firm*100/soc.tot):0;
   $("contenido").innerHTML=`<div>
-    ${encabezado("Políticas de evaluación","Las reglas que fijan el estándar de cada competencia · se socializan antes de evaluar",`<button class="btn ghost sm" id="po-xls">Exportar Excel</button><button class="btn ghost sm" id="po-doc">Documento de socialización</button>${sinPolConTexto.length?`<button class="btn ghost sm" id="po-mig">Crear catálogo desde competencias (${sinPolConTexto.length})</button>`:""}<button class="btn amber sm" id="po-nueva">Nueva política</button>`)}
+    ${encabezado("Políticas de evaluación","Las reglas que fijan el estándar de cada competencia · se socializan antes de evaluar",`<button class="btn ghost sm" id="po-xls">Exportar Excel</button><button class="btn ghost sm" id="po-doc">Documento de socialización</button>${sinPolConTexto.length?`<button class="btn ghost sm" id="po-mig">Crear catálogo desde competencias (${sinPolConTexto.length})</button>`:""}<button class="btn ghost sm" id="po-reg">✦ Reglamentos con IA</button><button class="btn amber sm" id="po-nueva">Nueva política</button>`)}
     <div class="grid4">
       <div class="card kpi"><div class="lbl">Políticas vigentes</div><div class="val">${vig.length}</div><div class="delta">${D.politicas.filter(p=>p.estado==="borrador").length} en borrador · ${D.politicas.filter(p=>p.estado==="derogada").length} derogadas</div></div>
       <div class="card kpi"><div class="lbl">Competencias con política</div><div class="val">${D.competencias.length?Math.round((D.competencias.length-sinPol.length)*100/D.competencias.length):0}%</div><div class="bar"><div style="width:${D.competencias.length?Math.round((D.competencias.length-sinPol.length)*100/D.competencias.length):0}%"></div></div></div>
@@ -1603,6 +1760,7 @@ VISTAS.politicas = async (arg)=>{
   $("po-dep").onchange=e=>re({dep:e.target.value}); $("po-est").onchange=e=>re({est:e.target.value});
   if($("po-per")) $("po-per").onchange=e=>re({per:Number(e.target.value)});
   $("po-nueva").onclick=()=>editarPolitica(null);
+  $("po-reg").onclick=modalReglamentosIA;
   document.querySelectorAll("[data-pol]").forEach(b=>b.onclick=()=>editarPolitica(D.politicas.find(p=>p.id===Number(b.dataset.pol))));
   document.querySelectorAll("[data-vinc]").forEach(b=>b.onclick=()=>vincularCompetencia(D.competencias.find(c=>c.id===Number(b.dataset.vinc))));
   if($("po-mig")) $("po-mig").onclick=migrarPoliticas;
@@ -1720,7 +1878,7 @@ async function modalManualesIA(){
         <div class="campo" style="flex:2" id="mi-p-w"><label for="mi-p">Puesto</label><select class="inp" id="mi-p">${opciones(D.puestos.slice().sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>[p.id,p.nombre]),"","Detectar del manual (puesto nuevo o existente)")}</select></div>
         <div class="campo" style="max-width:110px"><label for="mi-v">Versión</label><input class="inp" id="mi-v" placeholder="2026-1"></div></div>
       <div class="msg" id="mi-msg"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><label style="display:flex;gap:8px;align-items:center;margin:0;font-weight:500;font-size:13px"><input type="checkbox" id="mi-auto" checked> Analizar con IA apenas se suban</label><button class="btn amber sm" id="mi-subir">Subir</button></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><label style="display:flex;gap:8px;align-items:center;margin:0;font-weight:500;font-size:13px"><input type="checkbox" id="mi-auto" checked> Analizar con IA apenas se suban</label><label style="display:flex;gap:8px;align-items:center;margin:0;font-weight:500;font-size:13px" title="Una IA de otra empresa audita cada competencia: específica, observable, medible y trazable"><input type="checkbox" id="mi-rev" ${CFG.ia_revision>=1?"checked":""}> Revisión cruzada con otra IA</label><button class="btn amber sm" id="mi-subir">Subir</button></div>
     </div>
     ${(()=>{ const pend=l.filter(x=>x.estado==="cargado").length, rev=l.filter(x=>["borrador","en_revision"].includes(x.estado)).length;
       return (pend>1||rev)?`<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap">${rev?`<button class="btn ghost sm" id="mi-revtodos">Revisar borradores (${rev})</button>`:""}${pend>1?`<button class="btn amber sm" id="mi-antodos">✦ Analizar todos los cargados (${pend})</button>`:""}</div>`:""; })()}
@@ -1735,6 +1893,7 @@ async function modalManualesIA(){
     <div class="explbox" style="margin-top:12px">🔒 A la IA solo se envía el <b>manual del puesto</b> y los nombres del catálogo de políticas y competencias. <b>Nunca</b> se envían evaluaciones, puntajes ni datos personales. La clave de la IA está guardada como secreto en Supabase, no en esta página.</div>
     <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap"><button class="btn ghost sm" id="mi-ctx">🏢 Contexto de la empresa para la IA</button><span class="sub-t" id="mi-ctx-e"></span></div>`, m=>{
     m.querySelector("#mi-subir").onclick=()=>subirManual(m);
+    m.querySelector("#mi-rev").onchange=async e=>{ CFG.ia_revision=e.target.checked?1:0; await sb.from("configuracion").upsert({clave:"ia_revision",valor:String(CFG.ia_revision)},{onConflict:"clave"}); };
     m.querySelector("#mi-ctx").onclick=()=>modalContextoEmpresa();
     sb.from("configuracion").select("valor").eq("clave","contexto_empresa").maybeSingle().then(({data})=>{ const e=m.querySelector("#mi-ctx-e"); if(e) e.innerHTML=(data?.valor||"").trim()?'<span class="badge b-ok">configurado</span>':'<span class="badge b-wait">sin configurar: la IA no conoce la empresa</span>'; });
     // Zona para arrastrar o elegir archivos: se acumulan en una lista que se puede revisar antes de subir
@@ -1772,6 +1931,28 @@ async function modalManualesIA(){
 function m_ancho(px){ const md=document.querySelector("#modal-root .modal"); if(md) md.style.maxWidth=px+"px"; }
 
 // Texto de un .docx (es un ZIP con word/document.xml). Respeta el orden de párrafos y tablas.
+// Texto de un PDF (v3.13): lo usan Mistral, Cloudflare y GitHub Models, que no leen PDF directamente.
+// Si el PDF es escaneado (imagen) devuelve "" y solo Gemini podrá leerlo.
+function cargarScript(url){ return new Promise((ok,mal)=>{ const s=document.createElement("script"); s.src=url; s.onload=ok; s.onerror=()=>mal(new Error("no se pudo cargar "+url)); document.head.appendChild(s); }); }
+async function textoPdf(archivo){
+  const BASE="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/";
+  if(!window.pdfjsLib){ await cargarScript(BASE+"pdf.min.js"); window.pdfjsLib.GlobalWorkerOptions.workerSrc=BASE+"pdf.worker.min.js"; }
+  const pdf=await window.pdfjsLib.getDocument({ data:new Uint8Array(await archivo.arrayBuffer()) }).promise;
+  const partes=[];
+  for(let i=1;i<=Math.min(pdf.numPages,80);i++){ const pg=await pdf.getPage(i); const tc=await pg.getTextContent();
+    let linea="", lineas=[]; tc.items.forEach(it=>{ linea+=it.str; if(it.hasEOL){ lineas.push(linea.trim()); linea=""; } else linea+=" "; }); if(linea.trim()) lineas.push(linea.trim());
+    partes.push(`[Página ${i}]\n`+lineas.filter(Boolean).join("\n")); }
+  const t=partes.join("\n\n").replace(/[ \t]{2,}/g," ").slice(0,300000);
+  return t.replace(/\[Página \d+\]/g,"").trim().length<200?"":t;
+}
+// Antes de analizar: si es un PDF subido antes de v3.13 y aún no tiene texto, se extrae aquí y se guarda
+async function asegurarTexto(id){
+  try{ const { data:m } = await sb.from("manuales_puesto").select("id,mime_type,texto_extraido,archivo_path").eq("id",id).maybeSingle();
+    if(!m||(m.mime_type&&m.mime_type!=="application/pdf")||m.texto_extraido!=null||!m.archivo_path) return;
+    const { data:blob } = await sb.storage.from("manuales").download(m.archivo_path); if(!blob) return;
+    const t=await textoPdf(blob); await sb.from("manuales_puesto").update({texto_extraido:t}).eq("id",id);
+  }catch(e){ console.warn("No se pudo extraer el texto del PDF",e); }
+}
 async function textoDocx(file){
   if(!window.XLSX||!XLSX.CFB) throw new Error("lector no disponible");
   const zip=XLSX.CFB.read(new Uint8Array(await file.arrayBuffer()),{type:"array"});
@@ -1799,6 +1980,7 @@ async function subirUno(f, pid, version, preguntarDuplicado){
   const { data:ig } = await sb.from("manuales_puesto").select("id,nombre_archivo").eq("hash_archivo",hash);
   if(ig&&ig.length&&!(preguntarDuplicado&&await preguntarDuplicado(ig[0]))) return {ok:false,motivo:`ya se subió antes como «${ig[0].nombre_archivo}»`,dup:true};
   let texto=null;   // Word: se extrae el texto aquí mismo (párrafos y tablas) para que la IA lo lea
+  if(esPdf){ try{ texto=await textoPdf(f); }catch(e){ texto=null; } }   // PDF: texto para las IA que no leen PDF ("" = escaneado)
   if(esDocx){ try{ texto=await textoDocx(f); }catch(e){ return {ok:false,motivo:"no se pudo leer el Word; guárdalo como PDF"}; }
     if(!texto||texto.length<200) return {ok:false,motivo:"el Word casi no tiene texto (¿escaneado?); súbelo como PDF"}; }
   const mime=esDocx?"application/vnd.openxmlformats-officedocument.wordprocessingml.document":"application/pdf";
@@ -1848,12 +2030,13 @@ async function analizarLote(ids, noSubidos){
   for(const id of ids){
     if(cancelado){ est[id]=["no analizado","b-gris"]; continue; }
     est[id]=["analizando…","b-blue"]; pintar(hechos);
-    let r=await sb.functions.invoke("analizar-manual",{ body:{ manual_id:id } }), t=r.error?await errorFuncion(r.error):"";
+    const avance=(txt)=>{ est[id]=[txt,"b-blue"]; pintar(hechos); };
+    let r=await procesarManual(id, avance), t=r.error||"";
     if(r.error&&/429|quota|RESOURCE_EXHAUSTED|límite|saturad|tiempo/i.test(t)&&!/saldo|clave/i.test(t)){ est[id]=["IA ocupada: reintento en 60 s…","b-wait"]; pintar(hechos); await new Promise(z=>setTimeout(z,60000));
-      r=await sb.functions.invoke("analizar-manual",{ body:{ manual_id:id } }); t=r.error?await errorFuncion(r.error):""; }
+      r=await procesarManual(id, avance); t=r.error||""; }
     if(r.error){ est[id]=["✕ "+t,"b-red"];
-      if(/API_KEY|clave de IA|Failed to send|not found|404/i.test(t)){ ids.filter(x=>est[x][0]==="en espera").forEach(x=>est[x]=["no analizado","b-gris"]); hechos=ids.length; pintar(hechos); break; } }
-    else { est[id]=["✓ borrador listo","b-ok"]; ok++; }
+      if(/API_KEY|clave de IA|Failed to send|not found|404|publicar/i.test(t)){ ids.filter(x=>est[x][0]==="en espera").forEach(x=>est[x]=["no analizado","b-gris"]); hechos=ids.length; pintar(hechos); break; } }
+    else { est[id]=[r.data.calificacion!=null?`✓ borrador listo · revisión ${Number(r.data.calificacion).toFixed(1)}/5`:r.data.sinRevision?"✓ borrador listo (sin revisión cruzada)":"✓ borrador listo","b-ok"]; ok++; }
     hechos++; pintar(hechos);
   }
   const fin=$("al-fin"); if(!fin) return;
@@ -1871,11 +2054,12 @@ async function siguienteBorrador(actual){ const p=(await borradoresPendientes())
 async function analizarManual(id, boton){
   boton.disabled=true; boton.textContent="La IA está leyendo…";
   const fila=boton.closest("tr"); if(fila) fila.querySelector(".badge").outerHTML='<span class="badge b-blue">Analizando… (30–120 s)</span>';
-  const { data, error } = await sb.functions.invoke("analizar-manual",{ body:{ manual_id:id } });
-  if(error){ const t=await errorFuncion(error);
-    const ayuda=/API_KEY|clave de IA/.test(t)?"<br><br>Falta guardar al menos una clave de IA (GEMINI_API_KEY u OPENROUTER_API_KEY, ambas gratuitas) como secreto en Supabase (Edge Functions → Secrets).":/Failed to send|404|not found/i.test(t)?"<br><br>¿Ya publicaste la función <b>analizar-manual</b> en Supabase?":"";
+  const r=await procesarManual(id, (txt)=>{ boton.textContent=txt; const b=fila&&fila.querySelector(".badge"); if(b) b.textContent=txt; });
+  if(r.error){ const t=r.error;
+    const ayuda=/API_KEY|clave de IA/.test(t)?"<br><br>Falta guardar al menos una clave de IA (por ejemplo GEMINI_API_KEY o MISTRAL_API_KEY, gratuitas) como secreto en Supabase (Edge Functions → Secrets).":/Failed to send|404|not found/i.test(t)?"<br><br>¿Ya publicaste la función <b>analizar-manual</b> en Supabase?":"";
+    if(r.borId){ aviso("La lectura del manual quedó guardada, pero el diseño de competencias falló: "+esc(t)+ayuda+"<br><br>Pulsa «Reintentar» para continuar desde el paso 2."); modalManualesIA(); return; }
     aviso("No se pudo analizar el manual: "+esc(t)+ayuda); return; }
-  revisarBorrador(data.borrador_id);
+  revisarBorrador(r.data.borrador_id);
 }
 
 // ---------- Contexto de la empresa (v3.9): se agrega a las instrucciones de la IA en cada análisis ----------
@@ -1907,6 +2091,431 @@ async function modalContextoEmpresa(){
   m_ancho(720);
 }
 
+// ==================== METODOLOGÍA v3.14 · análisis riguroso, indicadores, reglamentos, validación ====================
+// --- IA: análisis del manual en 3 pasos (lectura → diseño → revisión cruzada con otra empresa de IA) ---
+async function invocarIA(body){
+  const { data, error } = await sb.functions.invoke("analizar-manual",{ body });
+  if(error) return { error: await errorFuncion(error) };
+  return { data };
+}
+async function procesarManual(id, avance=()=>{}){
+  await asegurarTexto(id);
+  let borId=null;
+  // Si la lectura (paso 1) ya se hizo y falló el diseño, se continúa desde el paso 2
+  const { data:prev } = await sb.from("borradores_manual").select("id,datos,estado").eq("manual_id",id).order("id",{ascending:false}).limit(1);
+  const p0=(prev||[])[0];
+  if(p0&&["pendiente","en_revision"].includes(p0.estado)&&p0.datos&&p0.datos._proceso&&p0.datos._proceso.extraer&&!(p0.datos.competencias||[]).length) borId=p0.id;
+  if(!borId){
+    avance("1/3 · leyendo el manual…");
+    const r1=await invocarIA({ paso:"extraer", manual_id:id });
+    if(r1.error) return r1;
+    if(r1.data.paso!=="extraer") return { data:{ borrador_id:r1.data.borrador_id } };   // función anterior: análisis en un solo paso
+    borId=r1.data.borrador_id;
+  }
+  avance("2/3 · diseñando competencias…");
+  const r2=await invocarIA({ paso:"disenar", borrador_id:borId });
+  if(r2.error) return { error:r2.error, borId };
+  if(!(CFG.ia_revision>=1)) return { data:{ borrador_id:borId } };
+  avance("3/3 · revisión cruzada…");
+  const r3=await invocarIA({ paso:"revisar", borrador_id:borId, evitar:r2.data.proveedor||"" });
+  if(r3.error) return { data:{ borrador_id:borId, sinRevision:r3.error } };
+  return { data:{ borrador_id:borId, calificacion:r3.data.calificacion } };
+}
+const PROV_NOMBRE={gemini:"Gemini",mistral:"Mistral",cloudflare:"Cloudflare",github:"GitHub Models",openrouter:"OpenRouter",claude:"Claude",openai:"OpenAI"};
+const provDe=(modelo)=>{ const p=String(modelo||"").split(":")[0]; return PROV_NOMBRE[p]||p||"—"; };
+const colorNota=(v)=>v==null?"var(--muted)":v>=4?"#15803D":v>=3?"#B45309":"#DC2626";
+
+// --- Biblioteca de indicadores ---
+function parseIndicador(t){
+  const partes=String(t||"").split("·").map(x=>x.trim()).filter(Boolean); const o={nombre:"",formula:"",fuente:"",frecuencia:""};
+  if(!partes.length) return o;
+  const [n,...f]=partes[0].split("="); o.nombre=n.trim(); o.formula=f.join("=").trim();
+  partes.slice(1).forEach(x=>{ const m=x.match(/^(fuente|frecuencia)\s*:\s*(.*)$/i); if(m) o[m[1].toLowerCase()]=m[2].trim(); else if(!o.fuente) o.fuente=x; });
+  return o;
+}
+const textoIndicador=(i)=>[(i.nombre||"")+(i.formula?" = "+i.formula:""), i.fuente?"Fuente: "+i.fuente:"", i.frecuencia?"Frecuencia: "+i.frecuencia:""].filter(Boolean).join(" · ");
+async function asegurarIndicador(texto, meta, dep, politicaId, origen="ia_aprobada"){
+  if(!D.v38||!String(texto||"").trim()) return null;
+  const pi=parseIndicador(texto); if(!pi.nombre) return null;
+  const ex=D.indicadores.find(x=>nrm(x.nombre)===nrm(pi.nombre)); if(ex) return ex.id;
+  const { data, error } = await sb.from("indicadores").insert({ nombre:pi.nombre, formula:pi.formula||null, fuente:pi.fuente||null, frecuencia:pi.frecuencia||null,
+    meta_tipica:meta||null, unidad:/%/.test(meta||"")?"%":null, sentido:/^\s*0\b|cero|ning/i.test(meta||"")?"cero":"mayor", departamento:dep||null, politica_id:politicaId||null, origen }).select("*").single();
+  if(error||!data) return null; D.indicadores.push(data); return data.id;
+}
+const FRECUENCIAS=["Diaria","Semanal","Quincenal","Mensual","Bimestral","Trimestral","Semestral","Anual","Por evento"];
+const SENTIDO={mayor:"Mayor es mejor",menor:"Menor es mejor",cero:"Meta cero (0 casos)"};
+let IND={q:"",dep:""};
+VISTAS.indicadores = async (arg)=>{
+  if(arg&&typeof arg==="object") Object.assign(IND,arg);
+  if(!D.v38){ $("contenido").innerHTML=encabezado("Indicadores","")+`<div class="card"><div class="aviso amber">Ejecuta <b>actualizacion_v3_8_metodologia.sql</b> en Supabase para activar la biblioteca de indicadores.</div></div>`; return; }
+  const cp=D.competencias.filter(c=>c.puesto_id);
+  const uso={}; cp.forEach(c=>{ if(c.indicador_id) uso[c.indicador_id]=(uso[c.indicador_id]||0)+1; });
+  const sinLib=cp.filter(c=>!c.indicador_id&&(c.indicador||"").trim()), sinInd=cp.filter(c=>!(c.indicador||"").trim()), sinMeta=cp.filter(c=>!(c.meta||"").trim());
+  const enl=cp.length?Math.round(cp.filter(c=>c.indicador_id).length*100/cp.length):0;
+  const q=normTxt(IND.q);
+  const lista=D.indicadores.filter(i=>(!q||normTxt(i.nombre+" "+(i.formula||"")+" "+(i.fuente||"")).includes(q))&&(!IND.dep||(IND.dep==="_empresa"?!i.departamento:i.departamento===IND.dep)))
+    .sort((a,b)=>String(a.nombre).localeCompare(String(b.nombre)));
+  $("contenido").innerHTML=`<div>
+    ${encabezado("Biblioteca de indicadores","Cómo se mide cada competencia · un buen indicador se reutiliza en todos los puestos parecidos",`<button class="btn ghost sm" id="in-xls">Exportar Excel</button>${sinLib.length?`<button class="btn ghost sm" id="in-mig">Crear desde competencias (${sinLib.length})</button>`:""}<button class="btn amber sm" id="in-nuevo">Nuevo indicador</button>`)}
+    <div class="grid4">
+      <div class="card kpi"><div class="lbl">Indicadores activos</div><div class="val">${D.indicadores.filter(i=>i.estado!=="inactivo").length}</div><div class="delta">${D.indicadores.filter(i=>i.origen==="ia_aprobada").length} propuestos por la IA y aprobados</div></div>
+      <div class="card kpi"><div class="lbl">Competencias enlazadas</div><div class="val">${enl}%</div><div class="bar"><div style="width:${enl}%"></div></div></div>
+      <div class="card kpi"><div class="lbl">Competencias sin indicador</div><div class="val" style="color:${sinInd.length?"var(--warn)":"inherit"}">${sinInd.length}</div><div class="delta">no se pueden medir con objetividad</div></div>
+      <div class="card kpi"><div class="lbl">Competencias sin meta</div><div class="val" style="color:${sinMeta.length?"var(--warn)":"inherit"}">${sinMeta.length}</div><div class="delta">el jefe no sabe cuánto es «cumplir»</div></div>
+    </div>
+    <div class="card mt"><div class="fila">
+      <div class="campo"><label for="in-q">Buscar</label><input class="inp" id="in-q" value="${esc(IND.q)}" placeholder="Nombre, fórmula o fuente"></div>
+      <div class="campo"><label for="in-dep">Alcance</label><select class="inp" id="in-dep">${opciones([["_empresa","Toda la empresa"],...departamentos().map(d=>[d,d])],IND.dep,"Todos")}</select></div>
+    </div></div>
+    <div class="card mt" style="padding:0;overflow:hidden"><div class="tabla-wrap" style="margin:0;padding:0"><table><thead><tr><th style="padding-left:18px">Indicador</th><th>Fuente del dato</th><th>Frecuencia</th><th>Meta típica</th><th>Alcance</th><th class="c">En uso</th><th></th></tr></thead><tbody>${
+      lista.map(i=>`<tr style="${i.estado==="inactivo"?"opacity:.55":""}"><td style="padding-left:18px;min-width:240px"><b>${esc(i.nombre)}</b>${i.formula?`<div class="sub-t">= ${esc(i.formula)}</div>`:'<div><span class="badge b-wait">sin fórmula</span></div>'}</td>
+        <td style="min-width:140px">${esc(i.fuente)||'<span class="badge b-wait">sin fuente</span>'}</td><td>${esc(i.frecuencia)||"—"}</td><td>${esc(i.meta_tipica)||"—"}<div class="sub-t">${SENTIDO[i.sentido]||""}</div></td>
+        <td>${esc(i.departamento)||"Toda la empresa"}</td><td class="c num">${uso[i.id]||0}</td><td class="r"><button class="btn ghost xs" data-in-ed="${i.id}">Editar</button></td></tr>`).join("")
+      ||`<tr><td colspan="7" class="vacio">${D.indicadores.length?"Ningún indicador coincide con el filtro.":"La biblioteca está vacía. Usa «Crear desde competencias» o aprueba manuales y reglamentos con IA: sus indicadores se agregan aquí."}</td></tr>`
+    }</tbody></table></div></div>
+    <div class="explbox">📏 <b>Un buen indicador</b> tiene nombre, <b>fórmula</b> (qué se divide entre qué), <b>fuente</b> (el sistema o registro de donde sale el dato) y <b>frecuencia</b>. La meta típica es la referencia; cada puesto puede tener la suya. La IA reutiliza los indicadores de esta biblioteca al analizar manuales y reglamentos.</div>
+  </div>`;
+  const re=()=>irA("indicadores",{q:$("in-q").value,dep:$("in-dep").value});
+  $("in-q").onchange=re; $("in-dep").onchange=re;
+  $("in-nuevo").onclick=()=>editarIndicador(null);
+  document.querySelectorAll("[data-in-ed]").forEach(b=>b.onclick=()=>editarIndicador(D.indicadores.find(x=>x.id===Number(b.dataset.inEd))));
+  $("in-xls").onclick=()=>exportarExcel("Indicadores_Etinar",[{nombre:"Indicadores",filas:lista.map(i=>({Indicador:i.nombre,Fórmula:i.formula||"",Fuente:i.fuente||"",Frecuencia:i.frecuencia||"",Unidad:i.unidad||"","Meta típica":i.meta_tipica||"",Sentido:SENTIDO[i.sentido]||"",Alcance:i.departamento||"Toda la empresa",Política:D.politicaPorId?.[i.politica_id]?.nombre||"","Competencias que lo usan":uso[i.id]||0,Estado:i.estado,Origen:i.origen}))}]);
+  if($("in-mig")) $("in-mig").onclick=async()=>{
+    if(!await confirmar(`Se crearán indicadores en la biblioteca a partir del texto de <b>${sinLib.length}</b> competencias (los nombres repetidos se unen en uno solo) y cada competencia quedará enlazada.`,"Crear")) return;
+    abrirModal(`<h3>Creando la biblioteca…</h3><div class="msg" id="mg-msg">0 de ${sinLib.length}</div>`); let n=0, enlz=0;
+    for(const c of sinLib){ const dep=D.puestoPorId[c.puesto_id]?.departamento||null; const iid=await asegurarIndicador(c.indicador,c.meta,dep,c.politica_id,"migracion");
+      if(iid){ const { error } = await sb.from("competencias").update({indicador_id:iid}).eq("id",c.id); if(!error) enlz++; } n++; if($("mg-msg")) $("mg-msg").textContent=`${n} de ${sinLib.length}`; }
+    cerrarModal(); await cargarBase(); irA("indicadores"); aviso(`✅ Biblioteca creada: <b>${D.indicadores.length}</b> indicadores · <b>${enlz}</b> competencias enlazadas.`);
+  };
+};
+function editarIndicador(i){
+  const usan=i?D.competencias.filter(c=>c.indicador_id===i.id):[];
+  abrirModal(`<h3>${i?"Editar indicador":"Nuevo indicador"}</h3>
+    <div class="campo" style="margin-top:12px"><label for="ie-n">Nombre</label><input class="inp" id="ie-n" value="${esc(i?.nombre)}" placeholder="Cumplimiento de entregas a obra"></div>
+    <div class="campo"><label for="ie-f">Fórmula</label><input class="inp" id="ie-f" value="${esc(i?.formula)}" placeholder="entregas a tiempo / entregas programadas × 100"></div>
+    <div class="fila"><div class="campo" style="flex:2"><label for="ie-fu">Fuente del dato</label><input class="inp" id="ie-fu" value="${esc(i?.fuente)}" placeholder="Reporte del ERP, registro de inspección…"></div>
+      <div class="campo"><label for="ie-fr">Frecuencia</label><input class="inp" id="ie-fr" value="${esc(i?.frecuencia)}" list="ie-frs"><datalist id="ie-frs">${FRECUENCIAS.map(f=>`<option value="${f}">`).join("")}</datalist></div></div>
+    <div class="fila"><div class="campo"><label for="ie-m">Meta típica</label><input class="inp" id="ie-m" value="${esc(i?.meta_tipica)}" placeholder="≥95%"></div>
+      <div class="campo"><label for="ie-u">Unidad</label><input class="inp" id="ie-u" value="${esc(i?.unidad)}" placeholder="%, días, número"></div>
+      <div class="campo"><label for="ie-s">Sentido</label><select class="inp" id="ie-s">${opciones(Object.entries(SENTIDO),i?.sentido||"mayor")}</select></div></div>
+    <div class="fila"><div class="campo"><label for="ie-d">Alcance</label><select class="inp" id="ie-d">${opciones(departamentos().map(d=>[d,d]),i?.departamento,"Toda la empresa")}</select></div>
+      <div class="campo"><label for="ie-p">Política relacionada</label><select class="inp" id="ie-p">${opciones((D.politicas||[]).filter(p=>p.estado!=="derogada").map(p=>[p.id,(p.codigo?p.codigo+" · ":"")+p.nombre]),i?.politica_id,"— Ninguna —")}</select></div></div>
+    <div class="campo"><label for="ie-de">Descripción / cómo se obtiene el dato</label><textarea class="inp" id="ie-de" rows="2">${esc(i?.descripcion)}</textarea></div>
+    ${i?`<label style="display:flex;gap:8px;align-items:center;font-weight:500;font-size:13px"><input type="checkbox" id="ie-act" ${i.estado==="inactivo"?"":"checked"}> Activo</label>
+      ${usan.length?`<label style="display:flex;gap:8px;align-items:center;font-weight:500;font-size:13px;margin-top:6px"><input type="checkbox" id="ie-prop" checked> Actualizar el texto del indicador en las <b>${usan.length}</b> competencias que lo usan</label>`:""}`:""}
+    <div class="msg" id="ie-msg"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px">${i&&!usan.length?`<button class="btn danger sm" id="ie-del" style="margin-right:auto">Eliminar</button>`:""}<button class="btn ghost sm" data-cerrar>Cancelar</button><button class="btn amber sm" id="ie-ok">Guardar</button></div>`, m=>{
+    const q=s=>m.querySelector(s);
+    q("#ie-ok").onclick=async()=>{ const msg=q("#ie-msg");
+      const v={ nombre:q("#ie-n").value.trim(), formula:q("#ie-f").value.trim()||null, fuente:q("#ie-fu").value.trim()||null, frecuencia:q("#ie-fr").value.trim()||null, meta_tipica:q("#ie-m").value.trim()||null,
+        unidad:q("#ie-u").value.trim()||null, sentido:q("#ie-s").value, departamento:q("#ie-d").value||null, politica_id:q("#ie-p").value?Number(q("#ie-p").value):null, descripcion:q("#ie-de").value.trim()||null };
+      if(!v.nombre){ msg.className="msg error"; msg.textContent="Escribe el nombre."; return; }
+      if(D.indicadores.some(x=>nrm(x.nombre)===nrm(v.nombre)&&(!i||x.id!==i.id))){ msg.className="msg error"; msg.textContent="Ya existe un indicador con ese nombre."; return; }
+      if(i) v.estado=q("#ie-act").checked?"activo":"inactivo";
+      const { error } = i?await sb.from("indicadores").update(v).eq("id",i.id):await sb.from("indicadores").insert(v);
+      if(error){ msg.className="msg error"; msg.textContent=error.message; return; }
+      if(i&&q("#ie-prop")&&q("#ie-prop").checked){ const txt=textoIndicador(v); for(let k=0;k<usan.length;k+=200) await sb.from("competencias").update({indicador:txt}).in("id",usan.slice(k,k+200).map(c=>c.id)); }
+      cerrarModal(); await cargarBase(); irA("indicadores"); };
+    if(q("#ie-del")) q("#ie-del").onclick=async()=>{ cerrarModal(); if(!await confirmar(`Se eliminará el indicador <b>${esc(i.nombre)}</b>.`,"Eliminar",true)) return; await sb.from("indicadores").delete().eq("id",i.id); await cargarBase(); irA("indicadores"); };
+  });
+  m_ancho(640);
+}
+
+// --- Reglamentos y procedimientos → políticas (con IA) ---
+const EST_DOC={cargado:["Cargado","b-gris"],procesando:["Analizando…","b-blue"],borrador:["Propuesta lista","b-wait"],aplicado:["Aplicado","b-ok"],rechazado:["Rechazado","b-red"]};
+async function modalReglamentosIA(){
+  if(!D.v38){ aviso("Ejecuta <b>actualizacion_v3_8_metodologia.sql</b> en Supabase para activar «Reglamentos con IA»."); return; }
+  const { data:docs, error } = await sb.from("documentos_politica").select("id,nombre_archivo,estado,notas,modelo_ia,creado_en,datos").order("id",{ascending:false});
+  if(error){ aviso("No se pudo leer: "+esc(error.message)); return; }
+  const l=docs||[];
+  abrirModal(`<h3>✦ Reglamentos y procedimientos con IA</h3>
+    <div style="color:var(--muted);font-size:12.5px;margin-bottom:12px">Sube el Reglamento Interno, el Reglamento de Seguridad y Salud, procedimientos o normas internas. La IA propone las <b>políticas</b> (la regla y su estándar exigible) con un <b>indicador</b> para verificarlas. Nada se aplica hasta que apruebes.</div>
+    <div class="card" style="padding:14px;margin:0"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input type="file" id="rg-f" multiple accept="application/pdf,.pdf,.docx" style="font-size:13px;flex:1;min-width:200px"><button class="btn amber sm" id="rg-subir">Subir y analizar</button></div><div class="msg" id="rg-msg"></div></div>
+    <div class="tabla-wrap" style="margin-top:12px;max-height:340px;overflow:auto"><table><thead><tr><th>Documento</th><th>Estado</th><th></th></tr></thead><tbody>${
+      l.map(d=>{ const e=EST_DOC[d.estado]||[d.estado,"b-gris"]; const n=(d.datos?.politicas||[]).length;
+        const acc=d.estado==="borrador"?`<button class="btn amber xs" data-rg-rev="${d.id}">Revisar (${n})</button>`:d.estado==="aplicado"?`<button class="btn ghost xs" data-rg-rev="${d.id}">Ver</button>`:d.estado==="procesando"?"":`<button class="btn amber xs" data-rg-an="${d.id}">${d.notas?"Reintentar":"✦ Analizar"}</button>`;
+        return `<tr><td style="min-width:200px;word-break:break-word"><b>${esc(d.nombre_archivo)}</b>${d.notas?`<div class="sub-t" style="color:var(--red)">${esc(d.notas)}</div>`:""}</td><td><span class="badge ${e[1]}">${e[0]}</span>${d.modelo_ia?`<div class="sub-t">${esc(provDe(d.modelo_ia))}</div>`:""}</td><td class="r" style="white-space:nowrap">${acc}</td></tr>`; }).join("")
+      ||`<tr><td colspan="3" class="vacio">Aún no hay documentos. Empieza por el Reglamento Interno de Trabajo.</td></tr>`
+    }</tbody></table></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn ghost sm" data-cerrar>Cerrar</button></div>`, m=>{
+    const msg=m.querySelector("#rg-msg");
+    const analizar=async(id)=>{ msg.className="msg"; msg.textContent="La IA está leyendo el documento (30–120 s)…";
+      const r=await invocarIA({ paso:"politicas", documento_id:id });
+      if(r.error){ msg.className="msg error"; msg.textContent="No se pudo analizar: "+r.error; return false; } return true; };
+    m.querySelector("#rg-subir").onclick=async()=>{ const fs=[...m.querySelector("#rg-f").files]; if(!fs.length){ msg.className="msg error"; msg.textContent="Elige uno o más archivos (PDF o Word .docx)."; return; }
+      m.querySelector("#rg-subir").disabled=true; const ids=[];
+      for(const f of fs){ msg.className="msg"; msg.textContent=`Subiendo ${f.name}…`; const r=await subirReglamento(f); if(r.ok) ids.push(r.id); else { msg.className="msg error"; msg.textContent=`${f.name}: ${r.motivo}`; await sleep(1500); } }
+      for(const id of ids){ await analizar(id); }
+      modalReglamentosIA(); };
+    m.querySelectorAll("[data-rg-an]").forEach(b=>b.onclick=async()=>{ b.disabled=true; b.textContent="Analizando…"; await analizar(Number(b.dataset.rgAn)); modalReglamentosIA(); });
+    m.querySelectorAll("[data-rg-rev]").forEach(b=>b.onclick=()=>revisarReglamento(Number(b.dataset.rgRev)));
+  });
+  m_ancho(760);
+}
+async function subirReglamento(f){
+  const esPdf=/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name), esDocx=/\.docx$/i.test(f.name);
+  if(!esPdf&&!esDocx) return {ok:false,motivo:"solo PDF o Word .docx"};
+  if(f.size>MAX_MANUAL_MB*1024*1024) return {ok:false,motivo:`pesa más de ${MAX_MANUAL_MB} MB`};
+  const hash=await hashArchivo(f);
+  const { data:ig } = await sb.from("documentos_politica").select("id").eq("hash_archivo",hash);
+  if(ig&&ig.length) return {ok:false,motivo:"ese archivo ya se subió antes"};
+  let texto=null;
+  try{ texto=esDocx?await textoDocx(f):await textoPdf(f); }catch(e){ texto=null; }
+  if(esDocx&&(!texto||texto.length<200)) return {ok:false,motivo:"el Word casi no tiene texto; súbelo como PDF"};
+  const mime=esDocx?"application/vnd.openxmlformats-officedocument.wordprocessingml.document":"application/pdf";
+  const ruta=`reglamentos/${new Date().getFullYear()}/${hash.slice(0,16)}_${f.name.normalize("NFD").replace(/[^\w.\-]/g,"_").slice(-80)}`;
+  const up=await sb.storage.from("manuales").upload(ruta,f,{contentType:mime,upsert:true});
+  if(up.error) return {ok:false,motivo:"no se pudo subir: "+up.error.message};
+  const { data, error } = await sb.from("documentos_politica").insert({nombre_archivo:f.name,archivo_path:ruta,hash_archivo:hash,mime_type:mime,tamano_bytes:f.size,texto_extraido:texto,estado:"cargado",subido_por:PERFIL.id}).select("id").single();
+  if(error) return {ok:false,motivo:error.message};
+  return {ok:true,id:data.id};
+}
+async function revisarReglamento(docId){
+  const { data:doc, error } = await sb.from("documentos_politica").select("*").eq("id",docId).single();
+  if(error||!doc){ aviso("No se encontró el documento."); return; }
+  const d=doc.datos||{politicas:[]}; const soloVer=doc.estado==="aplicado"||doc.estado==="rechazado", dis=soloVer?"disabled":"";
+  const deps=departamentos();
+  const existe=(n)=>(D.politicas||[]).find(p=>nrm(p.nombre)===nrm(n));
+  const card=(p,i)=>{ const ex=existe(p.nombre); const alc=deps.find(x=>nrm(x)===nrm(p.alcance))||"";
+    return `<div class="rg-p rv-card" data-i="${i}">
+      <div class="rv-top"><label class="rv-inc"><input type="checkbox" class="rg-inc" ${ex?"":"checked"} ${dis}></label><input class="rv-nombre rg-n" value="${esc(p.nombre)}" ${dis}>
+        ${ex?`<span class="badge b-blue" title="${esc(ex.codigo||"")}">Ya existe · se completa</span>`:'<span class="badge b-ok">Nueva</span>'}${p.critica?' <span class="badge b-red">Crítica</span>':""}</div>
+      <input class="inp rv-def rg-de" value="${esc(p.descripcion)}" placeholder="Qué regula" ${dis} style="margin-top:8px">
+      <div class="rv-sec">📌 Estándar exigible</div><textarea class="inp rg-es" rows="2" ${dis}>${esc(p.estandar)}</textarea>
+      <div class="fila" style="margin-top:8px"><div class="campo" style="margin:0"><label>Alcance</label><select class="inp rg-al" ${dis}>${opciones(deps.map(x=>[x,x]),alc,"Toda la empresa")}</select></div><div class="campo" style="margin:0"><label>Artículo / sección</label><input class="inp rg-ar" value="${esc(p.articulo)}" ${dis}></div></div>
+      <div class="rv-mide"><div class="rv-sec" style="margin-top:0">📏 Cómo se verifica</div>
+        <div class="fila" style="margin-top:6px"><div class="campo" style="flex:2;margin:0"><label>Indicador sugerido</label><input class="inp rg-in" value="${esc(p.indicador_sugerido)}" list="dl-ind" ${dis}></div><div class="campo" style="margin:0"><label>Meta</label><input class="inp rg-me" value="${esc(p.meta_sugerida)}" ${dis}></div></div>
+        <label style="display:flex;gap:8px;align-items:center;margin:8px 0 0;font-weight:500;font-size:12.5px"><input type="checkbox" class="rg-addind" ${p.indicador_sugerido?"checked":""} ${dis}> Agregar el indicador a la biblioteca</label></div>
+    </div>`; };
+  abrirModal(`<div class="rv-head"><div><h3 style="margin:0">${esc(d.documento||doc.nombre_archivo)}</h3><div style="color:var(--muted);font-size:12.5px;margin-top:2px">${esc(doc.nombre_archivo)} · propuesta de ${esc(provDe(doc.modelo_ia))} · ${(d.politicas||[]).length} políticas</div></div><span class="badge ${soloVer?"b-ok":"b-wait"}">${soloVer?esc(doc.estado):"nada se aplica hasta que apruebes"}</span></div>
+    ${d.observaciones?`<details class="rv-ia"><summary>⚠ La IA dejó una observación (clic para leer)</summary><div style="margin-top:6px">${esc(d.observaciones)}</div></details>`:""}
+    <datalist id="dl-ind">${(D.indicadores||[]).map(x=>`<option value="${esc(textoIndicador(x))}">`).join("")}</datalist>
+    <div style="max-height:58vh;overflow:auto;padding:12px 6px 0 0">${(d.politicas||[]).map(card).join("")||'<div class="vacio">Sin propuestas.</div>'}</div>
+    <div class="msg" id="rg-rmsg"></div>
+    <div class="rv-pie">${soloVer?`<button class="btn sm" data-cerrar>Cerrar</button>`:`<button class="btn danger sm" id="rg-rech">Rechazar</button><span style="margin-right:auto"></span><button class="btn ghost sm" id="rg-vol">Volver</button><button class="btn amber sm" id="rg-ok">Aprobar y crear políticas</button>`}</div>`, m=>{
+    if(soloVer) return;
+    const q=s=>m.querySelector(s);
+    const refrescar=()=>m.querySelectorAll(".rg-p").forEach(el=>el.style.opacity=el.querySelector(".rg-inc").checked?1:.5);
+    m.addEventListener("change",refrescar); refrescar();
+    q("#rg-vol").onclick=()=>modalReglamentosIA();
+    q("#rg-rech").onclick=async()=>{ await sb.from("documentos_politica").update({estado:"rechazado"}).eq("id",docId); modalReglamentosIA(); };
+    q("#rg-ok").onclick=async()=>{ const msg=q("#rg-rmsg");
+      const sel=[...m.querySelectorAll(".rg-p")].filter(el=>el.querySelector(".rg-inc").checked).map(el=>{ const g=s=>el.querySelector(s);
+        return { nombre:g(".rg-n").value.trim(), descripcion:g(".rg-de").value.trim(), estandar:g(".rg-es").value.trim(), dep:g(".rg-al").value||null, articulo:g(".rg-ar").value.trim(), ind:g(".rg-in").value.trim(), meta:g(".rg-me").value.trim(), addInd:g(".rg-addind").checked }; });
+      if(!sel.length){ msg.className="msg error"; msg.textContent="Marca al menos una política."; return; }
+      if(sel.some(p=>!p.nombre||!p.estandar)){ msg.className="msg error"; msg.textContent="Cada política marcada necesita nombre y estándar."; return; }
+      q("#rg-ok").disabled=true; q("#rg-ok").textContent="Aplicando…";
+      let nuevas=0, comp=0, inds=0; const ref=(p)=>[doc.nombre_archivo.replace(/\.(pdf|docx)$/i,""),p.articulo].filter(Boolean).join(" · ");
+      try{
+        for(const p of sel){ const ex=existe(p.nombre); let polId;
+          if(ex){ const v={}; if(!ex.descripcion&&p.descripcion) v.descripcion=p.descripcion; if(!ex.estandar&&p.estandar) v.estandar=p.estandar; if(!ex.documento_ref) v.documento_ref=ref(p); if(!ex.articulo&&p.articulo) v.articulo=p.articulo; if(!ex.documento_id) v.documento_id=docId;
+            if(Object.keys(v).length){ const { error } = await sb.from("politicas").update(v).eq("id",ex.id); if(error) throw error; Object.assign(ex,v); comp++; } polId=ex.id; }
+          else { const { data:r, error } = await sb.from("politicas").insert({ codigo:siguienteCodigo(p.dep), nombre:p.nombre, descripcion:p.descripcion||null, estandar:p.estandar, departamento:p.dep, documento_ref:ref(p), articulo:p.articulo||null, documento_id:docId, version:"1.0", estado:"vigente", origen:"ia_aprobada" }).select("*").single();
+            if(error) throw error; D.politicas.push(r); polId=r.id; nuevas++; }
+          if(p.addInd&&p.ind){ const n0=D.indicadores.length; await asegurarIndicador(p.ind,p.meta,p.dep,polId); if(D.indicadores.length>n0) inds++; }
+        }
+        await sb.from("documentos_politica").update({estado:"aplicado",aprobado_por:PERFIL.id,aprobado_en:new Date().toISOString()}).eq("id",docId);
+        cerrarModal(); await cargarBase(); irA("politicas");
+        aviso(`✅ ${nuevas} políticas nuevas${comp?`, ${comp} completadas`:""}${inds?` y ${inds} indicadores agregados a la biblioteca`:""}. Quedan como «sin aprobación registrada»: registra quién las aprobó en cada política.`);
+      }catch(e){ q("#rg-ok").disabled=false; q("#rg-ok").textContent="Aprobar y crear políticas"; msg.className="msg error"; msg.textContent="Se detuvo: "+(e.message||e); }
+    };
+  });
+  m_ancho(820);
+}
+
+// --- Validación con los jefes de área (Excel de ida y vuelta) ---
+function modalValidacionJefes(){
+  if(!D.v38){ aviso("Ejecuta <b>actualizacion_v3_8_metodologia.sql</b> en Supabase para activar la validación con jefes."); return; }
+  const deps=departamentos();
+  const compsDep=(dep)=>D.competencias.filter(c=>c.puesto_id&&(!dep||D.puestoPorId[c.puesto_id]?.departamento===dep));
+  const cuenta=(l)=>({a:l.filter(c=>c.validacion_estado==="aprobada").length,o:l.filter(c=>c.validacion_estado==="observada").length,t:l.length});
+  abrirModal(`<h3>Validación con los jefes de área</h3>
+    <div style="color:var(--muted);font-size:12.5px;margin-bottom:12px"><b>1.</b> Descarga el Excel del área y envíalo al jefe. <b>2.</b> El jefe marca SÍ o NO en cada competencia, corrige la meta o la conducta si hace falta y comenta. <b>3.</b> Importa el Excel: los cambios se aplican y queda constancia de quién validó y cuándo.</div>
+    <div class="fila"><div class="campo"><label for="vj-dep">Departamento</label><select class="inp" id="vj-dep">${opciones(deps.map(d=>[d,d]),"","Todos")}</select></div>
+      <div class="campo" style="display:flex;align-items:flex-end;gap:8px"><button class="btn sm" id="vj-xls">Descargar Excel para el jefe</button></div></div>
+    <div class="campo" style="margin-top:6px"><label for="vj-f">Importar el Excel validado</label><input type="file" id="vj-f" accept=".xlsx,.xls" style="font-size:13px"></div>
+    <div id="vj-out"></div>
+    <div class="tabla-wrap" style="margin-top:12px;max-height:260px;overflow:auto"><table><thead><tr><th>Departamento</th><th class="c">Aprobadas</th><th class="c">Con observaciones</th><th class="c">Pendientes</th></tr></thead><tbody>${
+      deps.map(d=>{ const k=cuenta(compsDep(d)); if(!k.t) return ""; return `<tr><td><b>${esc(d)}</b></td><td class="c num" style="color:#15803D">${k.a}</td><td class="c num" style="color:${k.o?"var(--warn)":"inherit"}">${k.o}</td><td class="c num">${k.t-k.a-k.o}</td></tr>`; }).join("")
+    }</tbody></table></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn ghost sm" data-cerrar>Cerrar</button></div>`, m=>{
+    const q=s=>m.querySelector(s);
+    q("#vj-xls").onclick=()=>{ const dep=q("#vj-dep").value; const l=compsDep(dep).sort((a,b)=>String(D.puestoPorId[a.puesto_id]?.nombre).localeCompare(String(D.puestoPorId[b.puesto_id]?.nombre))||(a.orden||0)-(b.orden||0));
+      if(!l.length){ aviso("No hay competencias de puesto en ese departamento."); return; }
+      exportarExcel("Validacion_"+(dep?soloAlnum(dep):"todas"),[{nombre:"Validar",filas:l.map(c=>({ ID:c.id, Departamento:D.puestoPorId[c.puesto_id]?.departamento||"", Puesto:D.puestoPorId[c.puesto_id]?.nombre||"", Competencia:c.nombre||c.categoria, Crítica:c.critico?"Sí":"No",
+        "Peso %":c.peso??"", "Nivel esperado":c.nivel_esperado??c.minimo??"", "Conducta que se califica":c.texto||"",
+        "Otras conductas":(D.conductas||[]).filter(k=>k.competencia_id===c.id&&!k.sincronizada).map(k=>k.texto).join(" | "),
+        Indicador:c.indicador||"", Meta:c.meta||"", Política:c.politica||"",
+        "¿De acuerdo? (SÍ / NO)":"", "Meta corregida":"", "Conducta corregida":"", "Comentario del jefe":"", "Validado por (nombre y cargo)":"" }))},
+        {nombre:"Instrucciones",filas:[{Paso:"1",Qué:"En «¿De acuerdo?» escribe SÍ si la competencia, la conducta y la meta reflejan lo que se espera del puesto; NO si hay que cambiar algo."},{Paso:"2",Qué:"Si la meta no es realista, escribe la correcta en «Meta corregida» (ej. ≥95%, 0 incidentes, en 48 h)."},{Paso:"3",Qué:"Si la conducta no es la correcta, escribe en «Conducta corregida» lo que el colaborador debe hacer y cómo se verifica."},{Paso:"4",Qué:"Explica en «Comentario» y escribe tu nombre y cargo en «Validado por». Devuelve el archivo a Talento Humano."}]}]); };
+    q("#vj-f").onchange=async e=>{ const out=q("#vj-out"); let filas;
+      try{ filas=await leerExcelArchivo(e.target.files[0]); }catch(err){ out.innerHTML=`<div class="msg error">No pude leer el archivo: ${esc(err.message)}</div>`; return; }
+      const col=(row,pref)=>{ const k=Object.keys(row).find(k=>normTxt(k).startsWith(pref)); return k?String(row[k]??"").trim():""; };
+      const cambios=[]; let ignor=0;
+      filas.forEach(r=>{ const id=Number(col(r,"id")); const c=D.competencias.find(x=>x.id===id); if(!c){ ignor++; return; }
+        const ac=normTxt(col(r,"¿de acuerdo")||col(r,"de acuerdo")); const meta=col(r,"meta corregida"), cond=col(r,"conducta corregida"), com=col(r,"comentario"), por=col(r,"validado por");
+        if(!ac&&!meta&&!cond&&!com) return;
+        const v={}; if(/^s/.test(ac)) v.validacion_estado="aprobada"; else if(/^n/.test(ac)||meta||cond) v.validacion_estado="observada";
+        if(com) v.validacion_nota=com; if(meta&&meta!==c.meta) v.meta=meta; if(cond&&cond!==c.texto) v.texto=cond;
+        if(v.validacion_estado){ v.validada_por=por||"Jefe de área (Excel)"; v.validada_en=hoyISO(); }
+        cambios.push({c,v}); });
+      const ap=cambios.filter(x=>x.v.validacion_estado==="aprobada").length, ob=cambios.filter(x=>x.v.validacion_estado==="observada").length, mm=cambios.filter(x=>x.v.meta).length, cc=cambios.filter(x=>x.v.texto).length;
+      out.innerHTML=cambios.length?`<div class="aviso" style="margin-top:10px">${ap} aprobadas · ${ob} con observaciones · ${mm} metas y ${cc} conductas corregidas${ignor?` · ${ignor} filas sin ID válido (se omiten)`:""}</div>
+        ${cambios.filter(x=>x.v.validacion_nota).slice(0,8).map(x=>`<div class="sub-t" style="margin-top:4px">• <b>${esc(x.c.nombre||x.c.categoria)}</b>: ${esc(x.v.validacion_nota)}</div>`).join("")}
+        <button class="btn amber sm" id="vj-ok" style="margin-top:10px">Aplicar validación</button><div class="msg" id="vj-msg"></div>`:`<div class="msg error" style="margin-top:10px">El archivo no tiene respuestas del jefe.</div>`;
+      if(q("#vj-ok")) q("#vj-ok").onclick=async()=>{ q("#vj-ok").disabled=true; let n=0;
+        for(const x of cambios){ const { error } = await sb.from("competencias").update(x.v).eq("id",x.c.id); if(error){ q("#vj-msg").className="msg error"; q("#vj-msg").textContent=error.message; return; } n++; }
+        await cargarBase(); cerrarModal(); aviso(`✅ Validación aplicada en <b>${n}</b> competencias. Las observadas quedan marcadas para revisarlas en Estructura.`); };
+    };
+  });
+  m_ancho(720);
+}
+
+// --- Calibración de metas (Analítica) ---
+function calibracionMetas(P){
+  const cm={};
+  P.forEach(x=>x.filas.forEach(f=>{ const v=f.kpi&&f.kpi.nota!=null?Number(f.kpi.nota):f.j; if(v==null||isNaN(v)||!f.c.puesto_id) return; (cm[f.c.id]=cm[f.c.id]||{c:f.c,v:[]}).v.push(Number(v)); }));
+  return Object.values(cm).map(o=>{ const n=o.v.length, m=prom(o.v), p5=o.v.filter(v=>v>=4.75).length/n, pb=o.v.filter(v=>v<=2).length/n, sd=Math.sqrt(o.v.reduce((s,v)=>s+(v-m)**2,0)/n);
+    let k=null;
+    if(n>=3&&p5>=0.8) k={o:1,txt:"Meta muy fácil",cls:"b-wait",acc:"Casi todos obtienen 5: sube la meta o el nivel esperado."};
+    else if(n>=3&&pb>=0.6) k={o:0,txt:"Meta difícil de alcanzar",cls:"b-red",acc:"La mayoría no llega: confirma si es realista o si falta un recurso o proceso."};
+    else if(n>=5&&sd<0.15) k={o:2,txt:"No diferencia",cls:"b-blue",acc:"Todos reciben la misma nota: la conducta o el indicador no distingue desempeños."};
+    else if(!(o.c.meta||"").trim()) k={o:3,txt:"Sin meta",cls:"b-gris",acc:"Define una meta concreta para que el jefe sepa cuánto es cumplir."};
+    return {...o,n,m,p5,pb,sd,k}; }).filter(o=>o.k).sort((a,b)=>a.k.o-b.k.o||b.n-a.n);
+}
+function calibracionMetasHTML(cal){
+  return `<div class="card mt"><h3>Calibración de metas e indicadores</h3><div class="cap">Competencias cuya meta conviene ajustar antes de la próxima campaña (con 3 o más personas evaluadas). Se usa la nota del KPI cuando existe; si no, la nota del jefe.</div>
+    ${cal.length?`<div class="tabla-wrap"><table><thead><tr><th>Puesto</th><th>Competencia</th><th>Meta actual</th><th class="c">Personas</th><th class="c">Promedio</th><th class="c">% con 5</th><th class="c">% ≤ 2</th><th>Diagnóstico</th><th></th></tr></thead><tbody>${
+      cal.slice(0,60).map(o=>`<tr><td>${esc(D.puestoPorId[o.c.puesto_id]?.nombre)}</td><td style="min-width:160px"><b>${esc(o.c.nombre||o.c.categoria)}</b></td><td>${esc(o.c.meta)||"—"}</td><td class="c num">${o.n}</td><td class="c num">${f2(o.m)}</td><td class="c num">${Math.round(o.p5*100)}%</td><td class="c num">${Math.round(o.pb*100)}%</td>
+        <td style="min-width:200px"><span class="badge ${o.k.cls}">${o.k.txt}</span><div class="sub-t">${o.k.acc}</div></td><td class="r"><button class="btn ghost xs" data-calm="${o.c.puesto_id}">Editar</button></td></tr>`).join("")
+    }</tbody></table></div>`:`<div class="vacio">Ninguna meta necesita ajuste con los filtros actuales.</div>`}
+    <div class="explbox"><b>Cómo leerlo:</b> si el 80% o más obtiene 5, la meta no reta. Si el 60% o más saca 2 o menos, la meta es irreal o falta un recurso o proceso. Si nadie se diferencia, la conducta o el indicador no distingue entre desempeños. Ajusta y vuelve a validar con el jefe del área.</div></div>`;
+}
+
+// ==================== CURVA DE REFERENCIA, CONSECUENCIAS Y PLAN DE CARRERA (v3.15) ====================
+// Niveles en el orden de NIVELES: 0 Deficiente · 1 Regular · 2 Bueno · 3 Muy bueno · 4 Excelente
+const CURVAS={1:{txt:"Campana suave",p:[10,20,40,20,10]},2:{txt:"Campana estricta",p:[5,20,50,20,5]},3:{txt:"Histórica de Etinar"},4:{txt:"Personalizada (meta de Gerencia)"}};
+const CONS_BASE=[
+  "Plan de Acción para la Mejora con seguimiento cercano. Si no hay mejora sostenida, evaluación de permanencia conforme al Reglamento Interno y la normativa laboral vigente (debido proceso).",
+  "Plan de Acción para la Mejora del Desempeño, con seguimiento del jefe a 60–90 días.",
+  "Refuerzo de las competencias con brecha y seguimiento normal del jefe.",
+  "Plan de Carrera: proyección a funciones de mayor responsabilidad y reconocimiento.",
+  "Plan de Carrera: asignación progresiva de mayores responsabilidades; considerar como referente o mentor interno."];
+const ESCALERA_BASE=`1. Primer incumplimiento: llamado de atención verbal.
+2. Reincidencia: llamado de atención escrito.
+3. Persistencia del bajo desempeño: Plan de Acción para la Mejora del Desempeño.
+4. Sin mejora sostenida: evaluación de permanencia conforme al Reglamento Interno y al Código del Trabajo.`;
+const consecuenciaNivel=(i)=>{ const t=(CFG_TXT["cons_"+i]||"").trim(); return t||CONS_BASE[i]||""; };
+const escaleraTexto=()=>(CFG_TXT.cons_escalera||"").trim()||ESCALERA_BASE;
+const pctDe=(dist)=>{ const t=dist.reduce((s,x)=>s+x,0); return t?dist.map(x=>x*100/t):[0,0,0,0,0]; };
+const desviacionCurva=(realPct,refPct)=>realPct.reduce((s,v,i)=>s+Math.abs(v-refPct[i]),0)/2;
+const centroCurva=(pct)=>pct.reduce((s,v,i)=>s+v*i,0)/100;   // 0 = todos Deficiente · 4 = todos Excelente
+function estadoCurva(desv,n){
+  if(n<(CFG.curva_min_n||15)) return {k:"peq",txt:"Grupo pequeño",cls:"b-gris",det:`Con menos de ${CFG.curva_min_n||15} personas la curva solo es referencia.`};
+  if(desv<CFG.curva_alerta_rev) return {k:"ok",txt:"Normal",cls:"b-ok",det:"La curva real se parece a la de referencia."};
+  if(desv<CFG.curva_alerta_cal) return {k:"rev",txt:"Revisar",cls:"b-wait",det:"Conviene revisar las notas en la reunión de calibración."};
+  return {k:"cal",txt:"Calibración necesaria",cls:"b-red",det:"La curva se aleja mucho de la referencia: calibrar antes de cerrar la campaña."};
+}
+const tendenciaCurva=(realPct,refPct)=>{ const d=centroCurva(realPct)-centroCurva(refPct); return d>=0.3?"más generosa que la referencia":d<=-0.3?"más severa que la referencia":"centrada como la referencia"; };
+// Curva de referencia elegida en Periodos (la histórica usa las campañas CERRADAS anteriores a la actual)
+async function curvaReferencia(pidActual){
+  const t=Math.round(CFG.curva_ref||1);
+  if(t===4){ const p=[0,1,2,3,4].map(i=>Number(CFG["curva_p"+i])||0); const s=p.reduce((a,b)=>a+b,0)||1; return {txt:CURVAS[4].txt,p:p.map(v=>v*100/s)}; }
+  if(t===3){ const ant=D.periodos.filter(p=>p.estado==="cerrado"&&p.id!==Number(pidActual)); const dist=[0,0,0,0,0]; let n=0;
+    for(const per of ant){ const l=(await analizarPeriodo(per.id)).filter(x=>x.prom180!=null); if(!l.length) continue; n++; l.forEach(x=>dist[nivelIdx(x.prom180)]++); }
+    if(n&&dist.some(Boolean)) return {txt:`Histórica de Etinar (${n} campaña${n>1?"s":""} cerrada${n>1?"s":""})`,p:pctDe(dist)};
+    return {...CURVAS[1],txt:"Campana suave (aún no hay campañas cerradas para la curva histórica)"}; }
+  return CURVAS[t]||CURVAS[1];
+}
+// Gráfico: barras = curva real · línea punteada = curva de referencia (en personas esperadas)
+function curvaRefSVG(dist, refP){
+  const tot=dist.reduce((s,x)=>s+x,0);
+  if(!tot) return `<div class="vacio">Sin resultados con estos filtros.</div>`;
+  const esp=refP.map(p=>p*tot/100);
+  const W=440,H=250,pl=34,pb=44,pt=22,pr=12,n=5,gap=(W-pl-pr)/n,bw=gap*0.58, max=Math.max(...dist,...esp)*1.22||1;
+  const x=i=>pl+gap*i+gap*0.21, y=v=>H-pb-(v/max)*(H-pb-pt), cx=i=>x(i)+bw/2;
+  const paso=Math.max(1,Math.ceil(max/4));
+  let g=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="max-width:460px" role="img" aria-label="Curva real comparada con la de referencia">`;
+  for(let v=0;v<=max;v+=paso){ g+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="#F1EFEA"/><text x="${pl-6}" y="${y(v)+3}" font-size="9" fill="#8A8377" text-anchor="end">${v}</text>`; }
+  NIVELES.forEach((c,i)=>{ const v=dist[i]; g+=`<rect x="${x(i)}" y="${y(v)}" width="${bw}" height="${Math.max(0,H-pb-y(v))}" rx="4" fill="${c.color}" opacity=".88"><title>${c.txt}: ${v} personas (${Math.round(v*100/tot)}%) · referencia ${Math.round(refP[i])}%</title></rect>`;
+    g+=`<text x="${cx(i)}" y="${y(v)-6}" font-size="10" font-weight="700" fill="#565049" text-anchor="middle">${Math.round(v*100/tot)}%</text>`;
+    g+=`<text x="${cx(i)}" y="${H-pb+15}" font-size="9.5" fill="#565049" text-anchor="middle">${c.txt}</text>`;
+    g+=`<text x="${cx(i)}" y="${H-pb+27}" font-size="8.5" fill="#8A8377" text-anchor="middle">ref. ${Math.round(refP[i])}%</text>`; });
+  const pts=esp.map((v,i)=>[cx(i),y(v)]); let d=`M ${pts[0][0]} ${pts[0][1]}`;
+  for(let i=0;i<pts.length-1;i++){ const [x0,y0]=pts[i],[x1,y1]=pts[i+1],m=(x0+x1)/2; d+=` C ${m} ${y0}, ${m} ${y1}, ${x1} ${y1}`; }
+  g+=`<path d="${d}" fill="none" stroke="#16130E" stroke-width="2" stroke-dasharray="5 4" stroke-opacity=".7"/>`;
+  pts.forEach(([px,py])=>{ g+=`<circle cx="${px}" cy="${py}" r="3.2" fill="#fff" stroke="#16130E" stroke-width="1.6"/>`; });
+  g+=`</svg>`;
+  return `<div style="display:flex;justify-content:center">${g}</div><div class="sub-t" style="text-align:center;margin-top:2px">Barras: curva real · <span style="border-bottom:2px dashed #16130E">línea punteada</span>: curva de referencia</div>`;
+}
+// Tarjetas de Analítica
+function curvaResumenHTML(dist, ref){
+  const tot=dist.reduce((s,x)=>s+x,0); if(!tot) return "";
+  const rp=pctDe(dist), dv=desviacionCurva(rp,ref.p), est=estadoCurva(dv,tot);
+  return `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px;justify-content:center">
+    <span class="badge ${est.cls}" style="font-size:12px">${est.txt}</span>
+    <span style="font-size:13px"><b>Desviación ${dv.toFixed(0)}%</b> · curva ${tendenciaCurva(rp,ref.p)}</span></div>
+    <div class="sub-t" style="text-align:center;margin-top:4px">Referencia: ${esc(ref.txt)} · ${est.det}</div>`;
+}
+function curvaGruposHTML(P, ref){
+  const fila=(nombre,sub,l)=>{ const dist=[0,0,0,0,0]; l.forEach(x=>dist[nivelIdx(x.prom180)]++); const rp=pctDe(dist), dv=desviacionCurva(rp,ref.p), est=estadoCurva(dv,l.length);
+    return {nombre,sub,n:l.length,rp,dv,est,tend:tendenciaCurva(rp,ref.p)}; };
+  const porDep={}, porJefe={};
+  P.forEach(x=>{ (porDep[x.departamento||"Sin departamento"]=porDep[x.departamento||"Sin departamento"]||[]).push(x); const j=x.jefeHecha?.evaluador_id; if(j) (porJefe[j]=porJefe[j]||[]).push(x); });
+  const deps=Object.entries(porDep).map(([d,l])=>fila(d,"Área",l)), jefes=Object.entries(porJefe).map(([j,l])=>fila(perfil(j)?.nombre||"(jefe)","Jefe · "+(l[0].departamento||""),l));
+  const orden=(a,b)=>(a.est.k==="peq")-(b.est.k==="peq")||b.dv-a.dv;
+  const mini=(rp)=>`<div style="display:flex;gap:2px;min-width:150px">${rp.map((v,i)=>`<div title="${NIVELES[i].txt}: ${Math.round(v)}%" style="flex:1;text-align:center;font-size:10.5px;font-weight:700;padding:3px 0;border-radius:4px;background:${NIVELES[i].color}${v?"":"22"};color:${v?"#fff":"#8A8377"};opacity:${.35+Math.min(1,v/40)*.65}">${Math.round(v)}</div>`).join("")}</div>`;
+  const tabla=(arr,titulo)=>arr.length?`<div class="lbl-campo" style="margin-top:12px">${titulo}</div><div class="tabla-wrap"><table><thead><tr><th>${titulo==="Por área"?"Área":"Jefe"}</th><th class="c">Personas</th><th>Distribución (%) Def · Reg · Bue · MB · Exc</th><th class="c">Desviación</th><th>Lectura</th></tr></thead><tbody>${
+    arr.sort(orden).map(r=>`<tr><td style="min-width:150px"><b>${esc(r.nombre)}</b><div class="sub-t">${esc(r.sub)}</div></td><td class="c num">${r.n}</td><td>${mini(r.rp)}</td><td class="c num">${r.dv.toFixed(0)}%</td><td style="min-width:190px"><span class="badge ${r.est.cls}">${r.est.txt}</span><div class="sub-t">${r.est.k==="peq"?r.est.det:"Curva "+r.tend}</div></td></tr>`).join("")}</tbody></table></div>`:"";
+  return `<div class="card mt"><h3>Curva por área y por jefe</h3><div class="cap">Cada fila compara su curva con la de referencia (${esc(ref.txt)}). Ordenadas de mayor a menor desviación.</div>
+    ${tabla(deps,"Por área")}${tabla(jefes.filter(r=>r.n>=3),"Por jefe")}
+    <div class="explbox"><b>Desviación</b> = % de personas que tendrían que cambiar de nivel para que la curva coincida con la referencia. Menos de ${CFG.curva_alerta_rev}%: normal · ${CFG.curva_alerta_rev}–${CFG.curva_alerta_cal}%: revisar · más de ${CFG.curva_alerta_cal}%: calibración. <b>La curva es una guía, no un cupo:</b> nadie cambia de nivel para «cuadrar» la curva; las diferencias se conversan con los jefes con evidencias.</div></div>`;
+}
+function consecuenciasHTML(dist){
+  return `<div class="card mt"><h3>Qué sigue para cada nivel</h3><div class="cap">Consecuencias del desempeño definidas por Talento Humano (Periodos → Curva de referencia y consecuencias). Se muestran a cada persona al firmar las reglas.</div>
+    ${[4,3,2,1,0].map(i=>`<div style="display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line-2)"><span class="nivel ${NIVELES[i].cls}" style="min-width:92px;text-align:center">${NIVELES[i].txt}</span><div style="flex:1;font-size:13px">${esc(consecuenciaNivel(i))}</div><div class="num" style="font-weight:800;min-width:70px;text-align:right">${dist[i]} persona${dist[i]===1?"":"s"}</div></div>`).join("")}
+    <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;font-size:13px">Escalera ante desempeño no adecuado</summary><div class="sub-t" style="white-space:pre-line;margin-top:6px;line-height:1.7">${esc(escaleraTexto())}</div>
+      <div class="explbox">Los llamados de atención y la desvinculación son medidas que aplica Talento Humano según el Reglamento Interno y el Código del Trabajo, con debido proceso. La plataforma no automatiza ninguna decisión.</div></details></div>`;
+}
+// Periodos: configuración de la curva y de las consecuencias
+function configCurvaHTML(){
+  const t=String(Math.round(CFG.curva_ref||1));
+  return `<div class="card mt"><h3>Curva de referencia y consecuencias</h3><div class="cap">Con qué curva se compara la distribución real de cada campaña, y qué sigue para cada nivel de desempeño.</div>
+    <div class="fila"><div class="campo" style="flex:2"><label for="cv-ref">Curva de referencia</label><select class="inp" id="cv-ref">${opciones([["1","Campana suave · 10 / 20 / 40 / 20 / 10 (recomendada para empezar)"],["2","Campana estricta · 5 / 20 / 50 / 20 / 5"],["3","Histórica de Etinar (promedio de campañas cerradas)"],["4","Personalizada (meta de Gerencia)"]],t)}</select></div>
+      <div class="campo"><label for="cv-min">Grupo mínimo</label><input class="inp num" id="cv-min" type="number" min="5" step="1" value="${CFG.curva_min_n}"></div></div>
+    <div id="cv-pers" class="fila" style="margin-top:10px;${t==="4"?"":"display:none"}">${[4,3,2,1,0].map(i=>`<div class="campo"><label for="cv-p${i}">${NIVELES[i].txt} %</label><input class="inp num" id="cv-p${i}" type="number" min="0" max="100" value="${CFG["curva_p"+i]}"></div>`).join("")}</div>
+    <div class="fila" style="margin-top:10px"><div class="campo"><label for="cv-rev">«Revisar» desde (% desviación)</label><input class="inp num" id="cv-rev" type="number" min="1" value="${CFG.curva_alerta_rev}"></div>
+      <div class="campo"><label for="cv-cal">«Calibración» desde (% desviación)</label><input class="inp num" id="cv-cal" type="number" min="2" value="${CFG.curva_alerta_cal}"></div></div>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2)"><b style="font-size:13.5px">Consecuencias por nivel</b><div class="sub-t" style="margin:2px 0 8px">Se muestran al firmar las reglas, en el informe individual y en Analítica. Revísalas con Asesoría Legal.</div>
+      ${[4,3,2,1,0].map(i=>`<div class="campo"><label for="cv-c${i}">${NIVELES[i].txt}</label><textarea class="inp" id="cv-c${i}" rows="2">${esc(consecuenciaNivel(i))}</textarea></div>`).join("")}
+      <div class="campo"><label for="cv-esc">Escalera ante desempeño no adecuado</label><textarea class="inp" id="cv-esc" rows="4">${esc(escaleraTexto())}</textarea></div></div>
+    <button class="btn sm" id="cv-guardar" style="margin-top:10px">Guardar curva y consecuencias</button><span class="msg" id="cv-msg" style="margin-left:10px"></span></div>`;
+}
+function configCurvaEventos(){
+  if(!$("cv-ref")) return;
+  $("cv-ref").onchange=e=>{ $("cv-pers").style.display=e.target.value==="4"?"":"none"; };
+  $("cv-guardar").onclick=async()=>{ const m=$("cv-msg");
+    const vals={curva_ref:$("cv-ref").value,curva_min_n:$("cv-min").value,curva_alerta_rev:$("cv-rev").value,curva_alerta_cal:$("cv-cal").value};
+    [0,1,2,3,4].forEach(i=>{ vals["curva_p"+i]=$("cv-p"+i).value; vals["cons_"+i]=$("cv-c"+i).value.trim(); });
+    vals.cons_escalera=$("cv-esc").value.trim();
+    if(vals.curva_ref==="4"){ const s=[0,1,2,3,4].reduce((a,i)=>a+(parseFloat(vals["curva_p"+i])||0),0); if(Math.round(s)!==100){ m.className="msg error"; m.textContent=`La curva personalizada suma ${Math.round(s)}%; debe sumar 100%.`; return; } }
+    if(!(parseFloat(vals.curva_alerta_cal)>parseFloat(vals.curva_alerta_rev))){ m.className="msg error"; m.textContent="«Calibración» debe ser mayor que «Revisar»."; return; }
+    const { error } = await sb.from("configuracion").upsert(Object.entries(vals).map(([clave,valor])=>({clave,valor:String(valor)})),{onConflict:"clave"});
+    if(error){ m.className="msg error"; m.textContent="Error: "+error.message; return; }
+    await cargarConfig(); m.className="msg ok"; m.textContent="✅ Guardado."; };
+}
+// Plan de Carrera: para quienes cumplen o superan lo esperado (Muy bueno o Excelente, sin brechas que requieran plan)
+function candidatosCarrera(personas, planes){
+  return personas.filter(x=>x.prom180!=null&&nivelIdx(x.prom180)>=3&&["ref","acomp"].includes(x.clasif.k)&&!planes.some(p=>p.evaluado_id===x.id&&p.tipo==="carrera"));
+}
+async function generarPlanesCarrera(lista, pid){
+  const filas=lista.map(x=>({ periodo_id:Number(pid), evaluado_id:x.id, competencia:"Plan de Carrera", departamento:x.departamento||null, tipo:"carrera", brecha:null,
+    accion:consecuenciaNivel(nivelIdx(x.prom180)), indicador:"Nuevas responsabilidades asumidas y cumplidas en el periodo", responsable:"Jefe inmediato + Talento Humano", acompanamiento:"Jefe inmediato",
+    fecha_seguimiento:sumarDias(hoyISO(),180), estado:"propuesto" }));
+  for(let i=0;i<filas.length;i+=200){ const { error } = await sb.from("planes").insert(filas.slice(i,i+200)); if(error) throw error; }
+  return filas.length;
+}
+
 // ---------- Revisión del borrador ----------
 async function revisarBorrador(borId){
   const { data:b, error } = await sb.from("borradores_manual").select("*").eq("id",borId).single();
@@ -1921,6 +2530,14 @@ async function revisarBorrador(borId){
   const jefeSug=d._reporta_a_id??(D.puestos.find(p=>nrm(p.nombre)===nrm(d.reporta_a))?.id||"");
   const polSug=(t)=>{ const n=nrm(t); return n?D.politicas?.find(p=>nrm(p.nombre)===n):null; };
   const dis=soloVer?"disabled":"";
+  const REV=d._revision||null, PROC=d._proceso||{};
+  const auditHTML=(i)=>{ const r=REV&&(REV.competencias||[]).find(x=>x.indice===i+1); if(!r) return "";
+    const crit=[["Específica",r.especifica],["Observable",r.observable],["Medible",r.medible],["Trazable",r.trazable]];
+    const sug=[["n","Nombre",r.nombre_sugerido],["c","Conducta principal",r.conducta_sugerida],["i","Indicador",r.indicador_sugerido],["m","Meta",r.meta_sugerida]].filter(x=>x[2]);
+    return `<div class="rv-audit"><div class="rv-audit-h">🔎 Revisión cruzada <span style="color:${colorNota(r.promedio)}">${r.promedio!=null?r.promedio.toFixed(1)+"/5":""}</span>
+      <span class="sub-t" style="font-weight:500">${crit.map(([k,v])=>`${k} <b style="color:${colorNota(v)}">${v??"—"}</b>`).join(" · ")}</span></div>
+      ${r.problemas?`<div style="margin-top:6px">${esc(r.problemas)}</div>`:`<div class="sub-t" style="margin-top:4px">Sin observaciones.</div>`}
+      ${sug.map(([k,t,v])=>`<div class="rv-sug"><span><b>${t} sugerido:</b> ${esc(v)}</span>${dis?"":`<button type="button" class="btn ghost xs" data-apl="${k}" data-val="${esc(v)}">Aplicar</button>`}</div>`).join("")}</div>`; };
   const compHTML=(c,i)=>{ const pm=c._pol??(polSug(c.politica)?.id?String(polSug(c.politica).id):(c.politica?"nueva":""));
     const polSel=D.v34?`<select class="inp br-po" ${dis}><option value="">— Sin política (definir después) —</option>${c.politica?`<option value="nueva" ${pm==="nueva"?"selected":""}>➕ Crear: ${esc(c.politica)}</option>`:""}${D.politicas.filter(p=>p.estado!=="derogada").map(p=>`<option value="${p.id}" ${String(pm)===String(p.id)?"selected":""}>${esc((p.codigo?p.codigo+" · ":"")+p.nombre)}</option>`).join("")}</select>`:`<input class="inp br-pt" value="${esc(c.politica)}" ${dis}>`;
     return `<div class="br-c rv-card" data-i="${i}">
@@ -1940,46 +2557,18 @@ async function revisarBorrador(borId){
       <textarea class="inp br-co" rows="3" ${dis}>${esc((c.conductas||[]).join("\n"))}</textarea>
       <div class="rv-mide">
         <div class="rv-sec" style="margin-top:0">📏 Cómo se mide</div>
-        <div class="fila" style="margin-top:6px"><div class="campo" style="flex:2;margin:0"><label>Indicador <span class="sub-t">· fórmula · fuente · frecuencia</span></label><input class="inp br-in" value="${esc(c.indicador)}" ${dis}></div>
+        <div class="fila" style="margin-top:6px"><div class="campo" style="flex:2;margin:0"><label>Indicador <span class="sub-t">· fórmula · fuente · frecuencia</span></label><input class="inp br-in" value="${esc(c.indicador)}" list="dl-ind" ${dis}></div>
           <div class="campo" style="margin:0"><label>Meta</label><input class="inp br-me" value="${esc(c.meta)}" ${dis}></div></div>
         <div class="campo" style="margin:8px 0 0"><label>Política que fija el estándar</label>${polSel}</div>
       </div>
       <div class="br-fw" data-sel="${esc((c.funciones_relacionadas||[]).join(","))}" style="margin-top:10px"></div>
+      ${auditHTML(i)}
       ${c.justificacion||c.fuente?`<details class="rv-why"><summary>¿Por qué la propuso la IA?</summary>${c.justificacion?`<div>${esc(c.justificacion)}</div>`:""}${c.fuente?`<div class="sub-t">Fuente en el manual: ${esc(c.fuente)}</div>`:""}</details>`:""}
     </div>`; };
-  abrirModal(`<style>
-    .rv-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .rv-resumen{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-    .rv-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:var(--line-2);font-size:12px;font-weight:600;color:var(--ink-2)}
-    .rv-chip.ok{background:#E8F5EC;color:#166534}.rv-chip.mal{background:#FDECEC;color:#B91C1C}
-    .rv-ia{margin-top:10px;background:var(--amber-soft);border:1px solid #F2E4B5;border-radius:12px;padding:8px 12px;font-size:12.5px;color:#6b5a1e}
-    .rv-ia summary{cursor:pointer;font-weight:700}
-    .rv-tabs{display:flex;gap:4px;margin-top:12px;border-bottom:1px solid var(--line)}
-    .rv-tab{border:0;background:none;padding:9px 14px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;font-family:inherit}
-    .rv-tab.on{color:var(--ink);border-bottom-color:var(--amber)}
-    .rv-tab .n{display:inline-block;min-width:20px;padding:1px 6px;margin-left:4px;border-radius:999px;background:var(--line-2);font-size:11px}
-    .rv-panel{display:none}.rv-panel.on{display:block}
-    .rv-card{border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;background:#fff;transition:opacity .2s}
-    .rv-top{display:flex;gap:10px;align-items:center}
-    .rv-inc input{width:18px;height:18px;accent-color:var(--amber-d);cursor:pointer}
-    .rv-nombre{flex:1;border:0;border-bottom:1px dashed transparent;font-size:15.5px;font-weight:800;color:var(--ink);padding:4px 2px;background:transparent;font-family:inherit;min-width:0}
-    .rv-nombre:hover,.rv-nombre:focus{border-bottom-color:var(--amber);outline:none}
-    .rv-meta{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin:8px 0}
-    .rv-mini{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:600;color:var(--muted);margin:0}
-    .rv-mini .inp{width:92px;padding:7px 10px}
-    .rv-crit{display:inline-flex;align-items:center;gap:6px;margin:0 0 4px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;font-size:12.5px;cursor:pointer}
-    .rv-crit:has(input:checked){background:#FDECEC;border-color:#F5C2C2;color:#B91C1C}
-    .rv-def{font-size:13px;color:var(--ink-2)}
-    .rv-sec{font-size:12.5px;font-weight:700;color:var(--ink);margin:12px 0 6px}
-    .rv-mide{margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-    .rv-why{margin-top:8px;font-size:12.5px;color:var(--ink-2)}.rv-why summary{cursor:pointer;color:var(--muted);font-weight:600}
-    .rv-funlist{counter-reset:f;list-style:none;padding:0;margin:8px 0 0}
-    .rv-funlist li{counter-increment:f;display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line-2);font-size:13px}
-    .rv-funlist li::before{content:counter(f);min-width:22px;height:22px;border-radius:50%;background:var(--amber-soft);font-weight:800;font-size:11.5px;display:inline-flex;align-items:center;justify-content:center}
-    .rv-pie{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
-  </style>
-  <div class="rv-head"><div><h3 style="margin:0">${esc(d.puesto||"Borrador del manual")}</h3><div style="color:var(--muted);font-size:12.5px;margin-top:2px">${esc(man?.nombre_archivo||"")} · propuesta de ${esc(b.modelo_ia||"la IA")}${cola.length>1&&pos>=0?` · <b>${pos+1} de ${cola.length}</b> por revisar`:""}</div></div><span class="badge ${b.estado==="aplicado"?"b-ok":b.estado==="rechazado"?"b-red":"b-wait"}">${soloVer?esc(b.estado):"nada se aplica hasta que apruebes"}</span></div>
+  abrirModal(`  <div class="rv-head"><div><h3 style="margin:0">${esc(d.puesto||"Borrador del manual")}</h3><div style="color:var(--muted);font-size:12.5px;margin-top:2px">${esc(man?.nombre_archivo||"")} · propuesta de ${esc(b.modelo_ia||"la IA")}${cola.length>1&&pos>=0?` · <b>${pos+1} de ${cola.length}</b> por revisar`:""}</div></div><span class="badge ${b.estado==="aplicado"?"b-ok":b.estado==="rechazado"?"b-red":"b-wait"}">${soloVer?esc(b.estado):"nada se aplica hasta que apruebes"}</span></div>
     <div class="rv-resumen" id="rv-res"></div>
+    ${PROC.extraer||REV?`<div class="rv-proc">${PROC.extraer?`<span>📖 Lectura: <b>${esc(provDe(PROC.extraer.modelo))}</b></span>`:""}${PROC.disenar?`<span>· ✏ Diseño: <b>${esc(provDe(PROC.disenar.modelo))}</b></span>`:""}${REV?`<span>· 🔎 Revisión: <b>${esc(provDe(REV.modelo))}</b>${REV.mismo_proveedor?" (misma empresa: no había otra disponible)":""}</span>`:""}</div>`:""}
+    <datalist id="dl-ind">${(D.indicadores||[]).map(x=>`<option value="${esc(textoIndicador(x))}">`).join("")}</datalist>
     ${d.observaciones?`<details class="rv-ia"><summary>⚠ La IA dejó una observación (clic para leer)</summary><div style="margin-top:6px">${esc(d.observaciones)}</div></details>`:""}
     <div class="rv-tabs" role="tablist"><button class="rv-tab" data-rv="1">1 · Puesto</button><button class="rv-tab" data-rv="2">2 · Funciones <span class="n" id="rv-nf"></span></button><button class="rv-tab on" data-rv="3">3 · Competencias <span class="n" id="rv-nc"></span></button></div>
     <div style="max-height:56vh;overflow:auto;padding:12px 6px 0 0">
@@ -1991,6 +2580,7 @@ async function revisarBorrador(borId){
         <div class="campo"><label for="br-niv">Nivel</label><select class="inp" id="br-niv" ${dis}>${opciones(NIVELES_PUESTO,d.nivel,"—")}</select></div></div>
       <div class="campo"><label for="br-jefe">Reporta a ${d.reporta_a?`<span class="sub-t">(el manual dice: «${esc(d.reporta_a)}»)</span>`:""}</label><select class="inp" id="br-jefe" ${dis}>${opciones(D.puestos.map(p=>[p.id,p.nombre]),jefeSug,"— Nadie / definir después —")}</select></div>
       <div class="campo"><label for="br-mis">Misión del puesto</label><textarea class="inp" id="br-mis" rows="3" ${dis}>${esc(d.mision)}</textarea></div>
+      ${d.requisitos||(d.riesgos||[]).length||(d.competencias_manual||[]).length?`<div class="rv-info"><b>Lo que dice el manual</b>${d.requisitos?`<div><b>Requisitos:</b> ${esc(d.requisitos)}</div>`:""}${(d.riesgos||[]).length?`<div><b>Responsabilidades críticas:</b> ${d.riesgos.map(esc).join(" · ")}</div>`:""}${(d.competencias_manual||[]).length?`<div><b>Competencias que ya trae:</b> ${d.competencias_manual.map(c=>esc(c.nombre)+(c.descripcion?` <span class="sub-t">(${esc(c.descripcion)})</span>`:"")).join(" · ")}</div>`:""}</div>`:""}
       </div>
       <div class="rv-panel" data-rvp="2">
       <div class="sub-t" style="margin-bottom:6px">Una función por línea. El número de cada función es el que aparece en las competencias.</div>
@@ -2001,6 +2591,9 @@ async function revisarBorrador(borId){
       </div>
       <div class="rv-panel on" data-rvp="3">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap"><span class="sub-t">Desmarca la casilla de una competencia para no incluirla.</span><span style="display:flex;gap:6px;align-items:center">${soloVer?"":`<button class="btn ghost xs" id="br-sugpeso" title="Según cuántas funciones respalda cada competencia y si es crítica">⚖ Sugerir pesos</button>`}<span id="br-suma"></span></span></div>
+      ${REV?`<div class="rv-info" style="margin:0 0 12px;border-color:${colorNota(REV.calificacion_global)}"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>🔎 Revisión cruzada: <span style="color:${colorNota(REV.calificacion_global)}">${REV.calificacion_global!=null?REV.calificacion_global.toFixed(1)+" / 5":"—"}</span></b>${soloVer?"":`<button type="button" class="btn ghost xs" id="br-revisar">Volver a revisar</button>`}</div>
+        ${REV.resumen?`<div>${esc(REV.resumen)}</div>`:""}${(REV.funciones_sin_cubrir||[]).length?`<div><b>Funciones sin cubrir bien:</b> ${REV.funciones_sin_cubrir.join(", ")}</div>`:""}${(REV.competencias_faltantes||[]).length?`<div><b>Podrían faltar:</b> ${REV.competencias_faltantes.map(esc).join(" · ")}</div>`:""}</div>`
+        :(soloVer||!d.competencias.length?"":`<div class="rv-info" style="margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span>Este borrador no tiene revisión cruzada. Otra IA puede auditar cada competencia (específica, observable, medible y trazable).</span><button type="button" class="btn ghost xs" id="br-revisar">🔎 Pedir revisión cruzada</button></div>`)}
       <div id="br-comps">${d.competencias.map(compHTML).join("")}</div>
       </div>
     </div>
@@ -2049,11 +2642,17 @@ async function revisarBorrador(borId){
       const chip=(cls,txt)=>`<span class="rv-chip ${cls}">${txt}</span>`;
       q("#rv-res").innerHTML=chip("",`${cards.length} competencias`)+chip(suma===100?"ok":"mal",`Pesos ${suma}%${suma===100?" ✓":""}`)+chip(fs.length&&cub.size>=fs.length?"ok":"mal",`${Math.min(cub.size,fs.length)}/${fs.length} funciones cubiertas`)+(crit?chip("",`${crit} crítica${crit>1?"s":""}`):"")+(sinMeta?chip("mal",`${sinMeta} sin indicador o meta`):"")+(sinPol?chip("",`${sinPol} sin política`):"");
       q("#rv-nf").textContent=fs.length; q("#rv-nc").textContent=cards.length;
-      q("#rv-funlist").innerHTML=fs.map(f=>`<li>${esc(f)}</li>`).join("");
+      q("#rv-funlist").innerHTML=fs.map((f,k)=>`<li><span>${esc(f)}${d.fuentes_funciones&&d.funciones[k]===f&&d.fuentes_funciones[k]?` <span class="sub-t">· ${esc(d.fuentes_funciones[k])}</span>`:""}</span></li>`).join("");
       m.querySelectorAll(".br-fw").forEach(w=>{ let l=w.querySelector(".rv-fsel"); if(!l){ l=document.createElement("div"); l.className="rv-fsel sub-t"; l.style.marginTop="6px"; w.appendChild(l); }
         const sel=[...w.querySelectorAll(".br-fn:checked")].map(i=>Number(i.value)); l.innerHTML=sel.map(n=>`<div>${n}. ${esc(fs[n-1]||"")}</div>`).join(""); }); };
     m.addEventListener("input",()=>setTimeout(resumen)); m.addEventListener("change",()=>setTimeout(resumen));
     refrescar(); resumen();
+    m.querySelectorAll("[data-apl]").forEach(bt=>bt.onclick=()=>{ const card=bt.closest(".br-c"), v=bt.dataset.val, k=bt.dataset.apl;
+      if(k==="n") card.querySelector(".br-n").value=v;
+      if(k==="c"){ const ta=card.querySelector(".br-co"), ls=ta.value.split("\n"); ls[0]=v; ta.value=ls.join("\n"); }
+      if(k==="i") card.querySelector(".br-in").value=v;
+      if(k==="m") card.querySelector(".br-me").value=v;
+      bt.textContent="✓ Aplicada"; bt.disabled=true; refrescar(); resumen(); });
     if(soloVer) return;
     const leer=()=>{ const nd={...d, puesto:q("#br-pn").value.trim(), departamento:q("#br-dep").value.trim(), nivel:q("#br-niv").value, mision:q("#br-mis").value.trim(),
         funciones:q("#br-fun").value.split("\n").map(x=>x.trim()).filter(Boolean), _destino:q("#br-dest").value, _reporta_a_id:q("#br-jefe").value, _reemplazar:q("#br-reemp").checked };
@@ -2064,6 +2663,13 @@ async function revisarBorrador(borId){
           funciones_relacionadas:[...el.querySelectorAll(".br-fn:checked")].map(i=>Number(i.value)) }; });
       return nd; };
     const err=(t)=>{ q("#br-msg").className="msg error"; q("#br-msg").textContent=t; };
+    if(q("#br-revisar")) q("#br-revisar").onclick=async()=>{ const bt=q("#br-revisar"); bt.disabled=true; bt.textContent="Revisando… (30–90 s)";
+      // guarda lo editado para que la revisión vea la versión actual
+      const nd=leer(); nd.competencias=nd.competencias.filter(c=>!c._excluir); delete nd._revision;
+      await sb.from("borradores_manual").update({datos:nd}).eq("id",b.id);
+      const r=await invocarIA({ paso:"revisar", borrador_id:b.id, evitar:String(nd._proceso?.disenar?.modelo||b.modelo_ia||"").split(":")[0] });
+      if(r.error){ bt.disabled=false; bt.textContent="🔎 Pedir revisión cruzada"; return err("No se pudo revisar: "+r.error); }
+      revisarBorrador(b.id); };
     q("#br-guardar").onclick=async()=>{ const { error } = await sb.from("borradores_manual").update({datos:leer(),estado:"en_revision",revisado_por:PERFIL.id,revisado_en:new Date().toISOString()}).eq("id",b.id);
       if(error) return err(error.message); await sb.from("manuales_puesto").update({estado:"en_revision"}).eq("id",b.manual_id); cerrarModal(); modalManualesIA(); };
     if(q("#br-saltar")) q("#br-saltar").onclick=()=>{ const sig=cola[(pos+1)%cola.length]; if(sig&&sig!==b.id) revisarBorrador(sig); };
@@ -2121,13 +2727,15 @@ async function aplicarBorrador(b, d){
   for(const c of inc){
     const polId=c._polId||(c._pol&&c._pol!=="nueva"?Number(c._pol):null);
     const polTxt=polId?(D.politicaPorId?.[polId]?.nombre||D.politicas.find(p=>p.id===polId)?.nombre):(D.v34?(c._pol===""?null:c.politica):c.politica)||null;
-    const v={categoria:c.nombre, texto:c.conductas[0], definicion:c.definicion||null, indicador:c.indicador||null, meta:c.meta||null, minimo:c.nivel_esperado, nivel_esperado:c.nivel_esperado, peso:c.peso, critico:!!c.critico, politica:polTxt};
+    const v={...(D.v39&&c.justificacion?{justificacion:c.justificacion}:{}), categoria:c.nombre, texto:c.conductas[0], definicion:c.definicion||null, indicador:c.indicador||null, meta:c.meta||null, minimo:c.nivel_esperado, nivel_esperado:c.nivel_esperado, peso:c.peso, critico:!!c.critico, politica:polTxt};
     if(D.v34) v.politica_id=polId||null;
     if(c.critico){ v.validada_por=`${PERFIL.nombre} (aprobación de manual)`; v.validada_en=hoy; }
     const e=ex.find(x=>nrm(x.nombre||x.categoria)===nrm(c.nombre)||nrm(x.categoria)===nrm(c.nombre));
     let compId;
     if(e){ ok(await sb.from("competencias").update(v).eq("id",e.id)); compId=e.id; act++; }
     else { compId=ok(await sb.from("competencias").insert({...v,nombre:c.nombre,puesto_id:puestoId,orden:++ordC,origen:"ia_aprobada",manual_id:b.manual_id}).select("id").single()).id; nuevas++; }
+    // biblioteca de indicadores (v3.14): se reutiliza o se agrega el indicador y se enlaza
+    if(D.v38&&c.indicador){ const iid=await asegurarIndicador(c.indicador,c.meta,d.departamento,polId); if(iid) ok(await sb.from("competencias").update({indicador_id:iid}).eq("id",compId)); }
     // conductas adicionales (la primera ya es el texto de la competencia)
     if(D.v35){ const fids=[...new Set((c.funciones_relacionadas||[]).map(idFuncion).filter(Boolean))];
       ok(await sb.from("competencia_funcion").delete().eq("competencia_id",compId));
@@ -2248,7 +2856,7 @@ function editarUsuario(u){
       if(r.error||!res?.ok){ msg.className="msg error"; msg.textContent=r.error||("Error: "+(res?.error||"desconocido")); q("#eu-ok").disabled=false; return; }
       const clave=res.clave; msg.textContent="";
       await cargarBase();
-      q("#eu-cred").innerHTML=`<div class="aviso amber">✅ <b>Usuario creado.</b> Comparte estos datos en persona y pide que cambie la contraseña con el botón <b>Clave</b> al ingresar:<br><br>Usuario: <b>${esc(usuario)}</b><br>Contraseña inicial: <b>${esc(clave)}</b></div>`;
+      q("#eu-cred").innerHTML=`<div class="aviso amber">✅ <b>Usuario creado.</b> Comparte estos datos en persona y pide que cambie la contraseña con el botón <b>Clave</b> al ingresar:<br><br>Usuario: <b>${esc(usuario)}</b> (o su cédula)<br>Código de activación: <b style="font-family:monospace;font-size:16px;letter-spacing:.1em">${esc(clave)}</b><br><span class="sub-t">Entra en «Es mi primera vez» y crea su propia contraseña.</span></div>`;
       q("#eu-ok").classList.add("oculto");
     };
     if(u){
@@ -2259,13 +2867,13 @@ function editarUsuario(u){
         await cargarBase(); irA("usuarios"); };
       if(q("#eu-forzar")) q("#eu-forzar").onclick=async()=>{ await sb.from("perfiles").update({debe_cambiar_clave:true}).eq("id",u.id); await cargarBase(); cerrarModal(); aviso("En su próximo ingreso, la persona deberá crear una nueva contraseña."); };
       if(q("#eu-reset")) q("#eu-reset").onclick=async()=>{
-        if(!await confirmar(`Se generará una <b>nueva contraseña temporal</b> para <b>${esc(u.nombre)}</b>. La actual dejará de funcionar y deberá crear la suya al ingresar.`,"Restablecer")) return;
+        if(!await confirmar(`Se generará un <b>nuevo código de activación</b> para <b>${esc(u.nombre)}</b>. La actual dejará de funcionar y deberá crear la suya al ingresar.`,"Restablecer")) return;
         const r=await fnUsuarios({ accion:"restablecer", perfil_id:u.id });
         if(r.error){ aviso("No se pudo restablecer: "+esc(r.error)); return; }
         await cargarBase();
-        aviso(`✅ Nueva contraseña temporal para <b>${esc(u.nombre)}</b>:<br><br>Usuario: <b>${esc(r.data.usuario)}</b><br>Contraseña: <b>${esc(r.data.clave)}</b><br><br><span class="sub-t">Entrégala en persona o por un canal privado. Al ingresar deberá crear la suya.</span>`); };
+        aviso(`✅ Nuevo código de activación para <b>${esc(u.nombre)}</b>:<br><br>Usuario: <b>${esc(r.data.usuario)}</b> (o su cédula)<br>Código: <b style="font-family:monospace;font-size:16px;letter-spacing:.1em">${esc(r.data.clave)}</b><br><br><span class="sub-t">Entrégalo en persona o por un canal privado. Entra en «Es mi primera vez» y crea su contraseña.</span>`); };
       q("#eu-acc").onclick=async()=>{ const { data } = await sb.from("accesos_temp").select("usuario,clave").eq("perfil_id",u.id).maybeSingle();
-        q("#eu-cred").innerHTML=data?`<div class="aviso amber">Usuario: <b>${esc(data.usuario)}</b> · Contraseña inicial: <b>${esc(data.clave)}</b><br><span class="sub-t">Si la persona ya la cambió, esta clave ya no funciona.</span></div>`:`<div class="aviso">No hay acceso inicial guardado para esta persona.</div>`; };
+        q("#eu-cred").innerHTML=data?`<div class="aviso amber">Usuario: <b>${esc(data.usuario)}</b> · Código de activación: <b style="font-family:monospace">${esc(data.clave)}</b><br><span class="sub-t">Si la persona ya activó su cuenta, este código ya no funciona.</span></div>`:`<div class="aviso">No hay acceso inicial guardado para esta persona.</div>`; };
     }
   });
 }
@@ -2274,7 +2882,7 @@ async function descargarAccesos(){
   const { data, error } = await sb.from("accesos_temp").select("perfil_id,usuario,clave");
   if(error){ aviso("No se pudieron leer los accesos: "+esc(error.message)); return; }
   const filas=(data||[]).map(a=>{ const p=perfil(a.perfil_id)||{}; const j=p.jefe_id?perfil(p.jefe_id):null;
-    return { Nombre:p.nombre||"", Usuario:a.usuario, "Contraseña temporal":a.clave, Departamento:p.departamento||"", Puesto:p.puesto||"", "Jefe directo":j?.nombre||"" }; })
+    return { Nombre:p.nombre||"", Usuario:a.usuario, "Código de activación":a.clave, "Cómo entrar":"Abrir el enlace → «Es mi primera vez» → cédula + código", Departamento:p.departamento||"", Puesto:p.puesto||"", "Jefe directo":j?.nombre||"" }; })
     .sort((a,b)=>String(a.Departamento).localeCompare(String(b.Departamento))||String(a.Nombre).localeCompare(String(b.Nombre)));
   // Accesos antiguos cuya contraseña inicial es la cédula: se cambian por claves aleatorias antes de descargar
   const conCedula=(data||[]).filter(a=>{ const p=perfil(a.perfil_id); return p&&p.rol!=="admin"&&p.cedula&&String(a.clave)===String(p.cedula); });
@@ -2564,7 +3172,7 @@ function interpretacion(x){
 }
 const EST_PLAN={propuesto:["Propuesto","b-wait"],en_curso:["En curso","b-blue"],cerrado:["Cerrado","b-ok"],grupal:["En programa grupal","b-gris"]};
 const RES_PLAN={mejora:["Mejora evidente","b-ok"],parcial:["Mejora parcial","b-wait"],sin_mejora:["Sin mejora","b-red"]};
-const TIPO_PLAN={desarrollo:"Acción de desarrollo",pdi:"PDI",grupal:"Programa grupal"};
+const TIPO_PLAN={desarrollo:"Acción de desarrollo",pdi:"PDI",grupal:"Programa grupal",carrera:"Plan de Carrera"};
 function informeHTML(x, ex, modo){
   const per=D.periodos.find(p=>p.id===x.periodo_id)||{};
   const filasR=x.filas.filter(f=>f.a!=null||f.j!=null);
@@ -2598,7 +3206,7 @@ function informeHTML(x, ex, modo){
           <td class="c num" style="${f.sigBA?(f.ba>0?"color:var(--warn);font-weight:700":"color:var(--blue);font-weight:700"):"color:var(--muted)"}">${f.ba==null?"—":signo(f.ba)}${f.sigBA?" *":""}</td></tr>`).join("")
       }</tbody></table></div></div>
     <div class="card mt"><h3>Brechas de autoconciencia — interpretación</h3><div class="cap">Dónde la percepción del colaborador difiere de la valoración del jefe directo</div><div style="font-size:13.5px;color:var(--ink-2);line-height:1.6">${interpretacion(x)}</div></div>
-    <div class="classbox ${x.clasif.k==="perm"?"perm":x.clasif.k==="ref"?"ref":""}"><div style="font-size:22px">${x.clasif.k==="ref"?"✅":x.clasif.k==="perm"?"⚠️":"📈"}</div><div><div class="lbl" style="color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Clasificación del caso</div><div style="font-size:18px;font-weight:800;margin:3px 0 4px">${x.clasif.txt}</div><div style="font-size:13px;color:var(--ink-2)">${esc(x.clasif.accion)}</div></div></div>
+    <div class="classbox ${x.clasif.k==="perm"?"perm":x.clasif.k==="ref"?"ref":""}"><div style="font-size:22px">${x.clasif.k==="ref"?"✅":x.clasif.k==="perm"?"⚠️":"📈"}</div><div><div class="lbl" style="color:var(--muted);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Clasificación del caso</div><div style="font-size:18px;font-weight:800;margin:3px 0 4px">${x.clasif.txt}</div><div style="font-size:13px;color:var(--ink-2)">${esc(x.clasif.accion)}</div>${x.prom180!=null?`<div style="font-size:12.5px;color:var(--ink-2);margin-top:6px"><b>Según su nivel (${esc(nivelDe(x.prom180).txt)}):</b> ${esc(consecuenciaNivel(nivelIdx(x.prom180)))}</div>`:""}</div></div>
     ${x.clasif.k==="perm"?`<div class="card mt" style="border-color:#F3C9C2"><h3>Debido proceso</h3><div class="cap">Recomendación técnica basada en evidencias; no es una decisión automática.</div><ol style="margin-left:18px;font-size:13.5px;color:var(--ink-2);line-height:1.8"><li>Revisión conjunta RRHH + jefatura de las evidencias de cada competencia.</li><li>Reunión de retroalimentación con el colaborador, con constancia firmada.</li><li>Último plan de mejora con plazo definido y seguimiento documentado.</li><li>Decisión final de Gerencia conforme al Código del Trabajo.</li></ol></div>`:""}
     ${top?`<div class="pdi-h"><div class="t">${x.nCrit?"Plan de Desarrollo Individual":"Acción de desarrollo"}</div><div style="font-size:19px;font-weight:800;margin-top:4px">Competencia prioritaria: ${esc(top.c.categoria)}</div><div style="color:#c9c3b6;font-size:13px;margin-top:6px">Brecha ${top.bd.toFixed(2)} (${top.nb.txt.toLowerCase()}) · Responsable del desarrollo: colaborador · Acompañamiento: jefe inmediato · Monitoreo: RRHH</div></div>`:""}
     <div class="card mt"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><div><h3>Seguimiento del plan</h3><div class="cap">Una acción por brecha, con indicador y fecha. El seguimiento es una sola pregunta a los 60/90 días.</div></div>${modo==="admin"&&conBrecha.length?`<button class="btn ghost sm no-print" id="inf-gen">Generar propuesta</button>`:""}</div>
@@ -2714,10 +3322,11 @@ VISTAS.planes = async (pidArg)=>{
   personas.forEach(x=>x.filas.forEach(f=>{ if(f.bd==null) return; const k=f.c.categoria+"|"+x.departamento; const o=(col[k]=col[k]||{comp:f.c.categoria,dep:x.departamento,n:0,tot:0,c:f.c}); o.tot++; if(f.nb.i>=2) o.n++; }));
   const colectivas=Object.values(col).filter(g=>g.n>=CFG.umbral_colectivo).sort((a,b)=>b.n-a.n);
   const grupales=planes.filter(p=>p.tipo==="grupal");
+  const carrera=candidatosCarrera(personas, planes);
   const pendientesGen=personas.reduce((s,x)=>s+x.filas.filter(f=>f.nb.i>=2&&!ind.some(p=>p.evaluado_id===x.id&&p.competencia_id===f.c.id)).length,0);
   const grupos=[...new Set(acc.map(a=>a.competencia))].sort();
   $("contenido").innerHTML=`<div>
-    ${encabezado("Planes de desarrollo","Acciones sin costo, seguimiento a 60/90 días y programas grupales",`${selPeriodoHTML("pl-per",pid)}<button class="btn ghost sm" id="pl-xls">Exportar Excel</button><button class="btn amber sm" id="pl-gen" ${pendientesGen?"":"disabled"}>Generar propuestas (${pendientesGen})</button>`)}
+    ${encabezado("Planes de desarrollo","Acciones sin costo, seguimiento a 60/90 días y programas grupales",`${selPeriodoHTML("pl-per",pid)}<button class="btn ghost sm" id="pl-xls">Exportar Excel</button>${D.v39&&carrera.length?`<button class="btn ghost sm" id="pl-car" title="Muy bueno o Excelente sin brechas que requieran plan">🚀 Planes de Carrera (${carrera.length})</button>`:""}<button class="btn amber sm" id="pl-gen" ${pendientesGen?"":"disabled"}>Generar propuestas (${pendientesGen})</button>`)}
     <div class="grid4">
       <div class="card kpi"><div class="lbl">Propuestos</div><div class="val">${ind.filter(p=>p.estado==="propuesto").length}</div><div class="delta">esperan que el jefe acepte</div></div>
       <div class="card kpi"><div class="lbl">En curso</div><div class="val">${ind.filter(p=>p.estado==="en_curso").length}</div><div class="delta">${ind.filter(p=>p.tipo==="pdi").length} PDI · ${ind.filter(p=>p.tipo==="desarrollo").length} acciones</div></div>
@@ -2745,11 +3354,13 @@ VISTAS.planes = async (pidArg)=>{
     const l=ind.filter(p=>(!est||p.estado===est)&&(!tipo||p.tipo===tipo)&&(!q||normTxt(perfil(p.evaluado_id)?.nombre).includes(q)));
     $("pl-cuenta").textContent=`${l.length} plan(es)`;
     const lim=VER_TODOS_PLANES?1000:40;
-    $("pl-tb").innerHTML=l.slice(0,lim).map(p=>{ const v=p.estado==="en_curso"&&p.fecha_seguimiento<hoy; return `<tr><td><b>${esc(perfil(p.evaluado_id)?.nombre)}</b><div class="sub-t">${esc(p.departamento)}</div></td><td>${esc(p.competencia)}<div class="sub-t">Brecha ${f2(p.brecha)}</div></td><td>${p.tipo==="pdi"?'<span class="badge b-red">PDI</span>':'<span class="badge b-blue">Desarrollo</span>'}</td><td style="min-width:220px">${esc(p.accion)}</td><td class="num" style="${v?"color:var(--red);font-weight:700":""}">${fmtFecha(p.fecha_seguimiento)}</td><td><span class="badge ${EST_PLAN[p.estado][1]}">${EST_PLAN[p.estado][0]}</span>${p.resultado?`<div style="margin-top:4px"><span class="badge ${RES_PLAN[p.resultado][1]}">${RES_PLAN[p.resultado][0]}</span></div>`:""}</td><td class="r" style="white-space:nowrap">${botonesPlan(p)}</td></tr>`; }).join("")||`<tr><td colspan="7" class="vacio">Sin planes. Usa "Generar propuestas" para crearlos desde las brechas.</td></tr>`;
+    $("pl-tb").innerHTML=l.slice(0,lim).map(p=>{ const v=p.estado==="en_curso"&&p.fecha_seguimiento<hoy; return `<tr><td><b>${esc(perfil(p.evaluado_id)?.nombre)}</b><div class="sub-t">${esc(p.departamento)}</div></td><td>${esc(p.competencia)}<div class="sub-t">Brecha ${f2(p.brecha)}</div></td><td>${p.tipo==="pdi"?'<span class="badge b-red">PDI</span>':p.tipo==="carrera"?'<span class="badge b-ok">Plan de Carrera</span>':'<span class="badge b-blue">Desarrollo</span>'}</td><td style="min-width:220px">${esc(p.accion)}</td><td class="num" style="${v?"color:var(--red);font-weight:700":""}">${fmtFecha(p.fecha_seguimiento)}</td><td><span class="badge ${EST_PLAN[p.estado][1]}">${EST_PLAN[p.estado][0]}</span>${p.resultado?`<div style="margin-top:4px"><span class="badge ${RES_PLAN[p.resultado][1]}">${RES_PLAN[p.resultado][0]}</span></div>`:""}</td><td class="r" style="white-space:nowrap">${botonesPlan(p)}</td></tr>`; }).join("")||`<tr><td colspan="7" class="vacio">Sin planes. Usa "Generar propuestas" para crearlos desde las brechas.</td></tr>`;
     if(l.length>lim) $("pl-tb").innerHTML+=`<tr><td colspan="7" class="c"><button class="btn ghost sm" id="pl-mas">Mostrar los ${l.length} planes</button></td></tr>`;
     if($("pl-mas")) $("pl-mas").onclick=()=>{ VER_TODOS_PLANES=true; pintar(); };
     enlazarPlanes(ind, recargar); };
   ["pl-est","pl-tipo"].forEach(id=>$(id).onchange=pintar); $("pl-q").oninput=pintar; pintar();
+  if($("pl-car")) $("pl-car").onclick=async()=>{ if(!await confirmar(`Se propondrá un <b>Plan de Carrera</b> a ${carrera.length} persona${carrera.length===1?"":"s"} con nivel Muy bueno o Excelente:<br><div class="sub-t" style="margin-top:6px;line-height:1.7">${carrera.slice(0,40).map(x=>esc(x.nombre)+" ("+nivelDe(x.prom180).txt+")").join(" · ")}${carrera.length>40?" …":""}</div><br>El jefe lo acepta o ajusta, igual que los demás planes.`,"Proponer")) return;
+    try{ const n=await generarPlanesCarrera(carrera,pid); aviso(`Se propusieron ${n} Planes de Carrera.`); }catch(e){ aviso("Error: "+esc(e.message)+(/check|tipo/i.test(e.message)?"<br><br>Ejecuta <b>actualizacion_v3_9_curva.sql</b> en Supabase.":"")); } recargar(); };
   $("pl-gen").onclick=async()=>{ if(!await confirmar(`Se propondrá una acción de la biblioteca para cada brecha significativa o crítica sin plan (<b>${pendientesGen}</b>). Los jefes solo tendrán que aceptarlas o modificarlas.`,"Generar")) return;
     try{ const n=await generarPlanes(personas); aviso(`Se generaron ${n} propuestas.`); }catch(e){ aviso("Error: "+esc(e.message)); } recargar(); };
   $("pl-xls").onclick=()=>exportarExcel("Planes_Etinar",[{nombre:"Planes",filas:planes.map(p=>({Colaborador:perfil(p.evaluado_id)?.nombre||"(programa grupal)",Departamento:p.departamento||"",Competencia:p.competencia,Tipo:TIPO_PLAN[p.tipo],Brecha:p.brecha,Acción:p.accion,Indicador:p.indicador||"",Responsable:p.responsable||"",Acompañamiento:p.acompanamiento||"","Fecha de seguimiento":p.fecha_seguimiento||"",Estado:EST_PLAN[p.estado][0],Resultado:p.resultado?RES_PLAN[p.resultado][0]:"",Comentario:p.comentario||"",Personas:p.personas||"",Programa:p.nombre_programa||"","Objetivo SMART":p.objetivo_smart||"","KPI de proceso":p.kpi?.proceso?.nombre||"","Fórmula":p.kpi?.proceso?.formula||"","Meta KPI":p.kpi?.proceso?.meta||"",Frecuencia:p.kpi?.proceso?.frecuencia||"","Fuente del dato":p.kpi?.proceso?.fuente||"","Línea base":p.kpi?.resultado?.linea_base??"","Meta de resultado":p.kpi?.resultado?.meta??"",Mediciones:(p.kpi?.mediciones||[]).map(x=>fmtFecha(x.fecha)+": "+x.valor).join(" | ")}))}]);
@@ -2823,6 +3434,7 @@ VISTAS.analitica = async (arg)=>{
   P.forEach(x=>{ if(x.brechaAuto!=null&&Math.abs(x.brechaAuto)>=1) cal.push({k:"b",mot:"Brecha alta",quien:x.nombre,area:x.departamento,det:`Autoevaluación ${f2(x.promA)} vs. jefe ${f2(x.promJ)} (brecha ${signo(x.brechaAuto)})`,x}); });
   const porDep={}; P.forEach(x=>(porDep[x.departamento]=porDep[x.departamento]||[]).push(x));
   Object.values(porDep).forEach(l=>{ if(l.length<3) return; const pd=prom(l.map(x=>x.prom180)); l.forEach(x=>{ if(Math.abs(x.prom180-pd)>=1) cal.push({k:"c",mot:"Fuera del promedio",quien:x.nombre,area:x.departamento,det:`Resultado ${f2(x.prom180)} · promedio del área ${pd.toFixed(2)}`,x}); }); });
+  const REF=await curvaReferencia(pid);
   $("contenido").innerHTML=`<div>
     ${encabezado("Analítica — Curva de desempeño","Distribución, evolución, mapa de brechas y calibración",`<button class="btn ghost sm" id="an-xls">Exportar Excel</button>`)}
     <div class="card"><div class="fila">
@@ -2831,13 +3443,16 @@ VISTAS.analitica = async (arg)=>{
       <div class="campo"><label for="an-pue">Puesto</label><select class="inp" id="an-pue">${opciones(pues,pue,"Todos")}</select></div>
     </div><div class="cap" style="margin:10px 0 0">${P.length} personas con resultado. Los gráficos se recalculan con los filtros.</div></div>
     <div class="row2 eq">
-      <div class="card"><h3>Distribución del desempeño</h3><div class="cap">Cuántas personas caen en cada nivel</div>${curvaSVG(dist)}</div>
+      <div class="card"><h3>Distribución del desempeño</h3><div class="cap">Curva real de la campaña comparada con la curva de referencia</div>${curvaRefSVG(dist,REF.p)}${curvaResumenHTML(dist,REF)}</div>
       <div class="card"><h3>Evolución en el tiempo</h3><div class="cap">Resultado promedio por campaña</div>${tendenciaSVG(evol)}</div>
     </div>
+    ${curvaGruposHTML(P,REF)}
+    ${consecuenciasHTML(dist)}
     <div class="card mt"><h3>Personas por nivel</h3><div class="cap">Elige un nivel para ver quiénes están en esa categoría y abrir su informe</div>
       <div class="chips" id="an-chips">${NIVELES.map((n,i)=>`<button class="chip" data-niv="${i}"><span class="dot" style="background:${n.color}"></span>${n.txt} · ${dist[i]}</button>`).join("")}</div><div id="an-niv" style="margin-top:12px"></div></div>
     <div class="card mt"><h3>Brecha por competencia</h3><div class="cap">% de personas con brecha ≥ ${CFG.brecha_significativa.toFixed(2)} (dice más que el promedio)</div>
         ${compL.length?compL.slice(0,15).map(o=>`<div class="prog"><div class="name" title="${esc(o.k)}">${esc(o.k)}</div><div class="track"><div style="width:${o.pct}%;background:${o.pct>=35?"#DC2626":o.pct>=15?"#B45309":"#15803D"}"></div></div><div class="pct">${o.pct}% <span class="sub-t">${o.s}/${o.n}</span></div></div>`).join(""):`<div class="vacio">Sin datos.</div>`}</div>
+    ${calibracionMetasHTML(calibracionMetas(P))}
     <div class="card mt"><h3>Mapa de calor</h3><div class="cap">Competencia × departamento · % de personas con brecha significativa o crítica</div>
         ${compL.length?`<div class="tabla-wrap"><table class="heat"><thead><tr><th>Competencia</th>${depsV.map(d=>`<th class="c">${esc(d)}</th>`).join("")}</tr></thead><tbody>${compL.slice(0,15).map(o=>`<tr><td style="font-size:12.5px;min-width:150px">${esc(o.k)}</td>${depsV.map(d=>{ const c=o.dep[d]; const p=c?Math.round(c.s*100/c.n):null; return `<td class="hc" style="${colorCalor(p)}" title="${c?c.s+" de "+c.n:"sin datos"}">${p==null?"—":p+"%"}</td>`; }).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="vacio">Sin datos.</div>`}</div>
     <div class="card mt"><h3>Casos para revisar (calibración)</h3><div class="cap">Personas o jefes cuyas notas conviene revisar en una reunión de calibración antes de cerrar la campaña</div>
@@ -2853,6 +3468,7 @@ VISTAS.analitica = async (arg)=>{
   document.querySelectorAll("[data-niv]").forEach(b=>b.onclick=()=>verNiv(Number(b.dataset.niv)));
   verNiv(dist.indexOf(Math.max(...dist)));
   document.querySelectorAll("[data-cal]").forEach(b=>b.onclick=()=>verInforme(cal[Number(b.dataset.cal)].x,"analitica"));
+  document.querySelectorAll("[data-calm]").forEach(b=>b.onclick=()=>irA("puestos",{vista:"competencias",puesto:Number(b.dataset.calm)}));
   $("an-xls").onclick=()=>exportarExcel("Analitica_Etinar",[
     {nombre:"Brecha por competencia",filas:compL.map(o=>({Competencia:o.k,"Personas evaluadas":o.n,"Con brecha ≥ significativa":o.s,"%":o.pct,"Brecha promedio":+(o.prom||0).toFixed(2)}))},
     {nombre:"Mapa de calor",filas:compL.map(o=>Object.assign({Competencia:o.k},...depsV.map(d=>({[d]:o.dep[d]?Math.round(o.dep[d].s*100/o.dep[d].n)+"%":""}))))},
@@ -3099,6 +3715,7 @@ function fichaUsuario(c, conIndicadores){
   const pc=c.politica_id&&D.politicaPorId?.[c.politica_id];
   if(c.politica) p.push(`<b>Política${pc&&pc.codigo?` ${esc(pc.codigo)} v${esc(pc.version||"1.0")}`:""}:</b> ${esc(c.politica)}`);
   if(conIndicadores){ if(c.indicador) p.push(`<b>Indicador:</b> ${esc(c.indicador)}`); if(c.meta) p.push(`<b>Meta:</b> ${esc(c.meta)}`); }
+  if(c.justificacion) p.push(`<b>Por qué importa:</b> ${esc(c.justificacion)}`);
   return p.length?`<div class="ficha">${p.join(" · ")}</div>`:"";
 }
 function reglasDelJuego(e, evsPeriodo, continuar){
@@ -3109,6 +3726,7 @@ function reglasDelJuego(e, evsPeriodo, continuar){
   abrirModal(`<h3>Reglas de la evaluación</h3><div style="color:var(--muted);font-size:12.5px;margin-bottom:12px">${esc(per.nombre)} · antes de evaluar, revisa ${soloAuto?"las competencias y políticas de tu puesto":"cómo se evalúa cada competencia"}.</div>
     <div style="max-height:52vh;overflow:auto;padding-right:4px">${puestos.map(pid=>{ const full=deJefe.has(pid);
       return `<div class="catchip" style="margin:6px 0 8px"><span class="d"></span>${esc(D.puestoPorId[pid]?.nombre)}${!soloAuto?(full?" · equipo que evalúas":" · tu autoevaluación"):""}</div>${compsDelPuesto(pid).map(c=>`<div style="padding:8px 0;border-bottom:1px solid var(--line-2)"><b>${esc(c.categoria)}</b><div style="font-size:13px">${esc(c.texto)}</div>${fichaUsuario(c,full)}</div>`).join("")}`; }).join("")}
+      <div class="explbox"><b>Consecuencias del desempeño</b><div style="margin-top:6px;line-height:1.6">${[4,3,2,1,0].map(i=>`<div><b>${NIVELES[i].txt}:</b> ${esc(consecuenciaNivel(i))}</div>`).join("")}</div><details style="margin-top:6px"><summary style="cursor:pointer;font-weight:600">Ante desempeño no adecuado</summary><div style="white-space:pre-line;margin-top:4px">${esc(escaleraTexto())}</div></details></div>
       <div class="explbox">Escala: 1 Deficiente · 2 Regular · 3 Bueno · 4 Muy bueno · 5 Excelente. ${soloAuto?"Califícate con honestidad, pensando en hechos concretos del periodo.":"Califica con base en hechos del periodo y en el indicador de cada competencia."}</div>
       ${!soloAuto&&modoKPI()?`<div class="explbox"><b>Cómo se convierte el resultado del indicador en nota</b>${modoKPI()===1?" (nota sugerida; si te apartas "+CFG.kpi_desvio+" punto o más, debes justificar)":" (la nota es la del indicador)"}<div style="margin-top:8px">${tablaConversionHTML(true)}</div></div>`:""}</div>
     <label style="display:flex;gap:8px;align-items:flex-start;margin-top:14px;font-weight:500;font-size:13px"><input type="checkbox" id="rg-ok" style="margin-top:3px"> ${soloAuto?"Declaro que conozco las competencias y políticas con las que se realiza esta evaluación.":"Declaro que conozco las políticas, indicadores y metas con los que se realiza esta evaluación."}</label>
@@ -3138,9 +3756,21 @@ async function abrirFormulario(evalId){
   const solo=ev.estado==="completada"||per.estado==="cerrado", esAuto=ev.tipo==="autoevaluacion";
   const NIV=["Deficiente","Regular","Bueno","Muy bueno","Excelente"];
   let cat=null, html="";
+  // v3.10: si la competencia tiene varias conductas, se califica cada una y la nota es el promedio
+  const kpiObligatorio=(c)=>!esAuto&&modoKPI()===2&&!!c.indicador&&!!interpretarMeta(c.meta);
+  const conductasDe=(c)=>{ const extra=(D.conductas||[]).filter(k=>k.competencia_id===c.id&&!k.sincronizada&&(k.texto||"").trim()).sort((a,b)=>(a.orden||0)-(b.orden||0));
+    return [{key:"p",texto:c.texto},...extra.map(k=>({key:String(k.id),texto:k.texto}))]; };
+  const multi=(c)=>conductasDe(c).length>1&&!kpiObligatorio(c);
+  const escala=(cid,key,actual,mini)=>`<div class="scale ${mini?"mini":""} ${solo?"solo":""}" data-comp="${cid}" ${key?`data-cond="${key}"`:""}>${NIV.map((t,i)=>`<div class="opt ${Number(actual)===i+1?"sel":""}" data-v="${i+1}" role="button" tabindex="${solo?-1:0}"><div class="n">${i+1}</div><div class="t">${t}</div></div>`).join("")}</div>`;
   comps.forEach(c=>{ if(c.categoria!==cat){ cat=c.categoria; html+=`<div class="catchip"><span class="d"></span>${esc(cat)}</div>`; }
-    html+=`<div class="q"><p>${esc(c.texto)}</p>${fichaUsuario(c,!esAuto)}
-      <div class="scale ${solo?"solo":""}" data-comp="${c.id}">${NIV.map((t,i)=>`<div class="opt ${ya[c.id]?.puntaje===i+1?"sel":""}" data-v="${i+1}" role="button" tabindex="${solo?-1:0}"><div class="n">${i+1}</div><div class="t">${t}</div></div>`).join("")}</div>
+    const det=ya[c.id]?.conductas||{};
+    html+=(multi(c)?`<div class="q"><p>${esc(c.nombre||c.categoria)}</p>${fichaUsuario(c,!esAuto)}
+      <div class="sub-t" style="margin:6px 0 2px">Califica cada conducta. La nota de la competencia es el promedio.</div>
+      ${conductasDe(c).map((k,j)=>`<div class="cond"><div class="cond-t"><span class="cond-n">${j+1}</span>${esc(k.texto)}</div>${escala(c.id,k.key,det[k.key],true)}</div>`).join("")}
+      <div class="cond-prom" id="pc-${c.id}"></div>`
+    :`<div class="q"><p>${esc(c.texto)}</p>${fichaUsuario(c,!esAuto)}
+      ${conductasDe(c).length>1?`<div class="sub-t" style="margin-top:6px">También se observa: ${conductasDe(c).slice(1).map(k=>esc(k.texto)).join(" · ")}</div>`:""}
+      ${escala(c.id,"",ya[c.id]?.puntaje,false)}`)+`
       ${!esAuto&&c.indicador?`<div class="evid"><label for="ev-${c.id}">Resultado real del indicador${modoKPI()&&interpretarMeta(c.meta)?` <span class="sub-t" style="font-weight:500">· escribe el número (ej. 97% · 2)${modoKPI()===2?" — la nota sale del KPI":""}</span>`:""}</label><input class="inp" id="ev-${c.id}" data-evid="${c.id}" value="${esc(ya[c.id]?.evidencia)}" placeholder="Ej. 97% · 2 errores en el mes" ${solo?"disabled":""}>
         <div class="sub-t" id="kn-${c.id}" style="margin-top:6px"></div>
         <div id="kj-w-${c.id}" style="display:none;margin-top:8px"><label for="kj-${c.id}" style="color:var(--warn)">Justificación obligatoria: tu nota se aparta de la que da el indicador</label><textarea class="inp" id="kj-${c.id}" data-just="${c.id}" rows="2" placeholder="Explica con hechos por qué la nota es distinta" ${solo?"disabled":""}>${esc(ya[c.id]?.justificacion)}</textarea></div></div>`:""}</div>`; });
@@ -3165,12 +3795,17 @@ async function abrirFormulario(evalId){
   const compPorId=Object.fromEntries(comps.map(c=>[c.id,c]));
   const kpiDe=(cid)=>{ const i=document.querySelector(`[data-evid="${cid}"]`); return i&&modoKPI()?notaKPI(compPorId[cid]?.meta,i.value):null; };
   const elegir=(cid,v)=>{ const s=document.querySelector(`.scale[data-comp="${cid}"]`); s.querySelectorAll(".opt").forEach(x=>x.classList.toggle("sel",Number(x.dataset.v)===v)); actualizar(); };
-  const revisarKPI=(cid,desdeInput)=>{ const k=kpiDe(cid), info=$("kn-"+cid), jw=$("kj-w-"+cid); if(!info) return;
-    const s=document.querySelector(`.scale[data-comp="${cid}"]`);
+  // Nota de la competencia: la elegida, o el promedio de sus conductas (null si falta alguna)
+  const notaComp=(cid)=>{ const ss=[...document.querySelectorAll(`.scale[data-comp="${cid}"]`)]; const vs=ss.map(x=>Number(x.querySelector(".opt.sel")?.dataset.v||0));
+    if(!vs.length||vs.some(v=>!v)) return null; return Math.round(vs.reduce((a,b)=>a+b,0)/vs.length*100)/100; };
+  const pintarProm=(cid)=>{ const el=$("pc-"+cid); if(!el) return; const ss=[...document.querySelectorAll(`.scale[data-comp="${cid}"]`)], hechas=ss.filter(x=>x.querySelector(".opt.sel")).length, n=notaComp(cid);
+    el.innerHTML=n!=null?`Nota de la competencia: <b>${n.toFixed(2).replace(".",",")}</b> · ${NIV[Math.min(4,Math.max(0,Math.round(n)-1))]}`:`<span class="sub-t">${hechas} de ${ss.length} conductas calificadas</span>`; };
+  const revisarKPI=(cid,desdeInput)=>{ pintarProm(cid); const k=kpiDe(cid), info=$("kn-"+cid), jw=$("kj-w-"+cid); if(!info) return;
+    const s=document.querySelector(`.scale[data-comp="${cid}"]`), esMulti=document.querySelectorAll(`.scale[data-comp="${cid}"]`).length>1;
     info.innerHTML=k?`📏 ${textoNotaKPI(k)}`:(modoKPI()&&interpretarMeta(compPorId[cid]?.meta)?`Meta: ${esc(interpretarMeta(compPorId[cid].meta).txt)}`:"");
-    if(k&&!solo&&(desdeInput||modoKPI()===2)) elegir(cid,k.nota);
-    if(modoKPI()===2&&interpretarMeta(compPorId[cid]?.meta)){ s.classList.toggle("solo",true); s.title="La nota sale del resultado del indicador"; }
-    const sel=Number(s.querySelector(".opt.sel")?.dataset.v||0);
+    if(k&&!solo&&!esMulti&&(desdeInput||modoKPI()===2)) elegir(cid,k.nota);
+    if(!esMulti&&modoKPI()===2&&interpretarMeta(compPorId[cid]?.meta)){ s.classList.toggle("solo",true); s.title="La nota sale del resultado del indicador"; }
+    const nc=notaComp(cid), sel=nc!=null?Math.round(nc):0;
     jw.style.display=(k&&modoKPI()===1&&sel&&Math.abs(sel-k.nota)>=CFG.kpi_desvio)||(solo&&$("kj-"+cid).value)?"":"none"; };
   comps.forEach(c=>revisarKPI(c.id,false));
   if(solo) return;
@@ -3178,8 +3813,11 @@ async function abrirFormulario(evalId){
   document.querySelectorAll(".scale").forEach(s=>s.querySelectorAll(".opt").forEach(o=>{ const sel=()=>{ if(s.classList.contains("solo")) return; s.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel")); o.classList.add("sel"); actualizar(); revisarKPI(Number(s.dataset.comp),false); }; o.onclick=sel; o.onkeydown=ev2=>{ if(ev2.key==="Enter"||ev2.key===" "){ ev2.preventDefault(); sel(); } }; }));
   $("fm-ok").onclick=async()=>{
     const msg=$("fm-msg"); const filas=[]; let faltan=0;
-    document.querySelectorAll(".scale").forEach(s=>{ const o=s.querySelector(".opt.sel"); if(!o){ faltan++; return; } const cid=Number(s.dataset.comp); const evd=document.querySelector(`[data-evid="${cid}"]`);
-      const k=kpiDe(cid), jt=$("kj-"+cid), fila={evaluacion_id:Number(evalId),competencia_id:cid,puntaje:Number(o.dataset.v),evidencia:evd?evd.value.trim()||null:null};
+    faltan=document.querySelectorAll(".scale").length-document.querySelectorAll(".scale .opt.sel").length;
+    comps.forEach(c=>{ const cid=c.id, nc=notaComp(cid); if(nc==null) return; const evd=document.querySelector(`[data-evid="${cid}"]`);
+      const k=kpiDe(cid), jt=$("kj-"+cid), fila={evaluacion_id:Number(evalId),competencia_id:cid,puntaje:nc,evidencia:evd?evd.value.trim()||null:null};
+      const ss=[...document.querySelectorAll(`.scale[data-comp="${cid}"][data-cond]`)];
+      if(ss.length&&D.v310) fila.conductas=Object.fromEntries(ss.map(x=>[x.dataset.cond,Number(x.querySelector(".opt.sel").dataset.v)]));
       if(D.v36&&!esAuto){ fila.resultado_kpi=k?k.real:null; fila.nota_kpi=k?k.nota:null; fila.justificacion=jt&&$("kj-w-"+cid).style.display!=="none"?jt.value.trim()||null:null; }
       filas.push(fila); });
     if(!esAuto&&modoKPI()){
@@ -3187,10 +3825,12 @@ async function abrirFormulario(evalId){
       if(sinJ){ msg.className="msg error"; msg.textContent=`Escribe la justificación en «${sinJ.categoria}»: tu nota se aparta de la que da el indicador.`; $("kj-"+sinJ.id).scrollIntoView({behavior:"smooth",block:"center"}); return; }
       const sinReal=modoKPI()===2&&comps.find(c=>interpretarMeta(c.meta)&&c.indicador&&!kpiDe(c.id));
       if(sinReal){ msg.className="msg error"; msg.textContent=`Escribe el resultado real del indicador en «${sinReal.categoria}».`; $("ev-"+sinReal.id).scrollIntoView({behavior:"smooth",block:"center"}); return; } }
-    if(faltan){ msg.className="msg error"; msg.textContent=`Faltan ${faltan} competencia(s) por calificar.`; [...document.querySelectorAll(".scale")].find(x=>!x.querySelector(".sel"))?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+    if(faltan){ msg.className="msg error"; msg.textContent=`Faltan ${faltan} calificación(es) por marcar.`; [...document.querySelectorAll(".scale")].find(x=>!x.querySelector(".sel"))?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
     $("fm-ok").disabled=true; $("fm-ok").textContent="Enviando...";
     let e1=(await sb.from("respuestas").upsert(filas,{onConflict:"evaluacion_id,competencia_id"})).error;
     if(e1&&/nota_kpi|resultado_kpi|justificacion/i.test(e1.message)){ filas.forEach(f=>{ delete f.nota_kpi; delete f.resultado_kpi; delete f.justificacion; }); e1=(await sb.from("respuestas").upsert(filas,{onConflict:"evaluacion_id,competencia_id"})).error; }
+    // Si la base aún guarda la nota como número entero (falta el SQL v3.10), se redondea el promedio
+    if(e1&&/integer|conductas/i.test(e1.message)){ filas.forEach(f=>{ f.puntaje=Math.round(f.puntaje); delete f.conductas; }); e1=(await sb.from("respuestas").upsert(filas,{onConflict:"evaluacion_id,competencia_id"})).error; }
     const e2=e1?null:(await sb.from("comentarios").upsert({evaluacion_id:Number(evalId),fortalezas:$("cm-f").value.trim(),areas_mejora:$("cm-a").value.trim(),aspectos_mejorar_evaluador:esAuto?null:($("cm-e").value.trim()||null)},{onConflict:"evaluacion_id"})).error;
     const e3=(e1||e2)?null:(await sb.from("evaluaciones").update({estado:"completada",completada_en:new Date().toISOString()}).eq("id",evalId)).error;
     const err=e1||e2||e3;
@@ -3315,6 +3955,12 @@ async function respaldoCompleto(){
   exportarExcel("Respaldo_Evaluacion180_Etinar",hojas);
 }
 
+// Cierre de sesión por inactividad (60 min): protege computadoras compartidas
+(()=>{ let ultimo=Date.now(); const MIN=60;
+  ["click","keydown","mousemove","touchstart","scroll"].forEach(ev=>window.addEventListener(ev,()=>{ ultimo=Date.now(); },{passive:true}));
+  setInterval(async()=>{ if(!PERFIL||window.MODO_DEMO) return; if(Date.now()-ultimo>MIN*60000){ await sb.auth.signOut(); mostrarLogin(); cerrarModal();
+    $("msg-login").className="msg"; $("msg-login").textContent="Por seguridad cerramos tu sesión después de "+MIN+" minutos sin actividad."; } },60000);
+})();
 // ==================== Inicio ====================
 if(window.MODO_DEMO){
   $("demo-box").classList.remove("oculto");
